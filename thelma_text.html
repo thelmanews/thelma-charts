@@ -1,0 +1,96 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/x-tag-imports/x-tag-deck.html">
+
+
+<polymer-element name="th-quote-box" attributes="personName personTitle personImage bgColor borderColor">
+  <template>
+      <style>
+          .quote-box {
+            width: 85%;
+            padding: 2% 3%;
+            margin: 10px auto 30px auto;
+            border: 2px solid {{borderColor}};
+            /*font-size: 1.125em;  //18px*/
+            font-weight:300;
+            position: relative;
+            background-color {{bgColor}};
+
+          } 
+          .quote-box:after, .quote-box:before {
+            top: 100%;
+            left: 50%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+            margin-bottom: 6%;
+          }
+          
+          .quote-box:after {
+            border-color: rgba(0, 0, 0, 0);
+            border-top-color: {{bgColor}};
+            border-width: 20px;
+            margin-left: -20px;
+          }
+          .quote-box:before {
+            border-color: rgba(255, 255, 255, 0);
+            border-top-color: {{borderColor}};
+            border-width: 23px;
+            margin-left: -23px;
+          }
+           
+          .person-info {
+            text-align: center;
+            margin: 0 auto;
+          }
+          .person-info .title {
+              font-size: 0.875em; //14px
+              width: 90%;
+              margin: 0 auto;
+          }
+          
+      </style>
+      <div class="quote">
+          <div class="quote-box">
+          <content></content>
+          </div>
+          <div class="person-info">
+              <template if="{{personImage}}">
+                <img src="{{personImage}}">
+              </template>
+              
+              <div>
+                  <template if="{{personName}}">
+                    <div class="name">{{personName}}</div>
+                  </template>
+                  <template if="{{personTitle}}">
+                    <div class="title">{{personTitle}}</div>
+                  </template>
+                  
+              </div>
+          </div>
+      </div>
+        
+    
+  </template>
+  <script>
+    Polymer('th-quote-box',{ 
+      bgColor: '#F5F5F5', 
+      borderColor: '#555',
+      domReady: function() {
+        /*
+        expressions not working in style
+
+        console.log('domread');
+        console.log(this);
+        console.log(this.$);
+        console.log(this.querySelectorAll('.quote-box'));
+        */
+      }
+    });
+
+  </script>
+</polymer-element>
+
