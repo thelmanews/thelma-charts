@@ -1,6 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<polymer-element name="th-quote-box" attributes="personName personTitle personImage bgColor borderColor">
+<polymer-element name="th-quote-box" attributes="qTitle qDetails qImage bgColor borderColor" noscript>
   <template>
       <style>
           .quote-box {
@@ -55,16 +55,16 @@
           <content></content>
           </div>
           <div class="person-info">
-              <template if="{{personImage}}">
-                <img src="{{personImage}}">
+              <template if="{{qImage}}">
+                <img src="{{qImage}}">
               </template>
               
               <div>
-                  <template if="{{personName}}">
-                    <div class="name">{{personName}}</div>
+                  <template if="{{qTitle}}">
+                    <div class="name">{{qTitle}}</div>
                   </template>
-                  <template if="{{personTitle}}">
-                    <div class="title">{{personTitle}}</div>
+                  <template if="{{qDetails}}">
+                    <div class="title">{{qDetails}}</div>
                   </template>
                   
               </div>
@@ -73,22 +73,6 @@
         
     
   </template>
-  <script>
-    Polymer('th-quote-box',{ 
-      bgColor: '#F5F5F5', 
-      borderColor: '#555',
-      domReady: function() {
-        /*
-        expressions not working in style
-
-        console.log('domread');
-        console.log(this);
-        console.log(this.$);
-        console.log(this.querySelectorAll('.quote-box'));
-        */
-      }
-    });
-
-  </script>
+  
 </polymer-element>
 
