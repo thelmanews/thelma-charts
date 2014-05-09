@@ -1,0 +1,77 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+      
+
+<polymer-element name="th-statcked-chart" attributes="myData chartWidth chartHeight">
+  <template>
+    
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+
+      #chart {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+
+    </style>
+
+      <svg id="stacked_chart">
+
+      </svg>
+    
+  </template>
+
+  <!-- <script src="../bower_components/d3/d3.min.js"> d3 is loaded from html page. move it to element/chart-import.html? -->
+
+  <script>
+
+    Polymer('th-statcked-chart', {
+      myData: [{label: 'medicaid', value: 20, display_value: '$20'},{label: 'gap', value: 40, display_value: '$40'},{label: 'sub', value: 10, display_value: '$10'}],
+      chartWidth: 200,
+      chartHeight: 300,
+      domReady: function() {
+          console.log('th-statcked_chart');
+          console.log(this.myData);
+          
+          var margin = {
+              top : 5,
+              right : 0,
+              bottom : 10,
+              left : 0
+          }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.55 - margin.top - margin.bottom
+             , barWidth = width* 0.12 , textLabelMargin = height*0.05;
+
+          x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+
+          y = d3.scale.linear().range([0, height]);
+
+          var chart_svg = this.$.stacked_chart;
+
+          console.log(d3.select(chart_svg));
+          svg = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
+              .attr('height', height + margin.top + margin.bottom)
+              .append('g')
+              .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+          var total = this.myData.reduce(function(prev, cur) {return prev + cur.value; }, 0);
+          console.log(total);
+
+          y.domain([0, total]);  
+
+          var sections = svg.selectAll('.bars').data(this.myData).enter().append('g').attr('class','section');
+          console.log(sections);
+          sections.attr('x',width/2)
+          .attr('y', function(d) {return d.value});
+      }
+
+    });
+  </script>
+  
+</polymer-element>
+
