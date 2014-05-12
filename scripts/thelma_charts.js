@@ -1,10 +1,24 @@
 
-
-Polymer('th-statcked-chart', {
+Polymer('th-d3-chart', {
   chartData: [{label: 'medicaid', value: 20, display_value: '$20'},{label: 'gap', value: 40, display_value: '$40'},{label: 'sub', value: 10, display_value: '$10'}],  // default data just for demo 
   chartWidth: 200,
   chartHeight: 300,
   animationDelay: 500,
+  domReady: function() {
+
+      this.init();
+
+  },
+  init: function() {
+  },
+  reset: function() {
+  },
+  animate: function() {
+  }
+});
+
+
+Polymer('th-statcked-chart', {
   domReady: function() {
 
       this.init();
@@ -30,7 +44,7 @@ Polymer('th-statcked-chart', {
       var y = d3.scale.linear().range([0, height]);
       this.y = y;
 
-      var chart_svg = this.$.stacked_chart;
+      var chart_svg = this.$.chart;
 
       var colors = d3.scale.category10();
       colors.domain(this.chartData.length);
@@ -119,9 +133,7 @@ Polymer('th-statcked-chart', {
 
   }
   
-
-  
-
-
-
 });
+
+
+

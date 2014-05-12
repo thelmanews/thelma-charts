@@ -1,16 +1,14 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
       
 
-<polymer-element name="th-statcked-chart" attributes="chartData chartWidth chartHeight">
+<polymer-element name="th-d3-chart" attributes="chartData chartWidth chartHeight">
   <template>
-    
     <style>
 
       :host {
         display: inline-block;
         position: relative;
       }
-
       #chart {
         position: absolute;
         top: 0;
@@ -18,22 +16,23 @@
         bottom: 0;
         left: 0;
       }
-
     </style>
 
-      <svg id="stacked_chart">
-
+      <svg id="chart">
       </svg>
     
   </template>
-  <script src="../bower_components/d3/d3.min.js"></script> <!-- import using require.js from thelma_charts.js file?! -->
-  <script src="scripts/thelma_charts.js"></scripts>
+  <script src="../bower_components/d3/d3.min.js"></script> 
+  <script src="scripts/thelma_charts.js"></script>
 
+</polymer-element>
 
-  <script>
-
-    
-  </script>
+<polymer-element name="th-statcked-chart" extends="th-d3-chart"  attributes="chartData chartWidth chartHeight">
+  
   
 </polymer-element>
+
+
+
+
 
