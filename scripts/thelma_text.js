@@ -1,5 +1,5 @@
 Polymer('th-countup-num', {
-  startFrom: 0,
+  startFrom: -1,
   startFromSameNumberOfDigit: true,  // to make sure span with remains the same
   duration: 2,
   ready: function() {
@@ -28,7 +28,7 @@ Polymer('th-countup-num', {
   		afterEl.innerText = beforeAfter[1];
   	}
   	console.log(this.startFromSameNumberOfDigit);
-  	var start = Boolean(this.startFromSameNumberOfDigit) ? Math.pow(10,digits-1) : this.startFrom;
+  	var start = (Boolean(this.startFromSameNumberOfDigit) && this.startFrom<0) ? Math.pow(10,digits-1) : this.startFrom;
   	console.log(start);
 
   	this.cnt = new countUp(numEl, start, number[0], 0, this.duration);
