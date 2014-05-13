@@ -29,6 +29,17 @@
                 <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-stripe)" />
             </mask>
         </defs>
+        <filter id="dropshadow" height="130%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3"/> 
+          <feOffset dx="2" dy="2" result="offsetblur"/>
+          <feComponentTransfer>
+            <feFuncA type="linear" slope="0.2"/>
+          </feComponentTransfer>
+          <feMerge> 
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/> 
+          </feMerge>
+        </filter>
       </svg>
     
   </template>
@@ -42,6 +53,39 @@
 
 
 <polymer-element name="th-spectrum-chart" extends="th-d3-chart" attributes="orientation">
+</polymer-element>
+
+
+<polymer-element name="th-donut-chart" extends="th-d3-chart">
+  <template>
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+      #chart {
+
+      }
+      #chart text {
+        font-size: 14px;
+      }
+      .foreground, .percent {
+        fill: #00c3d9;
+      }
+
+      .background {
+        fill: rgba(255,255,255,0.9);
+        stroke: #FFF;
+      }
+
+      .center-background {
+        fill: #FFF;
+      }
+    </style>
+
+      <svg id="chart"></svg>
+  </template>
 </polymer-element>
 
 

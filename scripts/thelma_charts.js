@@ -256,17 +256,117 @@ Polymer('th-spectrum-chart', {
   animate: function() {
 
         var y = this.y;
-        this.bars.transition().duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+        var labels = this.labels;
+        var delay = this.animationDelay;
+        this.bars.transition().duration(delay).delay(function(d,i) { return i*delay;})
         .attr('height', function(d) {return y(d.range.max.value - d.range.min.value)});
 
-        this.labels.transition(this.animationDelay).duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+        this.labels.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
         .style('opacity', 1);
-        //.attr('y', function(d) {return y(d.total) + 12 }); //12: font size
         
-        this.values.transition(this.animationDelay).duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+        this.values.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
         .style('opacity', 1);
-        //.attr('y', function(d) {return y(d.total) + 12 }); //12: font size
 
+  }
+  
+});
+
+
+Polymer('th-donut-chart', {
+  chartData: {value: 65},
+  domReady: function() {
+
+      this.init();
+
+  },
+
+  init: function() {
+    var margin = {
+          top : 8,
+          right : 0,
+          bottom : 10,
+          left : 0,
+          label: 3
+      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.95 - margin.top - margin.bottom,
+      twoPi = 2 * Math.PI,
+      progress = 0,
+      total = 100,
+      formatPercent = d3.format(".0%"),
+      outerRadius = height*0.39,
+      innerRadius = height*0.25;
+      this._prevProgress = 0;
+
+      this.height = height;
+
+      var foreground, text, arc;
+
+
+      arc = d3.svg.arc()
+        .startAngle(0)
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius);
+
+
+      var chart_svg = this.$.chart;
+      var svg = d3.select(chart_svg)
+          .attr("width", width)
+          .attr("height", height)
+          .append("g")
+          .attr("transform", "translate(" +(width / 2 ) + "," + (height * 0.4) + ")");
+      
+      var meter = svg.append("g")
+          .attr("class", "progress-meter");
+      
+      meter.append("circle")
+          .attr("class", "center-background")
+          .attr("r", outerRadius);
+
+      
+      meter.append("path")
+          .attr("class", "background")
+          .attr("d", arc.endAngle(twoPi));
+      
+      foreground = meter.append("path")
+          .attr("class", "foreground");
+      
+      text = meter.append("text")
+          .attr('class','percent')
+          .attr("text-anchor", "middle")
+          .attr("dy", ".35em");
+
+      this.foreground = foreground;
+      this.formatPercent = formatPercent;
+      this.arc = arc;
+      this.twoPi = twoPi;
+      this.text = text;
+
+
+      this.animate();
+
+
+  },
+  reset: function() {
+      
+      
+  },
+  
+  animate: function() {
+
+        var progress = this.chartData.value;
+        var total = 100;
+        var that = this;
+        console.log('total');
+        console.log(total);
+        var i = d3.interpolate(that._prevProgress/total, progress/total);//d3.event.loaded / total);
+        d3.transition().delay(1000).duration(1000).tween("progress", function() {
+          return function(t) {
+            progress = i(t);
+            that.foreground.attr("d", that.arc.endAngle(that.twoPi * progress));
+            that.text.text(that.formatPercent(progress));
+          };
+        });
+
+        this._prevProgress = progress; 
   }
   
 });
