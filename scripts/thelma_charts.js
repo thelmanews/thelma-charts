@@ -2,28 +2,12 @@
 Polymer('th-d3-chart', {
   chartData: [{label: 'medicaid', value: 20, display_value: '$20'},{label: 'gap', value: 40, display_value: '$40'},{label: 'sub', value: 10, display_value: '$10'}],  // default data just for demo 
   chartWidth: 200,
-  chartHeight: 300,
-  animationDelay: 1000,
-  domReady: function() {
+  chartHeight: 300
 
-      this.init();
-
-  },
-  init: function() {
-  },
-  reset: function() {
-  },
-  animate: function() {
-  }
 });
 
 
 Polymer('th-statcked-chart', {
-  domReady: function() {
-
-      this.init();
-
-  },
 
   init: function() {
     var margin = {
@@ -92,7 +76,6 @@ Polymer('th-statcked-chart', {
         .attr('y', height) //12: font size
         .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
-        this.animate();
 
         /*
         var that = this;
@@ -141,12 +124,6 @@ Polymer('th-spectrum-chart', {
               {label: 'federal', color: '#888', pattern: 'stripe',  range: { min: { value: 40, display_value: '$40'}, max: { value: 60, display_value: '$60'}}},
               {label: 'medicare', range: { min: { value: 70, display_value: '$70'}, max: { value: 100, display_value: '$100'}}}],
   orientation: 'vertical',
-  domReady: function() {
-
-      this.init();
-
-  },
-
   init: function() {
     var margin = {
           top : 5,
@@ -230,19 +207,6 @@ Polymer('th-spectrum-chart', {
         .attr('y', function(d) {return height - y(d.range.max.value) + 12;}) 
         .text(function(d) {return d.range.max.display_value ? d.range.max.display_value : d.range.max.value ;});
 
-     
-        this.animate();
-
-        var that = this;
-        setTimeout(
-            function() {
-                //that.reset();
-
-            }
-        , 5000);
-
-
-
   },
   reset: function() {
       
@@ -274,12 +238,6 @@ Polymer('th-spectrum-chart', {
 
 Polymer('th-donut-chart', {
   chartData: {value: 65},
-  domReady: function() {
-
-      this.init();
-
-  },
-
   init: function() {
     var margin = {
           top : 8,
@@ -339,9 +297,6 @@ Polymer('th-donut-chart', {
       this.arc = arc;
       this.twoPi = twoPi;
       this.text = text;
-
-
-      this.animate();
 
 
   },
