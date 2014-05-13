@@ -337,7 +337,7 @@ Polymer('th-n-bar-chart', {
   ],
   init: function() {
     var margin = {
-          top : 5,
+          top : 15,
           right : 0,
           bottom : 20,
           left : 0,
@@ -346,6 +346,24 @@ Polymer('th-n-bar-chart', {
          , barWidth = width* 0.12 , textLabelMargin = height*0.05;
 
       this.height = height;
+
+
+      var barInfos = this.querySelectorAll('th-bar');
+      var dataFromElements = [];
+      [].forEach.call(barInfos, function(info) {
+          var bardata = {value: info.getAttribute('value'), label: info.getAttribute('label'),
+                      color: info.getAttribute('color'), display_value: info.getAttribute('displayValue')};
+          console.log(bardata);
+          dataFromElements.push(bardata);
+      });
+
+      //TODO validate dataFromElements
+      if(dataFromElements.length>0) {
+        this.chartData= dataFromElements;
+      }
+
+
+      
 
       var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
 
@@ -363,14 +381,10 @@ Polymer('th-n-bar-chart', {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-      var total = 0;
-      this.chartData.forEach(function(d) {
-          d.total = total;
-          total+=d.value;
-          console.log(d);
-      });
-      
-      y.domain([0, total]); 
+      //TODO replace with d3.max
+      var max = d3.max(this.chartData, function(d) {return d.value});
+
+      y.domain([0, max]); 
       x.domain(this.chartData.map(function(d) {
             return d.label;
       }));
@@ -424,12 +438,12 @@ Polymer('th-n-bar-chart', {
         var y = this.y;
         var height= this.height;
         this.bars.transition().duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
-        .attr('y', function(d) {return y(d.value);})
-        .attr('height', function(d) {return height-y(d.value)});
+        .attr('y', function(d) { console.log(d.value); return height-y(d.value);})
+        .attr('height', function(d) {return y(d.value)});
         
         this.values.transition(this.animationDelay).duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
         //.style('opacity', 1)
-        .attr('y', function(d) {return y(d.value) - 2;});
+        .attr('y', function(d) {return height - y(d.value) - 2;});
 
   }
   
