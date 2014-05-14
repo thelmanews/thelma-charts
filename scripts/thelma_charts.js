@@ -32,7 +32,7 @@ Polymer('th-statcked-chart', {
       colors.domain(this.chartData.length);
 
       console.log(d3.select(chart_svg));
-      this.svg = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
+      this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -47,7 +47,7 @@ Polymer('th-statcked-chart', {
       y.domain([0, total]); 
 
 
-      this.bars = this.svg.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
+      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
       //console.log(this.bars);
       this.bars
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -57,7 +57,7 @@ Polymer('th-statcked-chart', {
         .attr('width',barWidth)
         .attr('height', 0);
 
-      this.labels = this.svg.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
       //console.log(this.bars);
       this.labels
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -67,7 +67,7 @@ Polymer('th-statcked-chart', {
         .attr('y', height) //12: font size
         .text(function(d) {return d.label;});
       
-      this.values = this.svg.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
       //console.log(this.bars);
       this.values
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -148,11 +148,41 @@ Polymer('th-spectrum-chart', {
       var colors = d3.scale.category10();
       colors.domain(this.chartData.length);
 
-      console.log(d3.select(chart_svg));
-      this.svg = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
+
+      var svg = d3.select(chart_svg);
+
+      /* adding stripe pattern and mask */
+
+      var defs = svg.append("defs");
+      defs.append("pattern")
+        .attr("id","pattern-stripe")
+        .attr("width", 1)
+        .attr("height", 5)
+        .attr("patternUnits", "userSpaceOnUse")
+        .attr("patternTransform", "rotate(45)")
+        .append("rect")
+          .attr("width", 1)
+          .attr("height", 1)
+          .attr("transform", "translate(0,0)")
+          .attr("fill", "white");
+
+      defs.append("mask")
+      .attr("id","mask-stripe")
+      .append("rect")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("fill", "url(#pattern-stripe)");
+
+
+      this.container = svg.attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+      
+
 
       var dataMargin = 0.1;  // 10% extra space     
 
@@ -166,7 +196,7 @@ Polymer('th-spectrum-chart', {
 
       y.domain([wholeRange.min,wholeRange.max]); 
 
-      var spectrum = this.svg.selectAll('.spectrum').data([wholeRange]).enter().append('rect').attr('class','spectrum');
+      var spectrum = this.container.selectAll('.spectrum').data([wholeRange]).enter().append('rect').attr('class','spectrum');
       console.log('spectrum');
       console.log(spectrum);
         
@@ -176,7 +206,7 @@ Polymer('th-spectrum-chart', {
         .attr('width',barWidth)
         .attr('height', function(d) {return y(wholeRange.max)});
 
-      this.bars = this.svg.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
+      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
       //console.log(this.bars);
       this.bars
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -188,7 +218,7 @@ Polymer('th-spectrum-chart', {
         .attr('height', 0);
 
 
-      this.labels = this.svg.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
       //console.log(this.bars);
       this.labels
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -198,7 +228,7 @@ Polymer('th-spectrum-chart', {
         .attr('y', function(d) {return height -  y(d.range.max.value) + 12;}) 
         .text(function(d) {return d.label;});
       
-      this.values = this.svg.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
       //console.log(this.bars);
       this.values
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -266,13 +296,41 @@ Polymer('th-donut-chart', {
 
 
       var chart_svg = this.$.chart;
-      var svg = d3.select(chart_svg)
-          .attr("width", width)
+
+      var svg = d3.select(chart_svg);
+
+      // adding shadow 
+
+      var defs = svg.append("defs");
+
+      var filter = defs.append("filter")
+          .attr("id", "dropshadow")
+
+      filter.append("feGaussianBlur")
+          .attr("in", "SourceAlpha")
+          .attr("stdDeviation", 4)
+          .attr("result", "blur");
+      filter.append("feOffset")
+          .attr("in", "blur")
+          .attr("dx", 2)
+          .attr("dy", 2)
+          .attr("result", "offsetBlur");
+
+      var feMerge = filter.append("feMerge");
+
+      feMerge.append("feMergeNode")
+          .attr("in", "offsetBlur")
+      feMerge.append("feMergeNode")
+          .attr("in", "SourceGraphic");
+
+
+
+      var container = svg.attr("width", width)
           .attr("height", height)
           .append("g")
           .attr("transform", "translate(" +(width / 2 ) + "," + (height * 0.4) + ")");
       
-      var meter = svg.append("g")
+      var meter = container.append("g")
           .attr("class", "progress-meter");
       
       meter.append("circle")
@@ -285,7 +343,8 @@ Polymer('th-donut-chart', {
           .attr("d", arc.endAngle(twoPi));
       
       foreground = meter.append("path")
-          .attr("class", "foreground");
+          .attr("class", "foreground")
+          .attr("filter", "url(#dropshadow)");
       
       text = meter.append("text")
           .attr('class','percent')
@@ -376,7 +435,7 @@ Polymer('th-n-bar-chart', {
       var colors = d3.scale.category10();
       colors.domain(this.chartData.length);
 
-      this.svg = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
+      this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -390,7 +449,7 @@ Polymer('th-n-bar-chart', {
       }));
 
 
-      this.bars = this.svg.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
+      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
       //console.log(this.bars);
       this.bars
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -400,7 +459,7 @@ Polymer('th-n-bar-chart', {
         .attr('height', 0);
 
       
-      this.labels = this.svg.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
       //console.log(this.bars);
       this.labels
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -410,7 +469,7 @@ Polymer('th-n-bar-chart', {
         .attr('y', height + 12) //12: font size
         .text(function(d) {return d.label;});
       
-      this.values = this.svg.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
       //console.log(this.bars);
       this.values
         .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
