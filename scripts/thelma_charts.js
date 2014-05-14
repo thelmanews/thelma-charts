@@ -1,9 +1,24 @@
 
 Polymer('th-d3-chart', {
-  chartData: [{label: 'medicaid', value: 20, display_value: '$20'},{label: 'gap', value: 40, display_value: '$40'},{label: 'sub', value: 10, display_value: '$10'}],  // default data just for demo 
-  chartWidth: 200,
-  chartHeight: 300
+   chartData: [{label: 'medicaid', value: 20, display_value: '$20'},{label: 'gap', value: 40, display_value: '$40'},{label: 'sub', value: 10, display_value: '$10'}],  // default data just for demo 
+   chartWidth: 200,
+   chartHeight: 300,
+   extractElementDataPoints : function() {
+        var barInfos = this.querySelectorAll('th-data-point');
+        var dataFromElements = [];
+        [].forEach.call(barInfos, function(dataPointEl) {
+            var dataPoint = {};
+            [].forEach.call(dataPointEl.attributes, function(attr) {
+              console.log(attr);
+              dataPoint[attr.name] = attr.value;
+            });
+            console.log(dataPoint);
+            dataFromElements.push(dataPoint);
+        });
 
+        return dataFromElements;
+
+    }
 });
 
 
@@ -406,20 +421,13 @@ Polymer('th-n-bar-chart', {
 
       this.height = height;
 
-
-      var barInfos = this.querySelectorAll('th-bar');
-      var dataFromElements = [];
-      [].forEach.call(barInfos, function(info) {
-          var bardata = {value: info.getAttribute('value'), label: info.getAttribute('label'),
-                      color: info.getAttribute('color'), display_value: info.getAttribute('displayValue')};
-          console.log(bardata);
-          dataFromElements.push(bardata);
-      });
+      var dataFromElements = this.extractElementDataPoints();
 
       //TODO validate dataFromElements
       if(dataFromElements.length>0) {
         this.chartData= dataFromElements;
       }
+
 
 
       
