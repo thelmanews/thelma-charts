@@ -2,7 +2,8 @@
 <link rel="import" href="thelma_core.html">
       
 
-<polymer-element name="th-d3-chart" extends="th-animated" attributes="chartData chartWidth chartHeight">
+<polymer-element name="th-d3-chart" extends="th-animated" attributes="chartData chartWidth chartHeight" 
+  on-animate ="{{ animate }}" on-reset="{{ reset }}">
   <template>
     <style>
 
@@ -38,9 +39,6 @@
 <polymer-element name="th-n-bar-chart" extends="th-d3-chart">
 </polymer-element>
 
-<polymer-element name="th-data-point" attributes="label value color displayValue image">
-</polymer-element>
-
 
 <polymer-element name="th-donut-chart" extends="th-d3-chart">
   <template>
@@ -72,6 +70,14 @@
 
       <svg id="chart"></svg>
   </template>
+</polymer-element>
+
+
+<polymer-element name="th-compare-grid-chart" extends="th-d3-chart">
+</polymer-element>
+
+
+<polymer-element name="th-data-point" attributes="label value color displayValue image">
 </polymer-element>
 
 

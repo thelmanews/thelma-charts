@@ -16,8 +16,19 @@ Polymer('th-d3-chart', {
             dataFromElements.push(dataPoint);
         });
 
-        return dataFromElements;
+        
+      if(this.validateElementDataPoints(dataFromElements)) {
+        this.chartData= dataFromElements;
+      }
 
+
+    },
+    validateElementDataPoints : function(data) {
+       
+        if(data.length<1) {
+          return false;
+        }
+        return true;
     }
 });
 
@@ -421,16 +432,7 @@ Polymer('th-n-bar-chart', {
 
       this.height = height;
 
-      var dataFromElements = this.extractElementDataPoints();
-
-      //TODO validate dataFromElements
-      if(dataFromElements.length>0) {
-        this.chartData= dataFromElements;
-      }
-
-
-
-      
+      this.extractElementDataPoints();
 
       var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
 
@@ -511,6 +513,124 @@ Polymer('th-n-bar-chart', {
         this.values.transition(this.animationDelay).duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
         //.style('opacity', 1)
         .attr('y', function(d) {return height - y(d.value) - 2;});
+
+  }
+  
+});
+
+
+
+Polymer('th-compare-grid-chart', {
+  chartData: [
+    {label: 'Non-Smoker', value: 33, image: 'images/kid.png'},
+    {label: 'Smoker', value: 1, image: 'images/kid-smoker.png'}
+  ],
+  init: function() {
+    var margin = {
+          top : 5,
+          right : 15,
+          bottom : 5,
+          left : 10,
+          label: 3
+      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*1.0 - margin.top - margin.bottom
+         , barWidth = width* 0.12 , textLabelMargin = height*0.05;
+
+      this.height = height;
+
+      this.extractElementDataPoints();
+
+      
+
+
+      var chart_svg = this.$.chart;
+
+      var totalCount = this.chartData.reduce(function(prev, cur) {
+          return prev+= parseInt(cur.value);
+      }, 0);
+
+      var _data = {};
+
+      _data.elementsPerRow = Math.min(9, totalCount);
+      var rowNum = Math.floor(totalCount / _data.elementsPerRow);
+      
+      _data.count = d3.range(0, totalCount);
+      console.log(height);
+      _data.dim = {
+          width : Math.floor(width / _data.elementsPerRow),
+          height : Math.floor(height / rowNum)
+      };
+
+      console.log(_data.dim);
+      _data.set1_count = this.chartData[0].value;
+      _data.set1_image = 'images/kid.png';
+
+      _data.set2_count = this.chartData[1].value;
+      _data.set2_image = 'images/kid-smoker.png';
+
+
+      this.data = _data;
+      
+
+      var svg, scale_bar, lefts, right, barg, left_holder, right_holder, right_labels;
+
+      var bar_width = 15, holder_height = 100, holder_width = width * 0.5;
+
+
+      this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+
+       this.icons = this.container.selectAll('.icon').data(_data.count).enter().append('image')
+          .attr('xlink:href',function(d, i) { 
+              return (i<_data.set1_count) ? _data.set1_image : _data.set2_image;
+           })
+          .attr('class', 'icon')
+          .attr('x', function(d, i) {
+               var rand =   Math.random()*100; 
+               return  Math.random()>0.5 ? rand+width : - rand - _data.dim.width;
+          })
+         .attr('y', function(d, i) {
+               var rand =   Math.random()*100; 
+               return  Math.random()>0.5 ? rand+height : - rand - _data.dim.height;
+          })
+          .attr('width', function(d, i) {
+              return (i<_data.set1_count) ? _data.dim.width : _data.dim.width+10; 
+           })
+          .attr('height', _data.dim.height);
+
+
+
+  },
+  reset: function() {
+      
+        this.icons.attr('x', function(d, i) {
+             return (Math.random() < 0.5 ? -1 : 1) * (250 + Math.random()*100) ;
+        })
+       .attr('y', function(d, i) {
+             return (Math.random() < 0.5 ? -1 : 1) * (250 + Math.random()*100) ;
+        });    
+  },
+  
+  animate: function() {
+
+       var delay = 40;
+       var _data = this.data;
+        
+        this.icons.transition().duration(function(d, i) {
+            return (i<_data.set1_count) ? delay*3 : delay*15;
+         })
+         .delay(function(d, i) {
+            return i * delay;
+        })
+        .attr('x', function(d, i) {
+             return  (i % _data.elementsPerRow) * (_data.dim.width + 2);
+        })
+       .attr('y', function(d, i) {
+            return (Math.floor(i / _data.elementsPerRow)) * (_data.dim.height) + 5;
+        })
+
 
   }
   
