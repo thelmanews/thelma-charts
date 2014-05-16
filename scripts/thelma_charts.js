@@ -334,12 +334,12 @@ Polymer('th-donut-chart', {
 
       filter.append("feGaussianBlur")
           .attr("in", "SourceAlpha")
-          .attr("stdDeviation", 4)
+          .attr("stdDeviation", 2)
           .attr("result", "blur");
       filter.append("feOffset")
           .attr("in", "blur")
-          .attr("dx", 2)
-          .attr("dy", 2)
+          .attr("dx", 1)
+          .attr("dy", 1)
           .attr("result", "offsetBlur");
 
       var feMerge = filter.append("feMerge");
