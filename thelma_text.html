@@ -142,13 +142,13 @@
       #container {
         position: absolute;
         left: 0;
-        bottom: -137%;
         padding: 15px 15px 15px 35px;
         background: url('/images/link-icon.png') 10px 20px no-repeat;
         background-color: rgba(0,0,0,.8);
         color: white;
         width: 100%;
         z-index: 1;
+        box-sizing: border;
         -webkit-transition: all 0.3s ease;
                 transition: all 0.3s ease;
            -moz-transition: all 0.3s ease;
@@ -167,9 +167,9 @@
       }
 
       .th-transition-show {
-        -webkit-transform: translateY(-500%);
-           -moz-transform: translateY(-500%);
-                transform: translateY(-500%);
+        -webkit-transform: translateY(-100%);
+           -moz-transform: translateY(-100%);
+                transform: translateY(-100%);
       }
 
     </style>
@@ -184,17 +184,13 @@
       init: function() {
       },
       domReady: function(){
-
+        var height = $('#container').outerHeight(true) + 70; // outerHeight is not being calculated correctly?
+        console.log("height: " + height);
+        this.$.container.style.bottom = -height +'px';
       },
       toggle: function(){
         var $container = this.$.container;
-        var height = "140";
         $container.classList.toggle('th-transition-show');
-        // $container.animate({ 'translateY': -height+'px');
-
-
-
-
       }
     });
   </script>
