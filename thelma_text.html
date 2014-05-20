@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="thelma_core.html">
 
-<polymer-element assetpath="." name="th-quote-box" attributes="qTitle qDetails qImage bgColor borderColor" noscript>
+<polymer-element name="th-quote-box" attributes="qTitle qDetails qImage bgColor borderColor" noscript>
   <template>
       <style>
           .quote-box {
@@ -77,7 +77,7 @@
   
 </polymer-element>
 
-<polymer-element assetpath="." name="th-countup-num" extends="th-animated" attributes="startFrom startFromSameNumberOfDigit duration">
+<polymer-element name="th-countup-num" extends="th-animated" attributes="startFrom startFromSameNumberOfDigit duration">
   <template>
       <style>
         :host {
@@ -101,7 +101,7 @@
 </polymer-element>
 
 
-<polymer-element assetpath="." name="th-reveal" extends="th-animated" attributes="transition duration">
+<polymer-element name="th-reveal" extends="th-animated" attributes="transition duration">
   <template>
       <style>
         :host {
@@ -134,44 +134,6 @@
       </div>
   </template>
   <script src="scripts/thelma_text.js"></script>
+
+
 </polymer-element>
-
-<polymer-element assetpath="." name="th-two-column" extends="th-animated" attributes="leftWidth">
-  <template>
-      <style>
-        :host {
-          display: inline-block;
-          position: relative;
-          width: 100%;
-        }
-        #leftCol, #rightCol {
-          display: inline-block;
-          position: relative;
-        }
-      </style>
-      <div id="leftCol">
-        <content select=".left"></content>
-      </div>
-      <div id="rightCol">
-        <content select=".right"></content>
-      </div>
-  </template>
-  <script>
-    Polymer('th-two-column', {
-      leftWidth: "40%",
-      ready: function() {
-        this.init();
-      },
-      init: function() {
-        var leftCol = this.$.leftCol;
-        var rightCol = this.$.rightCol;
-        var rightWidth = 98 - parseInt(this.leftWidth); // leave 2% for padding    
-        leftCol.style.width = this.leftWidth + "%";    
-        rightCol.style.width = rightWidth + "%";
-      }
-    });
-  </script>
-</polymer-element>
-
-
-
