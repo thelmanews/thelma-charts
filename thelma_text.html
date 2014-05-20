@@ -136,21 +136,43 @@
   <script src="scripts/thelma_text.js"></script>
 </polymer-element>
 
-<polymer-element name="th-footnote" extends "th-animated">
+<polymer-element name="th-footnote" extends="th-animated" attributes="toggle">
   <template>
     <style>
       #container {
         position: absolute;
-        display: block;
         left: 0;
-        bottom: 0;
-        padding: 5px;
-        background-color: black;
+        bottom: -137%;
+        padding: 15px 15px 15px 35px;
+        background: url('/images/link-icon.png') 10px 20px no-repeat;
+        background-color: rgba(0,0,0,.8);
         color: white;
         width: 100%;
+        -webkit-transition: all 0.3s ease;
+                transition: all 0.3s ease;
+           -moz-transition: all 0.3s ease;
+             -o-transition: all 0.3s ease;
       }
+      #info {
+        border-radius: 50%;
+        background-color: rgba(0,0,0,0.5);
+        color: white;
+        width: 23px;
+        height: 23px;
+        display: inline-block;
+        padding: 1px;
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .th-transition-show {
+        -webkit-transform: translateY(-500%);
+           -moz-transform: translateY(-500%);
+                transform: translateY(-500%);
+      }
+
     </style>
-    
+    <span id="info" on-click="{{toggle}}">i</span>
     <div id="container"><content></content></div>
   </template> 
   <script>
@@ -159,7 +181,9 @@
         this.init();
       },
       init: function() {
-       
+      },
+      toggle: function(){
+        this.$.container.classList.toggle('th-transition-show');
       }
     });
   </script>
