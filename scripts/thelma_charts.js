@@ -631,8 +631,7 @@ Polymer('th-compare-grid-chart', {
             return (Math.floor(i / _data.elementsPerRow)) * (_data.dim.height) + 5;
         })
 
-
-  }
+}
   
 });
 

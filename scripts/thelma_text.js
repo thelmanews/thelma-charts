@@ -48,7 +48,7 @@ Polymer('th-countup-num', {
 Polymer('th-reveal', {
   ready: function() {
 
-      this.init();
+    this.init();
 
   },
   init: function() {
@@ -56,22 +56,26 @@ Polymer('th-reveal', {
   	console.log(this);
   	console.log(this.$);
 
- 	this.$.container.classList.add('th-transition-slide');
+ 	  this.$.container.classList.add('th-transition-slide');
 
   },
   reset: function() {
- 	this.$.container.classList.remove('th-transition-slide-show');
- 	this.$.container.classList.add('th-transition-slide');
+ 	  this.$.container.classList.remove('th-transition-slide-show');
+ 	  this.$.container.classList.add('th-transition-slide');
   },
   
   animate: function() {
-
   	console.log('reveal animate');
   	var that = this;
   	setTimeout(function() {
-		that.$.container.classList.remove('th-transition-slide');
-	 	that.$.container.classList.add('th-transition-slide-show');
-	},500);
-
+  		that.$.container.classList.remove('th-transition-slide');
+  	 	that.$.container.classList.add('th-transition-slide-show');
+      that.$.container.addEventListener('transitionend', function(){
+        that.completed();
+      })
+    },500);
+  },
+  completed: function(){
+    alert();
   }
 });
