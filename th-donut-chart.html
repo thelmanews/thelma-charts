@@ -1,0 +1,158 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-donut-chart" extends="th-d3-chart">
+  <template>
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+      #chart {
+
+      }
+      #chart text {
+        font-size: 14px;
+      }
+      .foreground, .percent {
+        fill: #00c3d9;
+      }
+
+      .background {
+        fill: rgba(255,255,255,0.9);
+        stroke: #FFF;
+      }
+
+      .center-background {
+        fill: #FFF;
+      }
+    </style>
+
+      <svg id="chart"></svg>
+  </template>
+  <script>
+
+      Polymer('th-donut-chart', {
+        chartData: {value: 65},
+        init: function() {
+          var margin = {
+                top : 8,
+                right : 0,
+                bottom : 10,
+                left : 0,
+                label: 3
+            }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.95 - margin.top - margin.bottom,
+            twoPi = 2 * Math.PI,
+            progress = 0,
+            total = 100,
+            formatPercent = d3.format(".0%"),
+            outerRadius = height*0.39,
+            innerRadius = height*0.25;
+            this._prevProgress = 0;
+
+            this.height = height;
+
+            var foreground, text, arc;
+
+
+            arc = d3.svg.arc()
+              .startAngle(0)
+              .innerRadius(innerRadius)
+              .outerRadius(outerRadius);
+
+
+            var chart_svg = this.$.chart;
+
+            var svg = d3.select(chart_svg);
+
+            // adding shadow 
+
+            var defs = svg.append("defs");
+
+            var filter = defs.append("filter")
+                .attr("id", "dropshadow")
+
+            filter.append("feGaussianBlur")
+                .attr("in", "SourceAlpha")
+                .attr("stdDeviation", 2)
+                .attr("result", "blur");
+            filter.append("feOffset")
+                .attr("in", "blur")
+                .attr("dx", 1)
+                .attr("dy", 1)
+                .attr("result", "offsetBlur");
+
+            var feMerge = filter.append("feMerge");
+
+            feMerge.append("feMergeNode")
+                .attr("in", "offsetBlur")
+            feMerge.append("feMergeNode")
+                .attr("in", "SourceGraphic");
+
+
+
+            var container = svg.attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" +(width / 2 ) + "," + (height * 0.4) + ")");
+            
+            var meter = container.append("g")
+                .attr("class", "progress-meter");
+            
+            meter.append("circle")
+                .attr("class", "center-background")
+                .attr("r", outerRadius);
+
+            
+            meter.append("path")
+                .attr("class", "background")
+                .attr("d", arc.endAngle(twoPi));
+            
+            foreground = meter.append("path")
+                .attr("class", "foreground")
+                .attr("filter", "url(#dropshadow)");
+            
+            text = meter.append("text")
+                .attr('class','percent')
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em");
+
+            this.foreground = foreground;
+            this.formatPercent = formatPercent;
+            this.arc = arc;
+            this.twoPi = twoPi;
+            this.text = text;
+
+
+        },
+        reset: function() {
+            
+            
+        },
+        
+        animate: function() {
+
+              var progress = this.chartData.value;
+              var total = 100;
+              var that = this;
+              console.log('total');
+              console.log(total);
+              var i = d3.interpolate(that._prevProgress/total, progress/total);//d3.event.loaded / total);
+              d3.transition().delay(1000).duration(1000).tween("progress", function() {
+                return function(t) {
+                  progress = i(t);
+                  that.foreground.attr("d", that.arc.endAngle(that.twoPi * progress));
+                  that.text.text(that.formatPercent(progress));
+                };
+              });
+
+              this._prevProgress = progress; 
+        }
+        
+      });
+
+
+
+  </script>
+</polymer-element>
