@@ -38,7 +38,6 @@ Polymer('th-countup-num', {
   	this.cnt.reset();
   },
   animate: function() {
-  	console.log('countup animate');
   	this.cnt.start();
 
   }
@@ -71,11 +70,15 @@ Polymer('th-reveal', {
   		that.$.container.classList.remove('th-transition-slide');
   	 	that.$.container.classList.add('th-transition-slide-show');
       that.$.container.addEventListener('transitionend', function(){
-        that.completed();
+        //that.completed();
+        that.asyncFire('completed',{element: that});
       })
     },500);
-  },
-  completed: function(){
-    alert();
   }
+/*
+  ,
+  completed: function(){
+    //alert('comp');
+  }
+  */
 });
