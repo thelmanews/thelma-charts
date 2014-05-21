@@ -1,0 +1,115 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-n-bar-chart" extends="th-d3-chart">
+
+	<script>
+
+
+		Polymer('th-n-bar-chart', {
+		  chartData: [
+		    {label: 'Player', value: 15, display_value: '$15'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Mascot', value: 45, display_value: '$45'}
+		  ],
+		  init: function() {
+		    var margin = {
+		          top : 15,
+		          right : 0,
+		          bottom : 20,
+		          left : 0,
+		          label: 3
+		      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.55 - margin.top - margin.bottom
+		         , barWidth = width* 0.12 , textLabelMargin = height*0.05;
+
+		      this.height = height;
+
+		      this.extractElementDataPoints();
+
+		      var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+
+
+		      var y = d3.scale.linear().range([0, height]);
+		      this.y = y;
+
+		      var chart_svg = this.$.chart;
+
+		      var colors = d3.scale.category10();
+		      colors.domain(this.chartData.length);
+
+		      this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
+		          .attr('height', height + margin.top + margin.bottom)
+		          .append('g')
+		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		      //TODO replace with d3.max
+		      var max = d3.max(this.chartData, function(d) {return d.value});
+
+		      y.domain([0, max]); 
+		      x.domain(this.chartData.map(function(d) {
+		            return d.label;
+		      }));
+
+
+		      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
+		      //console.log(this.bars);
+		      this.bars
+		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr('x', function(d) { return x(d.label); })
+		        .attr('y', function(d) { return height; })
+		        .attr('width',barWidth)
+		        .attr('height', 0);
+
+		      
+		      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+		      //console.log(this.bars);
+		      this.labels
+		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        //.style('opacity', 0)
+		        .style('text-anchor','left')
+		        .attr('x', function(d) { return x(d.label); })
+		        .attr('y', height + 12) //12: font size
+		        .text(function(d) {return d.label;});
+		      
+		      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+		      //console.log(this.bars);
+		      this.values
+		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .style('text-anchor','middle')
+		        //.style('opacity', 0)
+		        .attr('x', function(d) { return x(d.label) + barWidth/2; })
+		        .attr('y', height) //12: font size
+		        .text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+
+		        
+
+
+		  },
+		  reset: function() {
+		      
+		      var height= this.height;
+		      this.bars.transition().duration(this.animationDelay).attr('y', height).attr('height', 0);
+		      this.values.transition().duration(this.animationDelay).attr('y', height );
+		      
+		  },
+		  
+		  animate: function() {
+
+		        var y = this.y;
+		        var height= this.height;
+		        this.bars.transition().duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        .attr('y', function(d) { console.log(d.value); return height-y(d.value);})
+		        .attr('height', function(d) {return y(d.value)});
+		        
+		        this.values.transition(this.animationDelay).duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        //.style('opacity', 1)
+		        .attr('y', function(d) {return height - y(d.value) - 2;});
+
+		  }
+		  
+		});
+
+
+	</script>
+</polymer-element>

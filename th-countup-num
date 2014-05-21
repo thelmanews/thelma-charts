@@ -1,0 +1,73 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="thelma_core.html">
+
+
+<polymer-element name="th-countup-num" extends="th-animated" attributes="startFrom startFromSameNumberOfDigit duration">
+  <template>
+      <style>
+        :host {
+          display: inline-block;
+          position: relative;
+        }
+        
+        span {
+          padding:0;
+          margin: 0;
+        }
+      </style>
+      <div class="container">
+        <span id="before_num"></span><span id="num"></span><span id="after_num"></span>
+      </div>
+  </template>
+  <script src="../bower_components/countUp.js/countUp.js"></script> 
+  <script>
+ 
+      Polymer('th-countup-num', {
+        startFrom: -1,
+        startFromSameNumberOfDigit: true,  // to make sure span with remains the same
+        duration: 2,
+        ready: function() {
+
+            this.init();
+
+        },
+        init: function() {
+          var content = this.textContent;
+
+          //TODO validation
+          var number = content.match(/\d+/g);
+          var digits = number.toString().length;
+
+          var beforeAfter = content.split(/\d+/,2);
+
+          var beforeEl = this.$.before_num;
+          var numEl = this.$.num;
+          var afterEl = this.$.after_num;
+
+          if(beforeAfter && beforeAfter.length>0) {
+            beforeEl.innerText = beforeAfter[0];
+          }
+
+          if(beforeAfter && beforeAfter.length>1) {
+            afterEl.innerText = beforeAfter[1];
+          }
+          console.log(this.startFromSameNumberOfDigit);
+          var start = (Boolean(this.startFromSameNumberOfDigit) && this.startFrom<0) ? Math.pow(10,digits-1) : this.startFrom;
+          console.log(start);
+
+          this.cnt = new countUp(numEl, start, number[0], 0, this.duration);
+
+        },
+        reset: function() {
+          this.cnt.reset();
+        },
+        animate: function() {
+          this.cnt.start();
+
+        }
+      });
+
+  </script>
+
+
+</polymer-element>
