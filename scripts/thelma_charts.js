@@ -154,7 +154,7 @@ Polymer('th-spectrum-chart', {
     var margin = {
           top : 5,
           right : 0,
-          bottom : 10,
+          bottom : 5,
           left : 0,
           label: 3
       }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.55 - margin.top - margin.bottom
@@ -267,9 +267,9 @@ Polymer('th-spectrum-chart', {
   reset: function() {
       
       var height= this.height;
-      this.bars.transition().duration(this.animationDelay).attr('y', height).attr('height', 0);
-      this.labels.transition().duration(this.animationDelay).attr('y', height ).style('opacity', 0);
-      this.values.transition().duration(this.animationDelay).attr('y', height ).style('opacity', 0);
+      this.bars.transition().duration(this.animationDelay).attr('height', 0);
+      this.labels.transition().duration(this.animationDelay).style('opacity', 0);
+      this.values.transition().duration(this.animationDelay).style('opacity', 0);
       
   },
   
