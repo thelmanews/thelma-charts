@@ -9,13 +9,27 @@
         font-size: 0.875em;
       }
       path {
-        stroke: steelblue;
-        stroke-width: 2;
+        stroke: white;
+        stroke-width: 2.5;
         fill: none;
       }
        
       line {
-        stroke: black;
+        stroke: #386c9d;
+        stroke-width: 2;
+      }
+      #chart {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      .xTicks, .yTicks {
+        stroke: #386c9d;
+      }
+
+      .xLabel, .yLabel {
+        font-size: 0.7em;
+        fill: #eee;
       }
 
     </style>
@@ -34,7 +48,7 @@
       var data = this.chartData,
           w = this.chartWidth,
           h = this.chartHeight,
-          margin = 20,
+          margin = 20, // space btw labels and axis
           y = d3.scale.linear().domain([0, d3.max(data)]).range([0 + margin, h - margin]),
           x = d3.scale.linear().domain([0, data.length]).range([0 + margin, w - margin]);
 
@@ -49,7 +63,8 @@
 
       var line = d3.svg.line()
         .x(function(d,i) { return x(i); })
-        .y(function(d) { return -1 * y(d); });
+        .y(function(d) { return -1 * y(d); })
+        .interpolate("cardinal");
       
       // the line itself
       g.append("path").attr("d", line(data));
