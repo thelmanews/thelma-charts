@@ -176,8 +176,7 @@
 </polymer-element>
 
 
->>>>>>> remove ready and init methods
-<polymer-element name="th-footnote" extends="th-animated" attributes="toggle">
+<polymer-element name="th-footnote" extends="th-animated" attributes="toggle show hide">
   <template>
     <style>
       #container {
@@ -220,14 +219,23 @@
   </template> 
   <script>
     Polymer('th-footnote', {
+      visible: false,
       domReady: function(){
-        var $container = this.$.container;
-        var height = $container.offsetHeight - 30; // remove the padding
-        $container.style.bottom = -height +'px';
+        this.$container = this.$.container;
+        var height = this.$container.offsetHeight - 30; // remove the padding
+        this.$container.style.bottom = -height +'px';
       },
       toggle: function(){
-        var $container = this.$.container;
-        $container.classList.toggle('th-transition-show');
+        this.$container.classList.toggle('th-transition-show');
+        this.visible != this.visible;
+      },
+      show: function() {
+        this.$container.classList.add('th-transition-show');
+        this.visible = true;
+      },
+      hide: function() {
+        this.$container.classList.remove('th-transition-show');
+        this.visible = false;
       }
     });
   </script>
