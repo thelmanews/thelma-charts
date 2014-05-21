@@ -137,3 +137,41 @@
 
 
 </polymer-element>
+
+
+<polymer-element assetpath="." name="th-two-column" extends="th-animated" attributes="leftWidth">
+  <template>
+      <style>
+        :host {
+          display: inline-block;
+          position: relative;
+          width: 100%;
+        }
+        #leftCol, #rightCol {
+          display: inline-block;
+          position: relative;
+        }
+      </style>
+      <div id="leftCol">
+        <content select=".left"></content>
+      </div>
+      <div id="rightCol">
+        <content select=".right"></content>
+      </div>
+  </template>
+  <script>
+    Polymer('th-two-column', {
+      leftWidth: "40%",
+      ready: function() {
+        this.init();
+      },
+      init: function() {
+        var leftCol = this.$.leftCol;
+        var rightCol = this.$.rightCol;
+        var rightWidth = 98 - parseInt(this.leftWidth); // leave 2% for padding    
+        leftCol.style.width = this.leftWidth + "%";    
+        rightCol.style.width = rightWidth + "%";
+      }
+    });
+  </script>
+</polymer-element>
