@@ -31,123 +31,111 @@
 
 		Polymer('th-compare-balance-chart', {
 		  chartData: [
-		    {label: 'Smoker', count: 1, image: 'images/kid-smoker.png'},
-		    {label: 'Non-Smoker', count: 33, image: 'images/kid.png'}
+		    {label: 'Smoker', count: 3, image: 'images/kid-smoker.png'},
+		    {label: 'Non-Smoker', count: 50, image: 'images/kid.png'}
 		  ],
 		  init: function() {
+
+		    var that = this;
+
 		    var margin = {
 		          top : 5,
-		          right : 15,
+		          right : 10,
 		          bottom : 20,
 		          left : 10,
 		          label: 3
-		      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*1.0 - margin.top - margin.bottom
+		      }, width = that.chartWidth*0.95 - margin.left - margin.right, height = that.chartHeight*1.0 - margin.top - margin.bottom
 		         , barWidth = height* 0.02 , textLabelMargin = height*0.05;
 
-		      this.height = height;
-		      this.width = width;
+		      that.height = height;
+		      that.width = width;
 
-		      this.extractElementDataPoints();
+		      that.extractElementDataPoints();
 
 		      
 
 
-		      var chartEl = this.$.chart;
+		      var chartEl = that.$.chart;
 		      var container = d3.select(chartEl).attr('width', width + margin.left + margin.right)
 		          .attr('height', height + margin.top + margin.bottom)
 		          .append('g')
 		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-		      this.container = container;
+		      that.container = container;
 
-		      this.holderTranslate = 'translate(' + width / 2 + ',' + (height* 0.91) + ')';
+		      that.holderTranslate = 'translate(' + width / 2 + ',' + (height* 0.91) + ')';
 
 
-		      var totalCount = this.chartData.reduce(function(prev, cur) {
+		      var totalCount = that.chartData.reduce(function(prev, cur) {
 		          return prev+= parseInt(cur.value);
 		      }, 0);
 
-		      var _data = {};
 
-		      _data.elementsPerRow = Math.min(9, totalCount);
-		      var rowNum = Math.floor(totalCount / _data.elementsPerRow);
+		      that.chartData[0].width = that.chartData[0].width || 25;
+		      that.chartData[0].height = that.chartData[0].height || 20;
+
+		      that.chartData[1].width = that.chartData[1].width || 20;
+		      that.chartData[1].height = that.chartData[1].height || 20;
+
+
+		      that.chartData[0].elementsPerRow =  Math.floor((width/2 - 10)/ that.chartData[0].width);
+
+		      that.chartData[1].elementsPerRow =  Math.floor((width/2 - 10)/ that.chartData[1].width);
 		      
-		      _data.count = d3.range(0, totalCount);
-		      console.log(height);
-		      _data.dim = {
-		          width : Math.floor(width / _data.elementsPerRow),
-		          height : Math.floor(height / rowNum)
-		      };
-
-		      console.log(_data.dim);
-		      _data.set1_count = this.chartData[0].count;
-		      _data.set1_image = 'images/kid.png';
-		      _data.set1_dim = 20;
-
-		      _data.set2_count = this.chartData[1].count;
-		      _data.set2_image = 'images/kid-smoker.png';
-		      _data.set2_dim = 20;
-
-
-		      this.data = _data;
-
-		      var elementsPerRow = 10;
-		      
-
 
 	        container.append('path')
 	            .attr('transform', 'translate(' + (width * 0.40) + ',' + (height *0.95) + ')')
-	            .attr('d', 'M 20 0 L 40 35 L 0 35 L 20 0').attr('class', 'triangle');
+	            .attr('d', 'M 15 0 L 30 22 L 0 22 L 15 0').attr('class', 'triangle');
 
-	        this.barg = container.append('g')
+	        that.barg = container.append('g')
 	            .attr('transform', 'translate(' + width / 2 + ',' + height*0.95 + ')');
 
-	        var bar = this.barg.append('rect')
+	        var bar = that.barg.append('rect')
 	            .attr('x', -width / 2)
 	            .attr('y', 0)
 	            .attr('class', 'scale-bar')
 	            .attr('width', width)
 	            .attr('height', barWidth);
 
-	        this.left_holder = container.append('g')
+	        that.left_holder = container.append('g')
 	            .attr('class', 'left_holder')
-	            .attr('transform', this.holderTranslate);
+	            .attr('transform', that.holderTranslate);
 
-	        this.lefts = this.left_holder.selectAll('.lefts').data(d3.range(0,this.chartData[0].count)).enter().append('image')
-	            .attr('xlink:href', _data.set1_image)
+	        that.lefts = that.left_holder.selectAll('.lefts').data(d3.range(0,that.chartData[0].count)).enter().append('image')
+	            .attr('xlink:href', that.chartData[0].image)
 	            .attr('class', 'lefts')
 	            .attr('x', function(d, i) {
-	                 return -width / 2 + (i % elementsPerRow) * (_data.set1_dim + 2);
+	                 return -width / 2 + (i % that.chartData[0].elementsPerRow) * (that.chartData[0].width);
 	            })
 	            .attr('y', function(d, i) {
 	                 return -height* 1.2;
 	            })
-	            .attr('width', _data.set1_dim)
-	            .attr('height', _data.set1_dim);
+	            .attr('width', that.chartData[0].width)
+	            .attr('height', that.chartData[0].height);
 
-	        this.right_holder = container.append('g')
+	        that.right_holder = container.append('g')
 	            .attr('class', 'right_holder')
-	            .attr('transform', this.holderTranslate);
+	            .attr('transform', that.holderTranslate);
 
-	        this.rights = this.right_holder.selectAll('.rights').data(d3.range(0,this.chartData[1].count)).enter().append('image')
-	            .attr('xlink:href', _data.set2_image)
+	        that.rights = that.right_holder.selectAll('.rights').data(d3.range(0,that.chartData[1].count)).enter().append('image')
+	            .attr('xlink:href', that.chartData[1].image)
 	            .attr('class', 'rights')
 	            .attr('x', function(d, i) {
-	                return (i % elementsPerRow) * (_data.set2_dim + 3);
+	                return width/2 - margin.right - ((i % that.chartData[1].elementsPerRow) * (that.chartData[1].width)) - 3;
 	            })
 	            .attr('y', function(d, i) {
 	                return -height* 1.2;
 	            })
 	            .attr('rx', 3)
 	            .attr('ry', 3)
-	            .attr('width', _data.set2_dim)
-	            .attr('height', _data.set2_dim);
+	            .attr('width', that.chartData[1].width)
+	            .attr('height', that.chartData[1].height);
 
 
 		  },
 		  reset: function() {
 		      
-		        this.icons.attr('x', function(d, i) {
+		        that.icons.attr('x', function(d, i) {
 		             return (Math.random() < 0.5 ? -1 : 1) * (250 + Math.random()*100) ;
 		        })
 		       .attr('y', function(d, i) {
@@ -156,79 +144,75 @@
 		  },
 		  
 		animate: function() {
-					      var elementsPerRow = 10;
-
-
-		    var _data = this.data;
+					      
+	        var that = this;
+	        var totalSideTransition = 2000
 		        
- 			var delay = {left: 150, right: 40}, waitForOtherSide = 1500;
+ 			var delay = {left: totalSideTransition/that.chartData[0].count,
+ 						right: totalSideTransition/that.chartData[1].count}
+ 					, pauseBeforeRight = 1000;
 
 	        // for bar
-	        var angle = -10;
+	        var maxAngle = -10;
 
-	        var that = this;
+	        var dropSpeed = 200;
 
-	        this.lefts.transition().ease('linear').duration(delay.left).delay(function(d, i) {
+
+	        var prevAngle = 0;
+	        that.lefts.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
 	            return i * delay.left;
 	        }).attr('y', function(d, i) {
-	            return -Math.floor(i / elementsPerRow) * (_data.set1_dim);
+	            return -Math.floor(i / that.chartData[0].elementsPerRow) * (that.chartData[0].height) - 10;
 	        }).each('end', function(d, i) {
 	            
-	            // the proper way is to rotate the bar a little bit each time (angle*(i/count))
-	            // but since there is only one object on the left, doing it this way to save on calculations
-	            that._animateBar(0, angle, delay.left);
-	        });
-	        
-	        setTimeout(function() {
+	            var angle = ((i+1) / that.chartData[0].count) * maxAngle;
+	            that._animateBar(prevAngle, angle, Math.min(delay.left, dropSpeed*1.5));
+	            prevAngle = angle;
+	            if(i+1 == that.chartData[0].count) {
 
-	            that.rights.transition().ease('linear').duration(delay.right).delay(function(d, i) {
-	                return i * delay.right;
-	            }).attr('y', function(d, i) {
-	                return -Math.floor(i / elementsPerRow) * (_data.set1_dim);
-	            });
-	    
-	            
-	    
-	            var fromAngle = -10, toAngle = 0;
-	            
-	            // the proper way is to rotate the bar a little bit each time (angle*(i/count))
-	            // by using .each('end'  (above)
-	            // but since there are many objects on the right and there is a very short pause between
-	            // objects falling this looks exactly the same
-	            that._animateBar(angle, 0, that.chartData[0].count * delay.right);
-	        
-	        },waitForOtherSide);
+			        setTimeout(function() {
+		            	var prevAngle = maxAngle;
+			            that.rights.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
+			                return i * delay.right;
+			            }).attr('y', function(d, i) {
+			                return -Math.floor(i / that.chartData[1].elementsPerRow) * (that.chartData[1].height) - 10;
+			            }).each('end', function(d, i) {
+			            
+				            var angle = maxAngle - ((i+1) / that.chartData[1].count) * maxAngle;
+				            that._animateBar(prevAngle, angle, Math.min(delay.right, dropSpeed*1.5));
+				            prevAngle = angle;
+				        });
+			        }, pauseBeforeRight);
+
+	            }
+	        });
 
 		},
 
 		_animateBar: function(fromAngle, toAngle, delay) {
 
-		var that = this;
-        
-        this.barg.transition().ease('linear').duration(delay).attrTween("transform", tween);
+			var that = this;
+	        
+	        that.barg.transition().ease('linear').duration(delay).attrTween("transform", tween);
 
-        this.left_holder.transition().ease('linear').duration(delay).attrTween("transform", tween2);
+	        that.left_holder.transition().ease('linear').duration(delay).attrTween("transform", tween2);
 
-        this.right_holder.transition().ease('linear').duration(delay).attrTween("transform", tween3);
+	        that.right_holder.transition().ease('linear').duration(delay).attrTween("transform", tween3);
 
-        function tween(d, i, a) {
-        	//console.log('tween');
-        	//console.log(that);
-        	//console.log(that.width);
-            return d3.interpolateString('translate(' + that.width / 2 + ',' + that.height*0.95 + ') rotate(' + fromAngle + ')', 'translate(' + that.width / 2 + ',' + that.height*0.95 + ') rotate(' + toAngle + ')');
-        }
+	        // for bar
+	        function tween(d, i, a) {
+	            return d3.interpolateString('translate(' + that.width / 2 + ',' + that.height*0.95 + ') rotate(' + fromAngle + ')', 'translate(' + that.width / 2 + ',' + that.height*0.95 + ') rotate(' + toAngle + ')');
+	        }
+	        // for lefts
+	        function tween2(d, i, a) {
+	            return d3.interpolateString(that.holderTranslate + '  rotate(' + (fromAngle) + ')', that.holderTranslate + ' rotate(' + toAngle + ')');
+	        }
+	        // for rights
+	        function tween3(d, i, a) {
+	            return d3.interpolateString(that.holderTranslate + ' rotate(' + fromAngle + ')', that.holderTranslate + '  rotate(' + toAngle + ')');
+	        }
 
-        // for lefts
-        function tween2(d, i, a) {
-            return d3.interpolateString(that.holderTranslate + '  rotate(' + (fromAngle) + ')', that.holderTranslate + ' rotate(' + toAngle + ')');
-        }
-
-        // for rights
-        function tween3(d, i, a) {
-            return d3.interpolateString(that.holderTranslate + ' rotate(' + fromAngle + ')', that.holderTranslate + '  rotate(' + toAngle + ')');
-        }
-
-    }
+	    }
 		  
 	});
 
