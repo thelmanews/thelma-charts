@@ -1,0 +1,239 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-compare-balance-chart" extends="th-d3-chart">
+  <template>
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+      #chart {
+
+      }
+      #chart text {
+        font-size: 14px;
+      }
+
+      .scale-bar, .triangle {
+      	fill: #333;
+      }
+    </style>
+
+      <svg id="chart">
+      </svg>
+    
+  </template>
+
+	<script>
+
+
+		Polymer('th-compare-balance-chart', {
+		  chartData: [
+		    {label: 'Smoker', value: 1, image: 'images/kid-smoker.png'},
+		    {label: 'Non-Smoker', value: 33, image: 'images/kid.png'}
+		  ],
+		  init: function() {
+		    var margin = {
+		          top : 5,
+		          right : 15,
+		          bottom : 20,
+		          left : 10,
+		          label: 3
+		      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*1.0 - margin.top - margin.bottom
+		         , barWidth = height* 0.02 , textLabelMargin = height*0.05;
+
+		      this.height = height;
+		      this.width = width;
+
+		      this.extractElementDataPoints();
+
+		      
+
+
+		      var chartEl = this.$.chart;
+		      var container = d3.select(chartEl).attr('width', width + margin.left + margin.right)
+		          .attr('height', height + margin.top + margin.bottom)
+		          .append('g')
+		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		      this.container = container;
+
+		      this.holderTranslate = 'translate(' + width / 2 + ',' + (height* 0.91) + ')';
+
+
+		      var totalCount = this.chartData.reduce(function(prev, cur) {
+		          return prev+= parseInt(cur.value);
+		      }, 0);
+
+		      var _data = {};
+
+		      _data.elementsPerRow = Math.min(9, totalCount);
+		      var rowNum = Math.floor(totalCount / _data.elementsPerRow);
+		      
+		      _data.count = d3.range(0, totalCount);
+		      console.log(height);
+		      _data.dim = {
+		          width : Math.floor(width / _data.elementsPerRow),
+		          height : Math.floor(height / rowNum)
+		      };
+
+		      console.log(_data.dim);
+		      _data.set1_count = this.chartData[0].value;
+		      _data.set1_image = 'images/kid.png';
+		      _data.set1_dim = 10;
+
+		      _data.set2_count = this.chartData[1].value;
+		      _data.set2_image = 'images/kid-smoker.png';
+		      _data.set2_dim = 10;
+
+
+		      this.data = _data;
+
+		      var elementsPerRow = 10;
+		      
+
+
+	        container.append('path')
+	            .attr('transform', 'translate(' + (width * 0.40) + ',' + (height *0.95) + ')')
+	            .attr('d', 'M 20 0 L 40 35 L 0 35 L 20 0').attr('class', 'triangle');
+
+	        this.barg = container.append('g')
+	            .attr('transform', 'translate(' + width / 2 + ',' + height*0.95 + ')');
+
+	        var bar = this.barg.append('rect')
+	            .attr('x', -width / 2)
+	            .attr('y', 0)
+	            .attr('class', 'scale-bar')
+	            .attr('width', width)
+	            .attr('height', barWidth);
+
+	        this.left_holder = container.append('g')
+	            .attr('class', 'left_holder')
+	            .attr('transform', this.holderTranslate);
+
+	        this.lefts = this.left_holder.selectAll('.lefts').data(d3.range(0,_data.set1_count)).enter().append('image')
+	            .attr('xlink:href', _data.set1_image)
+	            .attr('class', 'lefts')
+	            .attr('x', function(d, i) {
+	                 return -width / 2 + (i % elementsPerRow) * (_data.set1_dim + 2);
+	            })
+	            .attr('y', function(d, i) {
+	                 return -height* 1.2;
+	            })
+	            .attr('width', _data.set1_dim)
+	            .attr('height', _data.set1_dim);
+
+	        this.right_holder = container.append('g')
+	            .attr('class', 'right_holder')
+	            .attr('transform', this.holderTranslate);
+
+	        this.rights = this.right_holder.selectAll('.rights').data(d3.range(0,_data.set2_count)).enter().append('image')
+	            .attr('xlink:href', _data.set2_image)
+	            .attr('class', 'rights')
+	            .attr('x', function(d, i) {
+	                return (i % elementsPerRow) * (_data.set2_dim + 3);
+	            })
+	            .attr('y', function(d, i) {
+	                return -height* 1.2;
+	            })
+	            .attr('rx', 3)
+	            .attr('ry', 3)
+	            .attr('width', _data.set2_dim)
+	            .attr('height', _data.set2_dim);
+
+
+		  },
+		  reset: function() {
+		      
+		        this.icons.attr('x', function(d, i) {
+		             return (Math.random() < 0.5 ? -1 : 1) * (250 + Math.random()*100) ;
+		        })
+		       .attr('y', function(d, i) {
+		             return (Math.random() < 0.5 ? -1 : 1) * (250 + Math.random()*100) ;
+		        });    
+		  },
+		  
+		animate: function() {
+					      var elementsPerRow = 10;
+
+
+		    var _data = this.data;
+		        
+ 			var delay = {left: 150, right: 40}, waitForOtherSide = 1500;
+
+	        // for bar
+	        var angle = -10;
+
+	        var that = this;
+
+	        this.lefts.transition().ease('linear').duration(delay.left).delay(function(d, i) {
+	            return i * delay.left;
+	        }).attr('y', function(d, i) {
+	            return -Math.floor(i / elementsPerRow) * (_data.set1_dim);
+	        }).each('end', function(d, i) {
+	            
+	            // the proper way is to rotate the bar a little bit each time (angle*(i/count))
+	            // but since there is only one object on the left, doing it this way to save on calculations
+	            that._animateBar(0, angle, delay.left);
+	        });
+	        
+	        setTimeout(function() {
+
+	            that.rights.transition().ease('linear').duration(delay.right).delay(function(d, i) {
+	                return i * delay.right;
+	            }).attr('y', function(d, i) {
+	                return -Math.floor(i / elementsPerRow) * (_data.set1_dim);
+	            });
+	    
+	            
+	    
+	            var fromAngle = -10, toAngle = 0;
+	            
+	            // the proper way is to rotate the bar a little bit each time (angle*(i/count))
+	            // by using .each('end'  (above)
+	            // but since there are many objects on the right and there is a very short pause between
+	            // objects falling this looks exactly the same
+	            that._animateBar(angle, 0, _data.set1_count * delay.right);
+	        
+	        },waitForOtherSide);
+
+		},
+
+		_animateBar: function(fromAngle, toAngle, delay) {
+
+		var that = this;
+        
+        this.barg.transition().ease('linear').duration(delay).attrTween("transform", tween);
+
+        this.left_holder.transition().ease('linear').duration(delay).attrTween("transform", tween2);
+
+        this.right_holder.transition().ease('linear').duration(delay).attrTween("transform", tween3);
+
+        function tween(d, i, a) {
+        	//console.log('tween');
+        	//console.log(that);
+        	//console.log(that.width);
+            return d3.interpolateString('translate(' + that.width / 2 + ',' + that.height*0.95 + ') rotate(' + fromAngle + ')', 'translate(' + that.width / 2 + ',' + that.height*0.95 + ') rotate(' + toAngle + ')');
+        }
+
+        // for lefts
+        function tween2(d, i, a) {
+            return d3.interpolateString(that.holderTranslate + '  rotate(' + (fromAngle) + ')', that.holderTranslate + ' rotate(' + toAngle + ')');
+        }
+
+        // for rights
+        function tween3(d, i, a) {
+            return d3.interpolateString(that.holderTranslate + ' rotate(' + fromAngle + ')', that.holderTranslate + '  rotate(' + toAngle + ')');
+        }
+
+    }
+		  
+	});
+
+
+
+	</script>
+
+</polymer-element>
