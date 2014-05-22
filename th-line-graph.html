@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-line-graph" extends="th-d3-chart">
+<polymer-element name="th-line-graph" extends="th-d3-chart" attributes="line-style">
   <template>
     <style>
       :host {
@@ -27,13 +27,20 @@
         fill: #eee;
       }
 
-      .dot {
-
+      .tooltip {
+        background-color: red;
+        color: black;
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        left: 0;
+        top: 0;
       }
 
     </style>
     <content></content>
     <svg id="chart"></svg> 
+    <svg id="info"></svg> 
   </template> 
   
   <script>
@@ -43,15 +50,16 @@
         data2: [5, 2, 5, 8, 12, 15, 18, 10, 3, 14, 7, 5, 2]
       },
       init: function() {
-        var data = this.chartData.data1,
-            w = this.chartWidth,
-            h = this.chartHeight,
+        var that = this;
+        var data = that.chartData.data1,
+            w = that.chartWidth,
+            h = that.chartHeight,
             margin = 18, // space btw labels and axis
             y = d3.scale.linear().domain([0, d3.max(data)]).range([0 + margin, h - margin]),
             x = d3.scale.linear().domain([0, data.length]).range([0 + margin, w - margin]);
         
         // container
-        var chart_svg = this.$.chart;
+        var chart_svg = that.$.chart;
         var svg = d3.select(chart_svg)
           .attr("width", w)
           .attr("height", h);
@@ -121,14 +129,15 @@
           .attr("x2", x(0));
         
         // make variables accessible in other methods
-        this.svg = svg;
-        this.data = data;
-        this.g = g;
-        this.line = line;
-        this.x = x;
-        this.y = y;
+        that.svg = svg;
+        that.data = data;
+        that.g = g;
+        that.line = line;
+        that.x = x;
+        that.y = y;
       },
       reset: function() {
+        var that = this;
         path      
           .transition()
           .duration(2000)
@@ -137,18 +146,20 @@
       },
       
       animate: function() {
-        var g = this.g,
-            data = this.data,
-            line = this.line,
-            x = this.x,
-            y = this.y;
+        var that = this;
+        var g = that.g,
+            svg = that.svg,
+            data = that.data,
+            line = that.line,
+            x = that.x,
+            y = that.y;
 
         var path = g.append("path")
             .attr("d", line(data))
             .attr("stroke", "white")
             .attr("stroke-width", "2.5")
             .attr("fill", "none");
-        
+          
         var totalLength = path.node().getTotalLength();
         
         path
@@ -160,6 +171,12 @@
             .attr("stroke-dashoffset", 0);
         
         this.path = path;
+        
+        var tooltip = svg.append("div")   
+            .attr("class", "tooltip")               
+            .style("opacity", 1)
+            .style("width", 100)
+            .style("height", 100);
 
         g.selectAll(".dot")
           .data(data)
@@ -170,12 +187,17 @@
           .attr("stroke-width", 2)
           .attr("cx", function(d,i) { return  x(i); })
           .attr("cy", function(d) { return -1 * y(d); })
+          .on("mouseover", function(d) {      
+            console.log(tooltip[0][0]);
+            tooltip.transition()        
+                .duration(200)      
+                .style("opacity", .8);      
+            tooltip.html(d);  
+            })
           .transition()
             .duration(500)
             .delay(3000)
-            .attr("r", 4);
-        
-
+            .attr("r", 3);
 
         // TODO
         // add select markers for certain datapoints, and animate
