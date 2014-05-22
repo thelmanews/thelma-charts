@@ -27,6 +27,10 @@
         fill: #eee;
       }
 
+      .dot {
+
+      }
+
     </style>
     <content></content>
     <svg id="chart"></svg> 
@@ -35,11 +39,11 @@
   <script>
     Polymer('th-line-graph', {
       chartData: { 
-        seriesName: "Random", 
-        seriesValues: [1, 6, 2, 7, 5, 2, 1, 3, 8, 20, 2, 5, 7]
+        data1: [1, 6, 2, 7, 5, 2, 1, 3, 8, 20, 2, 5, 7],
+        data2: [5, 2, 5, 8, 12, 15, 18, 10, 3, 14, 7, 5, 2]
       },
       init: function() {
-        var data = this.chartData.seriesValues,
+        var data = this.chartData.data1,
             w = this.chartWidth,
             h = this.chartHeight,
             margin = 18, // space btw labels and axis
@@ -60,7 +64,7 @@
           .x(function(d,i) { return x(i); })
           .y(function(d) { return -y(d); })
           .interpolate("cardinal");
-        
+
         // x-axis
         g.append("line")
           .attr("x1", x(0))
@@ -115,12 +119,14 @@
           .attr("x1", x(-0.2))
           .attr("y2", function(d) { return -1 * y(d); })
           .attr("x2", x(0));
-
+        
         // make variables accessible in other methods
         this.svg = svg;
         this.data = data;
         this.g = g;
         this.line = line;
+        this.x = x;
+        this.y = y;
       },
       reset: function() {
         path      
@@ -133,7 +139,9 @@
       animate: function() {
         var g = this.g,
             data = this.data,
-            line = this.line;
+            line = this.line,
+            x = this.x,
+            y = this.y;
 
         var path = g.append("path")
             .attr("d", line(data))
@@ -153,10 +161,21 @@
         
         this.path = path;
 
-        d3.selectAll(".node")
-          .x(function(d,i) { return x(i); })
-          .y(function(d) { return -y(d); })
-          .attr("fill", "blue");
+        g.selectAll(".dot")
+          .data(data)
+          .enter().append("circle")
+          .attr("r", 0)
+          .attr("fill", "#2a94cb") // needs to be same as background
+          .attr("stroke", "white")
+          .attr("stroke-width", 2)
+          .attr("cx", function(d,i) { return  x(i); })
+          .attr("cy", function(d) { return -1 * y(d); })
+          .transition()
+            .duration(500)
+            .delay(3000)
+            .attr("r", 4);
+        
+
 
         // TODO
         // add select markers for certain datapoints, and animate
