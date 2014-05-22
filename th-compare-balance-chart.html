@@ -31,8 +31,8 @@
 
 		Polymer('th-compare-balance-chart', {
 		  chartData: [
-		    {label: 'Smoker', value: 1, image: 'images/kid-smoker.png'},
-		    {label: 'Non-Smoker', value: 33, image: 'images/kid.png'}
+		    {label: 'Smoker', count: 1, image: 'images/kid-smoker.png'},
+		    {label: 'Non-Smoker', count: 33, image: 'images/kid.png'}
 		  ],
 		  init: function() {
 		    var margin = {
@@ -80,13 +80,13 @@
 		      };
 
 		      console.log(_data.dim);
-		      _data.set1_count = this.chartData[0].value;
+		      _data.set1_count = this.chartData[0].count;
 		      _data.set1_image = 'images/kid.png';
-		      _data.set1_dim = 10;
+		      _data.set1_dim = 20;
 
-		      _data.set2_count = this.chartData[1].value;
+		      _data.set2_count = this.chartData[1].count;
 		      _data.set2_image = 'images/kid-smoker.png';
-		      _data.set2_dim = 10;
+		      _data.set2_dim = 20;
 
 
 		      this.data = _data;
@@ -113,7 +113,7 @@
 	            .attr('class', 'left_holder')
 	            .attr('transform', this.holderTranslate);
 
-	        this.lefts = this.left_holder.selectAll('.lefts').data(d3.range(0,_data.set1_count)).enter().append('image')
+	        this.lefts = this.left_holder.selectAll('.lefts').data(d3.range(0,this.chartData[0].count)).enter().append('image')
 	            .attr('xlink:href', _data.set1_image)
 	            .attr('class', 'lefts')
 	            .attr('x', function(d, i) {
@@ -129,7 +129,7 @@
 	            .attr('class', 'right_holder')
 	            .attr('transform', this.holderTranslate);
 
-	        this.rights = this.right_holder.selectAll('.rights').data(d3.range(0,_data.set2_count)).enter().append('image')
+	        this.rights = this.right_holder.selectAll('.rights').data(d3.range(0,this.chartData[1].count)).enter().append('image')
 	            .attr('xlink:href', _data.set2_image)
 	            .attr('class', 'rights')
 	            .attr('x', function(d, i) {
@@ -195,7 +195,7 @@
 	            // by using .each('end'  (above)
 	            // but since there are many objects on the right and there is a very short pause between
 	            // objects falling this looks exactly the same
-	            that._animateBar(angle, 0, _data.set1_count * delay.right);
+	            that._animateBar(angle, 0, that.chartData[0].count * delay.right);
 	        
 	        },waitForOtherSide);
 
