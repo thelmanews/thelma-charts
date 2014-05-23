@@ -42,7 +42,7 @@
       lineStyle: "linear", // options are linear, basis, cardinal, step-before/after
       colors: {
         foreground: "white", // axis color
-        background: "#2a94cb", // same as card background
+        background: "#2a94cb", // TODO: make variable to match card background
         accents: ["#1EC4E6","#2D5B8C"] // line colors
       },
       chartData: { 
@@ -57,11 +57,9 @@
           {label: 7, value: 3 },
           {label: 8, value: 8 },
           {label: 9, value: 20, tooltip: "Here's an explanation of the spike..." },
-          {label: 10, value: 2 },
-          {label: 11, value: 5 },
-          {label: 12, value: 7 }
+          {label: 10, value: 2 }
         ],
-        1: [ // not connected to chart yet
+        1: [
           {label: 0, value: 11},
           {label: 1, value: 15},
           {label: 2, value: 5 },
@@ -72,9 +70,7 @@
           {label: 7, value: 8 },
           {label: 8, value: 12 },
           {label: 9, value: 16, tooltip: "This is a tooltip" },
-          {label: 10, value: 4 },
-          {label: 11, value: 6 },
-          {label: 12, value: 9 }
+          {label: 10, value: 4 }
         ]
       },
       init: function() {
@@ -224,21 +220,18 @@
             x = that.x,
             y = that.y;
 
-
-
         var tooltip_area = that.$.info;
         var tooltip = d3.select(tooltip_area)
           .append("div")   
           .attr("class", "tooltip");
 
-        function drawLine(data, color){
+        function drawLine(seriesName, data, color){
           var path = g.append("path")
             .attr("d", line(data))
             .attr("stroke", color)
             .attr("stroke-width", "2.5")
             .attr("fill", "none");
 
-        
           var totalLength = path.node().getTotalLength();
           
           path
@@ -249,9 +242,10 @@
               .ease("linear")
               .attr("stroke-dashoffset", 0);
 
-          g.selectAll("circle")
+          g.selectAll(".allCircles")
           .data(data)
           .enter().append("circle")
+          .attr("class", "circle circle-" + seriesName)
           .attr("r", 0)
           .attr("fill", that.colors.foreground) 
           .attr("stroke", color)
@@ -281,19 +275,13 @@
         }
 
         for (var prop in that.chartData) {
-          drawLine(that.chartData[prop],that.colors.accents[prop]);
+          drawLine(prop, that.chartData[prop],that.colors.accents[prop]);
         }
-
-        // drawLine(data,that.colors.accents[0]);
-        // drawLine(data2,that.colors.accents[1]);
 
         // TODO
         // add color background to highlight part of the data?
         // progressively show more data by tapping next button?
-        // add another series to the graph
-        // restructure data accordingly
         // animate the axes - http://bl.ocks.org/mbostock/1166403
-        // set specific values to x axis? (i.e. not the index)
         // make chart-type dynamic (bar vs line)
         // refactor
       }
