@@ -39,7 +39,7 @@
   
   <script>
     Polymer('th-line-graph', {
-      lineStyle: "linear", // options are linear, basis, cardinal, step-before/after
+      lineStyle: "linear", // options: linear, basis, cardinal, monotone, step-before/after
       colors: {
         foreground: "white", // axis color
         background: "#2a94cb", // TODO: make variable to match card background
@@ -81,7 +81,17 @@
             h = that.chartHeight,
             margin = 18; // space btw labels and axis
       
-        // TODO: refactor
+        // TODO: refactor these functions
+        var minY = (function(){ 
+              // var min = data[0].value;
+              var min = 0; // hardcode min to be so scale isn't uneven
+              for (var i=0; i<data.length; i++){ 
+                if (data[i].value < min) {
+                  min = data[i].value;
+                }
+              }
+              return min;
+            })();
         var maxY = (function(){ 
               var max = data[0].value;
               for (var i=0; i<data.length; i++){ 
@@ -102,7 +112,6 @@
             })();
         var maxX = (function(){ 
               var max = data[0].label;
-              
               for (var i=0; i<data.length; i++){ 
                 if (data[i].label > max) {
                   max = data[i].label;
@@ -111,7 +120,7 @@
               return max;
             })();
 
-        var y = d3.scale.linear().domain([0, maxY]).range([0 + margin, h - margin]),
+        var y = d3.scale.linear().domain([minY, maxY]).range([0 + margin, h - margin]), 
             x = d3.scale.linear().domain([minX, maxX]).range([0 + margin, w - margin]);
             
         // container
@@ -202,12 +211,12 @@
         that.y = y;
       },
       reset: function() {
-        var that = this;
-        that.path      
-          .transition()
-          .duration(2000)
-          .ease("linear")
-          .attr("stroke-dashoffset", totalLength);
+        // var that = this;
+        // that.path      
+        //   .transition()
+        //   .duration(2000)
+        //   .ease("linear")
+        //   .attr("stroke-dashoffset", totalLength);
       },
       
       animate: function() {
@@ -238,7 +247,7 @@
             .attr("stroke-dasharray", totalLength + " " + totalLength)
             .attr("stroke-dashoffset", totalLength)
             .transition()
-              .duration(3000)
+              .duration(3000) // TODO: make variable?
               .ease("linear")
               .attr("stroke-dashoffset", 0);
 
@@ -265,9 +274,18 @@
                 .duration(200)      
                 .style("opacity", 0);      
             })
+          .on("click", function(d){
+            // TODO: fix conflict with mouseout event
+            g.selectAll(".circle").classed("selected", false);
+            d3.select(this).classed("selected", true)
+              .transition().duration(500).attr("r", 4);      
+            tooltip.transition()        
+                .duration(200)      
+                .style("opacity", 1);    
+            })
           .transition()
             .duration(500)
-            .delay(3000)
+            .delay(3000) // TODO: make variable?
             .attr("r", function(d){ 
               return (d.tooltip ? 3 : 0); // Only if datapoint has tooltip, a marker will be drawn
             }
@@ -283,6 +301,7 @@
         // progressively show more data by tapping next button?
         // animate the axes - http://bl.ocks.org/mbostock/1166403
         // make chart-type dynamic (bar vs line)
+        // make it so you can name a series anything (not by index)
         // refactor
       }
     });
