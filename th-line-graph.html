@@ -41,12 +41,12 @@
     Polymer('th-line-graph', {
       lineStyle: "linear", // options are linear, basis, cardinal, step-before/after
       colors: {
-        foreground: "white",
+        foreground: "white", // axis color
         background: "#2a94cb", // same as card background
-        accent1: "#386c9d"
+        accents: ["#1EC4E6","#2D5B8C"] // line colors
       },
       chartData: { 
-        data1: [ // although labels are repetitive, it helps with d3 data binding
+        0: [ // although labels are repetitive, it helps with d3 data binding
           {label: 0, value: 1, tooltip: "This is a tooltip" },
           {label: 1, value: 5, tooltip: "This is another tooltip" },
           {label: 2, value: 2 },
@@ -61,17 +61,17 @@
           {label: 11, value: 5 },
           {label: 12, value: 7 }
         ],
-        data2: [ // not connected to chart yet
-          {label: 0, value: 11, tooltip: "This is a tooltip" },
-          {label: 1, value: 15, tooltip: "This is another tooltip" },
+        1: [ // not connected to chart yet
+          {label: 0, value: 11},
+          {label: 1, value: 15},
           {label: 2, value: 5 },
           {label: 3, value: 2 },
           {label: 4, value: 6 },
-          {label: 5, value: 9, tooltip: "Not all points need tooltips" },
+          {label: 5, value: 9 },
           {label: 6, value: 5, tooltip: "This is a tooltip" },
           {label: 7, value: 8 },
           {label: 8, value: 12 },
-          {label: 9, value: 16 },
+          {label: 9, value: 16, tooltip: "This is a tooltip" },
           {label: 10, value: 4 },
           {label: 11, value: 6 },
           {label: 12, value: 9 }
@@ -79,7 +79,8 @@
       },
       init: function() {
         var that = this;
-        var data = that.chartData.data1,
+        var data = that.chartData[0],
+            data2 = that.chartData[1],
             w = that.chartWidth,
             h = that.chartHeight,
             margin = 18; // space btw labels and axis
@@ -130,7 +131,7 @@
         var line = d3.svg.line()
           .x(function(d) { return x(d.label); })
           .y(function(d) { return -y(d.value); })
-          .interpolate(this.lineStyle);
+          .interpolate(that.lineStyle);
 
         // x-axis
         g.append("line")
@@ -138,7 +139,7 @@
           .attr("y1", -1 * y(0))
           .attr("x2", x(data.length))
           .attr("y2", -1 * y(0))
-          .attr("stroke", this.colors.accent1)
+          .attr("stroke", that.colors.foreground)
           .attr("stroke-width", 2);
         
         // y-axis
@@ -147,7 +148,7 @@
           .attr("y1", -1 * y(0))
           .attr("x2", x(0))
           .attr("y2", -1 * y(maxY))
-          .attr("stroke", this.colors.accent1)
+          .attr("stroke", that.colors.foreground)
           .attr("stroke-width", 2);
 
         // x labels
@@ -159,7 +160,7 @@
           .attr("x", function(d) { return x(d) })
           .attr("y", 0)
           .attr("text-anchor", "middle")
-          .attr("fill", this.colors.foreground);
+          .attr("fill", that.colors.foreground);
         
         // y labels
         g.selectAll(".yLabel")
@@ -171,7 +172,7 @@
           .attr("y", function(d) { return -1 * y(d) })
           .attr("text-anchor", "right")
           .attr("dy", 4)
-          .attr("fill", this.colors.foreground);
+          .attr("fill", that.colors.foreground);
         
         // x tick marks
         g.selectAll(".xTicks")
@@ -182,7 +183,7 @@
           .attr("y1", -1 * y(0))
           .attr("x2", function(d) { return x(d); })
           .attr("y2", -1 * y(-0.5))
-          .attr("stroke", this.colors.accent1);
+          .attr("stroke", that.colors.foreground);
         
         // y tick marks
         g.selectAll(".yTicks")
@@ -193,11 +194,12 @@
           .attr("x1", x(-0.2))
           .attr("y2", function(d) { return -1 * y(d); })
           .attr("x2", x(0))
-          .attr("stroke", this.colors.accent1);
+          .attr("stroke", that.colors.foreground);
         
         // make variables accessible in other methods
         that.svg = svg;
         that.data = data;
+        that.data2 = data2;
         that.g = g;
         that.line = line;
         that.x = x;
@@ -216,40 +218,43 @@
         var that = this;
         var g = that.g,
             svg = that.svg,
-            data = that.data
+            data = that.data,
+            data2 = that.data2,
             line = that.line,
             x = that.x,
             y = that.y;
 
-        var path = g.append("path")
-            .attr("d", line(data))
-            .attr("stroke", this.colors.foreground)
-            .attr("stroke-width", "2.5")
-            .attr("fill", "none");
-        
-        var totalLength = path.node().getTotalLength();
-        
-        path
-          .attr("stroke-dasharray", totalLength + " " + totalLength)
-          .attr("stroke-dashoffset", totalLength)
-          .transition()
-            .duration(3000)
-            .ease("linear")
-            .attr("stroke-dashoffset", 0);
-        
-        this.path = path;
-      
+
+
         var tooltip_area = that.$.info;
         var tooltip = d3.select(tooltip_area)
           .append("div")   
           .attr("class", "tooltip");
 
-        g.selectAll("circle")
+        function drawLine(data, color){
+          var path = g.append("path")
+            .attr("d", line(data))
+            .attr("stroke", color)
+            .attr("stroke-width", "2.5")
+            .attr("fill", "none");
+
+        
+          var totalLength = path.node().getTotalLength();
+          
+          path
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+              .duration(3000)
+              .ease("linear")
+              .attr("stroke-dashoffset", 0);
+
+          g.selectAll("circle")
           .data(data)
           .enter().append("circle")
           .attr("r", 0)
-          .attr("fill", this.colors.background) 
-          .attr("stroke", this.colors.foreground)
+          .attr("fill", that.colors.foreground) 
+          .attr("stroke", color)
           .attr("stroke-width", 2)
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); })
@@ -273,6 +278,14 @@
               return (d.tooltip ? 3 : 0); // Only if datapoint has tooltip, a marker will be drawn
             }
           );
+        }
+
+        for (var prop in that.chartData) {
+          drawLine(that.chartData[prop],that.colors.accents[prop]);
+        }
+
+        // drawLine(data,that.colors.accents[0]);
+        // drawLine(data2,that.colors.accents[1]);
 
         // TODO
         // add color background to highlight part of the data?
