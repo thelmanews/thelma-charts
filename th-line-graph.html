@@ -1,31 +1,23 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-line-graph" extends="th-d3-chart" attributes="line-style">
+<polymer-element name="th-line-graph" extends="th-d3-chart" attributes="lineStyle, colors">
   <template>
     <style>
       :host {
         font-size: 0.875em;
         color: white;
       }
-       
-      line {
-        stroke: #386c9d;
-        stroke-width: 2;
-      }
+
       #chart {
         width: 100%;
         padding: 10px;
         box-sizing: border-box;
       }
-      .xTicks, .yTicks {
-        stroke: #386c9d;
-      }
 
       .xLabel, .yLabel {
         font-size: 0.65em;
         font-weight: 300;
-        fill: #eee;
       }
 
       .tooltip {
@@ -47,39 +39,43 @@
   
   <script>
     Polymer('th-line-graph', {
+      lineStyle: "linear", // options are linear, basis, cardinal, step-before/after
+      colors: {
+        foreground: "white",
+        background: "#2a94cb", // same as card background
+        accent1: "#386c9d"
+      },
       chartData: { 
-        data1: [
-          {value: 1, tooltip: "This is a tooltip" },
-          {value: 5, tooltip: "This is another tooltip" },
-          {value: 2 },
-          {value: 7 },
-          {value: 5 },
-          {value: 2, tooltip: "Not all points need tooltips" },
-          {value: 1, tooltip: "This is a tooltip" },
-          {value: 3 },
-          {value: 8 },
-          {value: 20, tooltip: "Here's an explanation of the spike..." },
-          {value: 2 },
-          {value: 5 },
-          {value: 7 }
+        data1: [ // although labels are repetitive, it helps with d3 data binding
+          {label: 0, value: 1, tooltip: "This is a tooltip" },
+          {label: 1, value: 5, tooltip: "This is another tooltip" },
+          {label: 2, value: 2 },
+          {label: 3, value: 7 },
+          {label: 4, value: 5 },
+          {label: 5, value: 2, tooltip: "Not all points need tooltips" },
+          {label: 6, value: 1, tooltip: "This is a tooltip" },
+          {label: 7, value: 3 },
+          {label: 8, value: 8 },
+          {label: 9, value: 20, tooltip: "Here's an explanation of the spike..." },
+          {label: 10, value: 2 },
+          {label: 11, value: 5 },
+          {label: 12, value: 7 }
         ],
         data2: [ // not connected to chart yet
-          {value: 11, tooltip: "This is a tooltip" },
-          {value: 15, tooltip: "This is another tooltip" },
-          {value: 5 },
-          {value: 2 },
-          {value: 6 },
-          {value: 9, tooltip: "Not all points need tooltips" },
-          {value: 5, tooltip: "This is a tooltip" },
-          {value: 8 },
-          {value: 12 },
-          {value: 16 },
-          {value: 4 },
-          {value: 6 },
-          {value: 9 }
+          {label: 0, value: 11, tooltip: "This is a tooltip" },
+          {label: 1, value: 15, tooltip: "This is another tooltip" },
+          {label: 2, value: 5 },
+          {label: 3, value: 2 },
+          {label: 4, value: 6 },
+          {label: 5, value: 9, tooltip: "Not all points need tooltips" },
+          {label: 6, value: 5, tooltip: "This is a tooltip" },
+          {label: 7, value: 8 },
+          {label: 8, value: 12 },
+          {label: 9, value: 16 },
+          {label: 10, value: 4 },
+          {label: 11, value: 6 },
+          {label: 12, value: 9 }
         ]
-        // data1: [1, 6, 2, 7, 5, 2, 1, 3, 8, 20, 2, 5, 7],
-        // data2: [5, 2, 5, 8, 12, 15, 18, 10, 3, 14, 7, 5, 2]
       },
       init: function() {
         var that = this;
@@ -87,10 +83,10 @@
             w = that.chartWidth,
             h = that.chartHeight,
             margin = 18; // space btw labels and axis
-        
+      
         // TODO: refactor
-        var maxValue = (function(){ 
-              var max = 0;
+        var maxY = (function(){ 
+              var max = data[0].value;
               for (var i=0; i<data.length; i++){ 
                 if (data[i].value > max) {
                   max = data[i].value;
@@ -98,9 +94,28 @@
               }
               return max;
             })();
+        var minX = (function(){ 
+              var min = data[0].label;
+              for (var i=0; i<data.length; i++){ 
+                if (data[i].value < min) {
+                  min = data[i].label;
+                }
+              }
+              return min;
+            })();
+        var maxX = (function(){ 
+              var max = data[0].label;
+              
+              for (var i=0; i<data.length; i++){ 
+                if (data[i].label > max) {
+                  max = data[i].label;
+                }
+              }
+              return max;
+            })();
 
-        var y = d3.scale.linear().domain([0, maxValue]).range([0 + margin, h - margin]),
-            x = d3.scale.linear().domain([0, data.length]).range([0 + margin, w - margin]);
+        var y = d3.scale.linear().domain([0, maxY]).range([0 + margin, h - margin]),
+            x = d3.scale.linear().domain([minX, maxX]).range([0 + margin, w - margin]);
             
         // container
         var chart_svg = that.$.chart;
@@ -113,23 +128,27 @@
         
         // line data
         var line = d3.svg.line()
-          .x(function(d,i) { return x(i); })
+          .x(function(d) { return x(d.label); })
           .y(function(d) { return -y(d.value); })
-          .interpolate("cardinal");
+          .interpolate(this.lineStyle);
 
         // x-axis
         g.append("line")
           .attr("x1", x(0))
           .attr("y1", -1 * y(0))
           .attr("x2", x(data.length))
-          .attr("y2", -1 * y(0));
+          .attr("y2", -1 * y(0))
+          .attr("stroke", this.colors.accent1)
+          .attr("stroke-width", 2);
         
         // y-axis
         g.append("line")
           .attr("x1", x(0))
           .attr("y1", -1 * y(0))
           .attr("x2", x(0))
-          .attr("y2", -1 * y(maxValue));
+          .attr("y2", -1 * y(maxY))
+          .attr("stroke", this.colors.accent1)
+          .attr("stroke-width", 2);
 
         // x labels
         g.selectAll(".xLabel")
@@ -139,7 +158,8 @@
           .text(String)
           .attr("x", function(d) { return x(d) })
           .attr("y", 0)
-          .attr("text-anchor", "middle");
+          .attr("text-anchor", "middle")
+          .attr("fill", this.colors.foreground);
         
         // y labels
         g.selectAll(".yLabel")
@@ -150,7 +170,8 @@
           .attr("x", 0)
           .attr("y", function(d) { return -1 * y(d) })
           .attr("text-anchor", "right")
-          .attr("dy", 4);
+          .attr("dy", 4)
+          .attr("fill", this.colors.foreground);
         
         // x tick marks
         g.selectAll(".xTicks")
@@ -160,7 +181,8 @@
           .attr("x1", function(d) { return x(d); })
           .attr("y1", -1 * y(0))
           .attr("x2", function(d) { return x(d); })
-          .attr("y2", -1 * y(-0.5));
+          .attr("y2", -1 * y(-0.5))
+          .attr("stroke", this.colors.accent1);
         
         // y tick marks
         g.selectAll(".yTicks")
@@ -170,7 +192,8 @@
           .attr("y1", function(d) { return -1 * y(d); })
           .attr("x1", x(-0.2))
           .attr("y2", function(d) { return -1 * y(d); })
-          .attr("x2", x(0));
+          .attr("x2", x(0))
+          .attr("stroke", this.colors.accent1);
         
         // make variables accessible in other methods
         that.svg = svg;
@@ -200,7 +223,7 @@
 
         var path = g.append("path")
             .attr("d", line(data))
-            .attr("stroke", "white")
+            .attr("stroke", this.colors.foreground)
             .attr("stroke-width", "2.5")
             .attr("fill", "none");
         
@@ -225,10 +248,10 @@
           .data(data)
           .enter().append("circle")
           .attr("r", 0)
-          .attr("fill", "#2a94cb") // Needs to be same as background
-          .attr("stroke", "white")
+          .attr("fill", this.colors.background) 
+          .attr("stroke", this.colors.foreground)
           .attr("stroke-width", 2)
-          .attr("cx", function(d,i) { return  x(i); })
+          .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); })
           .on("mouseover", function(d) {      
             d3.select(this).transition().duration(500).attr("r", 4);
@@ -258,7 +281,7 @@
         // restructure data accordingly
         // animate the axes - http://bl.ocks.org/mbostock/1166403
         // set specific values to x axis? (i.e. not the index)
-        // make line style and chart style dynamic, as inputs
+        // make chart-type dynamic (bar vs line)
         // refactor
       }
     });
