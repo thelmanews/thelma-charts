@@ -40,7 +40,7 @@
   <script>
     Polymer('th-line-graph', {
       lineStyle: "linear", // options: linear, basis, cardinal, monotone, step-before/after
-      animateStyle: "raise", // options: raise, draw
+      animateStyle: "draw", // options: raise, draw
       colors: {
         foreground: "white", // axis color
         background: "#2a94cb", // TODO: make variable to match card background
@@ -77,38 +77,32 @@
       init: function() {
         var that = this;
         var data = that.chartData[0],
-            data2 = that.chartData[1],
             alldata = that.chartData,
             w = that.chartWidth,
             h = that.chartHeight,
             margin = 18; // space btw labels and axis
       
-        // TODO: refactor these functions
      
-        var maxValue = d3.max(d3.entries(alldata), function(d){
-          return d3.max(d.value, function(e){
-            return e.value;
+        function getMax(data, property){ // takes an object where keys are equal to arrays of data objects
+          return d3.max(d3.entries(data), function(d){
+            return d3.max(d.value, function(e){
+              return e[property];
+            })
           })
-        });
+        }
 
-        var minValue = d3.min(d3.entries(alldata), function(d){
-          return d3.min(d.value, function(e){
-            // return e.value;
-            return 0; // hardcode min to be so scale isn't uneven
+        function getMin(data, property){ // takes an object where keys are equal to arrays of data objects
+          return d3.min(d3.entries(data), function(d){
+            return d3.min(d.value, function(e){
+              return e[property];
+            })
           })
-        });
+        }
 
-        var maxLabel = d3.max(d3.entries(alldata), function(d){
-          return d3.max(d.value, function(e){
-            return e.label;
-          })
-        });
-
-        var minLabel = d3.min(d3.entries(alldata), function(d){
-          return d3.min(d.value, function(e){
-            return e.label;
-          })
-        });
+        var maxValue = getMax(alldata, "value");
+        var minValue = getMin(alldata, "value");
+        var maxLabel = getMax(alldata, "label");
+        var minLabel = getMin(alldata, "label");
 
         var y = d3.scale.linear().domain([minValue, maxValue]).range([0 + margin, h - margin]), 
             x = d3.scale.linear().domain([minLabel, maxLabel]).range([0 + margin, w - margin]);
@@ -204,7 +198,6 @@
         // make variables accessible in other methods
         that.svg = svg;
         that.data = data;
-        that.data2 = data2;
         that.g = g;
         that.line = line;
         that.x = x;
@@ -214,6 +207,7 @@
         that.yTicks = yTicks;
         that.yLabels = yLabels;
         that.startingLine = startingLine;
+        that.alldata = alldata;
       },
       reset: function() {
         // var that = this;
@@ -229,7 +223,6 @@
         var g = that.g,
             svg = that.svg,
             data = that.data,
-            data2 = that.data2,
             line = that.line,
             x = that.x,
             y = that.y,
@@ -237,7 +230,8 @@
             startingLine = that.startingLine,
             yAxis = that.yAxis,
             yLabels = that.yLabels,
-            yTicks = that.yTicks;
+            yTicks = that.yTicks,
+            alldata = that.alldata;
 
         var tooltip_area = that.$.info;
         var tooltip = d3.select(tooltip_area)
@@ -247,7 +241,7 @@
         function drawLine(seriesName, data, color, animationStyle){
           
           if (animationStyle === "draw"){
-            var path = g.append("path")
+            var path = g.selectAll('.asdad').data([seriesName]).enter().append("path")
               .attr("d", line(data))
               .attr("stroke", color)
               .attr("stroke-width", "2.5")
@@ -264,7 +258,7 @@
                 .ease("linear")
                 .attr("stroke-dashoffset", 0);
           } else { // raise style
-             var path = g.append("path")
+             var path = g.selectAll('.asdad').data([seriesName]).enter().append("path")
               .attr("d", startingLine(data))
               .attr("stroke", color)
               .attr("stroke-width", "2.5")
@@ -341,7 +335,7 @@
         animateAxis(1000);
         for (var prop in that.chartData) {
           drawLine(prop, that.chartData[prop],that.colors.accents[prop], that.animateStyle);
-        }
+        } 
 
         // TODO
         // add color background to highlight part of the data?
