@@ -78,51 +78,40 @@
         var that = this;
         var data = that.chartData[0],
             data2 = that.chartData[1],
+            alldata = that.chartData,
             w = that.chartWidth,
             h = that.chartHeight,
             margin = 18; // space btw labels and axis
       
         // TODO: refactor these functions
-        var minY = (function(){ 
-              // var min = data[0].value;
-              var min = 0; // hardcode min to be so scale isn't uneven
-              for (var i=0; i<data.length; i++){ 
-                if (data[i].value < min) {
-                  min = data[i].value;
-                }
-              }
-              return min;
-            })();
-        var maxY = (function(){ 
-              var max = data[0].value;
-              for (var i=0; i<data.length; i++){ 
-                if (data[i].value > max) {
-                  max = data[i].value;
-                }
-              }
-              return max;
-            })();
-        var minX = (function(){ 
-              var min = data[0].label;
-              for (var i=0; i<data.length; i++){ 
-                if (data[i].value < min) {
-                  min = data[i].label;
-                }
-              }
-              return min;
-            })();
-        var maxX = (function(){ 
-              var max = data[0].label;
-              for (var i=0; i<data.length; i++){ 
-                if (data[i].label > max) {
-                  max = data[i].label;
-                }
-              }
-              return max;
-            })();
+     
+        var maxValue = d3.max(d3.entries(alldata), function(d){
+          return d3.max(d.value, function(e){
+            return e.value;
+          })
+        });
 
-        var y = d3.scale.linear().domain([minY, maxY]).range([0 + margin, h - margin]), 
-            x = d3.scale.linear().domain([minX, maxX]).range([0 + margin, w - margin]);
+        var minValue = d3.min(d3.entries(alldata), function(d){
+          return d3.min(d.value, function(e){
+            // return e.value;
+            return 0; // hardcode min to be so scale isn't uneven
+          })
+        });
+
+        var maxLabel = d3.max(d3.entries(alldata), function(d){
+          return d3.max(d.value, function(e){
+            return e.label;
+          })
+        });
+
+        var minLabel = d3.min(d3.entries(alldata), function(d){
+          return d3.min(d.value, function(e){
+            return e.label;
+          })
+        });
+
+        var y = d3.scale.linear().domain([minValue, maxValue]).range([0 + margin, h - margin]), 
+            x = d3.scale.linear().domain([minLabel, maxLabel]).range([0 + margin, w - margin]);
             
         // container
         var chart_svg = that.$.chart;
@@ -220,7 +209,7 @@
         that.line = line;
         that.x = x;
         that.y = y;
-        that.maxY = maxY;
+        that.maxValue = maxValue;
         that.yAxis = yAxis;
         that.yTicks = yTicks;
         that.yLabels = yLabels;
@@ -244,7 +233,7 @@
             line = that.line,
             x = that.x,
             y = that.y,
-            maxY = that.maxY,
+            maxValue = that.maxValue,
             startingLine = that.startingLine,
             yAxis = that.yAxis,
             yLabels = that.yLabels,
@@ -334,7 +323,7 @@
           yAxis.transition()
             .duration(1000)
             .attr("y1", -1 * y(0))
-            .attr("y2", -1 * y(maxY))
+            .attr("y2", -1 * y(maxValue))
             .attr("opacity", 1);
 
           yLabels.transition()
