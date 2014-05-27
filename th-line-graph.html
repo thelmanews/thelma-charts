@@ -76,11 +76,11 @@
       },
       init: function() {
         var that = this;
-        var data = that.chartData[0],
-            alldata = that.chartData,
-            w = that.chartWidth,
-            h = that.chartHeight,
-            margin = 18; // space btw labels and axis
+        var data = that.chartData[0], // this needs to encompass all data
+            margin = 18,// space btw labels and axis
+            w = that.chartWidth - margin,
+            h = that.chartHeight - margin;
+            
       
      
         function getMax(data, property){ // takes an object where keys are equal to arrays of data objects
@@ -99,13 +99,13 @@
           })
         }
 
-        var maxValue = getMax(alldata, "value");
-        var minValue = getMin(alldata, "value");
-        var maxLabel = getMax(alldata, "label");
-        var minLabel = getMin(alldata, "label");
+        var maxValue = getMax(that.chartData, "value");
+        var minValue = getMin(that.chartData, "value");
+        var maxLabel = getMax(that.chartData, "label");
+        var minLabel = getMin(that.chartData, "label");
 
-        var y = d3.scale.linear().domain([minValue, maxValue]).range([0 + margin, h - margin]), 
-            x = d3.scale.linear().domain([minLabel, maxLabel]).range([0 + margin, w - margin]);
+        var y = d3.scale.linear().domain([minValue, maxValue]).range([margin, h ]), 
+            x = d3.scale.linear().domain([minLabel, maxLabel]).range([margin, w ]);
             
         // container
         var chart_svg = that.$.chart;
@@ -131,7 +131,7 @@
         g.append("line")
           .attr("x1", x(0))
           .attr("y1", -1 * y(0))
-          .attr("x2", x(data.length))
+          .attr("x2", x(data.length)) // this needs to be more dynamic
           .attr("y2", -1 * y(0))
           .attr("stroke", that.colors.foreground)
           .attr("stroke-width", 2);
@@ -139,9 +139,9 @@
         // y-axis
         var yAxis = g.append("line")
           .attr("x1", x(0))
-          .attr("y1", -margin)
+          .attr("y1", 0)
           .attr("x2", x(0))
-          .attr("y2", -margin)
+          .attr("y2", 0)
           .attr("stroke", that.colors.foreground)
           .attr("stroke-width", 2)
           .attr("opacity", 0);
@@ -164,7 +164,7 @@
           .attr("class", "yLabel")
           .text(String)
           .attr("x", 0)
-          .attr("y", -margin)
+          .attr("y", 0)
           .attr("text-anchor", "right")
           .attr("dy", 4)
           .attr("fill", that.colors.foreground)
@@ -187,9 +187,9 @@
           .data(y.ticks(4)) // TODO: Replace with formula (number of tickmarks)
           .enter().append("line")
           .attr("class", "yTicks")
-          .attr("y1", -margin)
+          .attr("y1", 0)
           .attr("x1", x(-0.2))
-          .attr("y2", -margin)
+          .attr("y2", 0)
           .attr("x2", x(0))
           .attr("stroke", that.colors.foreground)
           .attr("opacity", 0);
@@ -207,7 +207,6 @@
         that.yTicks = yTicks;
         that.yLabels = yLabels;
         that.startingLine = startingLine;
-        that.alldata = alldata;
       },
       reset: function() {
         // var that = this;
@@ -230,8 +229,7 @@
             startingLine = that.startingLine,
             yAxis = that.yAxis,
             yLabels = that.yLabels,
-            yTicks = that.yTicks,
-            alldata = that.alldata;
+            yTicks = that.yTicks;
 
         var tooltip_area = that.$.info;
         var tooltip = d3.select(tooltip_area)
@@ -258,6 +256,7 @@
                 .ease("linear")
                 .attr("stroke-dashoffset", 0);
           } else { // raise style
+             
              var path = g.selectAll('.asdad').data([seriesName]).enter().append("path")
               .attr("d", startingLine(data))
               .attr("stroke", color)
@@ -334,7 +333,7 @@
 
         animateAxis(1000);
         for (var prop in that.chartData) {
-          drawLine(prop, that.chartData[prop],that.colors.accents[prop], that.animateStyle);
+          drawLine(prop, that.chartData[prop], that.colors.accents[prop], that.animateStyle); // color will break if series name is changed
         } 
 
         // TODO
