@@ -44,42 +44,42 @@
       colors: {
         foreground: "white", // axis color
         background: "#2a94cb", // TODO: make variable to match card background
-        accents: ["#1EC4E6","#2D5B8C"] // line colors
+        accents: ["#1EC4E6","#2D5B8C", "#EDE374"] // line colors
       },
       chartData: { 
-        0: [ // although labels are repetitive, it helps with d3 data binding
-          {label: 0, value: 1, tooltip: "This is a tooltip" },
-          {label: 1, value: 5, tooltip: "This is another tooltip" },
-          {label: 2, value: 2 },
-          {label: 3, value: 7 },
-          {label: 4, value: 5 },
-          {label: 5, value: 2, tooltip: "Not all points need tooltips" },
-          {label: 6, value: 1, tooltip: "This is a tooltip" },
-          {label: 7, value: 3 },
-          {label: 8, value: 8 },
-          {label: 9, value: 20, tooltip: "Here's an explanation of the spike..." },
-          {label: 10, value: 2 }
+        '0': [ 
+          {'label': 0, 'value': 1, 'tooltip': 'This is a tooltip' },
+          {'label': 1, 'value': 5, 'tooltip': 'This is a tooltip' },
+          {'label': 2, 'value': 2 },
+          {'label': 3, 'value': 7 },
+          {'label': 4, 'value': 5 },
+          {'label': 5, 'value': 2, 'tooltip': 'This is a tooltip' },
+          {'label': 6, 'value': 1, 'tooltip': 'This is a tooltip' },
+          {'label': 7, 'value': 3 },
+          {'label': 8, 'value': 8 },
+          {'label': 9, 'value': 20, 'tooltip': 'This is a tooltip' },
+          {'label': 10, 'value': 2 }
         ],
-        1: [
-          {label: 0, value: 11},
-          {label: 1, value: 15},
-          {label: 2, value: 5 },
-          {label: 3, value: 2 },
-          {label: 4, value: 6 },
-          {label: 5, value: 9 },
-          {label: 6, value: 5, tooltip: "This is a tooltip" },
-          {label: 7, value: 8 },
-          {label: 8, value: 12 },
-          {label: 9, value: 16, tooltip: "This is a tooltip" },
-          {label: 10, value: 4 }
+        '1': [
+          {'label': 0, 'value': 11},
+          {'label': 1, 'value': 15},
+          {'label': 2, 'value': 5 },
+          {'label': 3, 'value': 2 },
+          {'label': 4, 'value': 6 },
+          {'label': 5, 'value': 9 },
+          {'label': 6, 'value': 5, 'tooltip': 'This is a tooltip' },
+          {'label': 7, 'value': 8 },
+          {'label': 8, 'value': 12 },
+          {'label': 9, 'value': 16, 'tooltip': 'This is a tooltip' },
+          {'label': 10, 'value': 4 }
         ]
       },
       init: function() {
         var that = this;
-        var data = that.chartData[0], // this needs to encompass all data
+        var data = that.chartData['0'], // this needs to encompass all data
             margin = 18,// space btw labels and axis
-            w = that.chartWidth - margin,
-            h = that.chartHeight - margin;
+            w = that.chartWidth - margin*2,
+            h = that.chartHeight - margin*2;
             
       
      
@@ -126,7 +126,8 @@
           .x(function(d) { return x(d.label); })
           .y(-margin)
           .interpolate(that.lineStyle);
-
+        // console.log("==========");
+        // console.log(data.length);
         // x-axis
         g.append("line")
           .attr("x1", x(0))
@@ -246,7 +247,8 @@
               .attr("fill", "none");
 
             var totalLength = path.node().getTotalLength();
-          
+            console.log("==========");
+            console.log(totalLength);
             path
               .attr("stroke-dasharray", totalLength + " " + totalLength)
               .attr("stroke-dashoffset", totalLength)
