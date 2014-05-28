@@ -77,9 +77,10 @@
       init: function() {
         var that = this;
         var data = that.chartData['0'], // this needs to encompass all data
-            margin = 18,// space btw labels and axis
-            w = that.chartWidth - margin*2,
-            h = that.chartHeight - margin*2;
+            xMargin = 20,// space btw labels and axis
+            yMargin = 25,// space btw labels and axis
+            w = that.chartWidth - xMargin*2,
+            h = that.chartHeight;
             
       
      
@@ -104,8 +105,8 @@
         var maxLabel = getMax(that.chartData, "label");
         var minLabel = getMin(that.chartData, "label");
 
-        var y = d3.scale.linear().domain([minValue, maxValue]).range([margin, h ]), 
-            x = d3.scale.linear().domain([minLabel, maxLabel]).range([margin, w ]);
+        var y = d3.scale.linear().domain([minValue, maxValue]).range([yMargin, h ]), 
+            x = d3.scale.linear().domain([minLabel, maxLabel]).range([xMargin, w ]); 
             
         // container
         var chart_svg = that.$.chart;
@@ -124,10 +125,8 @@
 
         var startingLine = d3.svg.line()
           .x(function(d) { return x(d.label); })
-          .y(-margin)
+          .y(-yMargin)
           .interpolate(that.lineStyle);
-        // console.log("==========");
-        // console.log(data.length);
         // x-axis
         g.append("line")
           .attr("x1", x(0))
