@@ -1,0 +1,351 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-line-graph" extends="th-d3-chart" attributes="lineStyle, animateStyle, colors">
+  <template>
+    <style>
+      :host {
+        font-size: 0.875em;
+        color: white;
+      }
+
+      #chart {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      .xLabel, .yLabel {
+        font-size: 0.65em;
+        font-weight: 300;
+      }
+
+      .tooltip {
+        width: 100%;
+        position: relative;
+        box-sizing: border-box;
+        padding: 20px;
+      }
+
+      circle {
+        cursor: pointer;
+      }
+
+    </style>
+    <content></content>
+    <svg id="chart"></svg> 
+    <div id="info"></div> 
+  </template> 
+  
+  <script>
+    Polymer('th-line-graph', {
+      lineStyle: "linear", // options: linear, basis, cardinal, monotone, step-before/after
+      animateStyle: "draw", // options: raise, draw
+      colors: {
+        foreground: "white", // axis color
+        background: "#2a94cb", // TODO: make variable to match card background
+        accents: ["#1EC4E6","#2D5B8C"] // line colors
+      },
+      chartData: { 
+        0: [ // although labels are repetitive, it helps with d3 data binding
+          {label: 0, value: 1, tooltip: "This is a tooltip" },
+          {label: 1, value: 5, tooltip: "This is another tooltip" },
+          {label: 2, value: 2 },
+          {label: 3, value: 7 },
+          {label: 4, value: 5 },
+          {label: 5, value: 2, tooltip: "Not all points need tooltips" },
+          {label: 6, value: 1, tooltip: "This is a tooltip" },
+          {label: 7, value: 3 },
+          {label: 8, value: 8 },
+          {label: 9, value: 20, tooltip: "Here's an explanation of the spike..." },
+          {label: 10, value: 2 }
+        ],
+        1: [
+          {label: 0, value: 11},
+          {label: 1, value: 15},
+          {label: 2, value: 5 },
+          {label: 3, value: 2 },
+          {label: 4, value: 6 },
+          {label: 5, value: 9 },
+          {label: 6, value: 5, tooltip: "This is a tooltip" },
+          {label: 7, value: 8 },
+          {label: 8, value: 12 },
+          {label: 9, value: 16, tooltip: "This is a tooltip" },
+          {label: 10, value: 4 }
+        ]
+      },
+      init: function() {
+        var that = this;
+        var data = that.chartData[0], // this needs to encompass all data
+            margin = 18,// space btw labels and axis
+            w = that.chartWidth - margin,
+            h = that.chartHeight - margin;
+            
+      
+     
+        function getMax(data, property){ // takes an object where keys are equal to arrays of data objects
+          return d3.max(d3.entries(data), function(d){
+            return d3.max(d.value, function(e){
+              return e[property];
+            })
+          })
+        }
+
+        function getMin(data, property){ // takes an object where keys are equal to arrays of data objects
+          return d3.min(d3.entries(data), function(d){
+            return d3.min(d.value, function(e){
+              return e[property];
+            })
+          })
+        }
+
+        var maxValue = getMax(that.chartData, "value");
+        var minValue = getMin(that.chartData, "value");
+        var maxLabel = getMax(that.chartData, "label");
+        var minLabel = getMin(that.chartData, "label");
+
+        var y = d3.scale.linear().domain([minValue, maxValue]).range([margin, h ]), 
+            x = d3.scale.linear().domain([minLabel, maxLabel]).range([margin, w ]);
+            
+        // container
+        var chart_svg = that.$.chart;
+        var svg = d3.select(chart_svg)
+          .attr("width", w)
+          .attr("height", h);
+     
+        var g = svg.append("g")
+          .attr("transform", "translate(0,"+ h +")");
+        
+        // line data
+        var line = d3.svg.line()
+          .x(function(d) { return x(d.label); })
+          .y(function(d) { return -y(d.value); })
+          .interpolate(that.lineStyle);
+
+        var startingLine = d3.svg.line()
+          .x(function(d) { return x(d.label); })
+          .y(-margin)
+          .interpolate(that.lineStyle);
+
+        // x-axis
+        g.append("line")
+          .attr("x1", x(0))
+          .attr("y1", -1 * y(0))
+          .attr("x2", x(data.length)) // this needs to be more dynamic
+          .attr("y2", -1 * y(0))
+          .attr("stroke", that.colors.foreground)
+          .attr("stroke-width", 2);
+        
+        // y-axis
+        var yAxis = g.append("line")
+          .attr("x1", x(0))
+          .attr("y1", 0)
+          .attr("x2", x(0))
+          .attr("y2", 0)
+          .attr("stroke", that.colors.foreground)
+          .attr("stroke-width", 2)
+          .attr("opacity", 0);
+
+        // x labels
+        g.selectAll(".xLabel")
+          .data(x.ticks(5))// TODO: Replace with formula (number of labels)
+          .enter().append("text")
+          .attr("class", "xLabel")
+          .text(String)
+          .attr("x", function(d) { return x(d) })
+          .attr("y", 0)
+          .attr("text-anchor", "middle")
+          .attr("fill", that.colors.foreground);
+        
+        // y labels
+        var yLabels = g.selectAll(".yLabel")
+          .data(y.ticks(4)) // TODO: Replace with formula (number of labels)
+          .enter().append("text")
+          .attr("class", "yLabel")
+          .text(String)
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("text-anchor", "right")
+          .attr("dy", 4)
+          .attr("fill", that.colors.foreground)
+          .attr("opacity", 0);
+
+
+        // x tick marks
+        g.selectAll(".xTicks")
+          .data(x.ticks(5)) // TODO: Replace with formula (number of tickmarks)
+          .enter().append("line")
+          .attr("class", "xTicks")
+          .attr("x1", function(d) { return x(d); })
+          .attr("y1", -1 * y(0))
+          .attr("x2", function(d) { return x(d); })
+          .attr("y2", -1 * y(-0.5))
+          .attr("stroke", that.colors.foreground);
+        
+        // y tick marks
+        var yTicks = g.selectAll(".yTicks")
+          .data(y.ticks(4)) // TODO: Replace with formula (number of tickmarks)
+          .enter().append("line")
+          .attr("class", "yTicks")
+          .attr("y1", 0)
+          .attr("x1", x(-0.2))
+          .attr("y2", 0)
+          .attr("x2", x(0))
+          .attr("stroke", that.colors.foreground)
+          .attr("opacity", 0);
+        
+       
+        // make variables accessible in other methods
+        that.svg = svg;
+        that.data = data;
+        that.g = g;
+        that.line = line;
+        that.x = x;
+        that.y = y;
+        that.maxValue = maxValue;
+        that.yAxis = yAxis;
+        that.yTicks = yTicks;
+        that.yLabels = yLabels;
+        that.startingLine = startingLine;
+      },
+      reset: function() {
+        // var that = this;
+        // that.path      
+        //   .transition()
+        //   .duration(2000)
+        //   .ease("linear")
+        //   .attr("stroke-dashoffset", totalLength);
+      },
+      
+      animate: function() {
+        var that = this;
+        var g = that.g,
+            svg = that.svg,
+            data = that.data,
+            line = that.line,
+            x = that.x,
+            y = that.y,
+            maxValue = that.maxValue,
+            startingLine = that.startingLine,
+            yAxis = that.yAxis,
+            yLabels = that.yLabels,
+            yTicks = that.yTicks;
+
+        var tooltip_area = that.$.info;
+        var tooltip = d3.select(tooltip_area)
+          .append("div")   
+          .attr("class", "tooltip");
+
+        function drawLine(seriesName, data, color, animationStyle){
+          
+          if (animationStyle === "draw"){
+            var path = g.selectAll('.asdad').data([seriesName]).enter().append("path")
+              .attr("d", line(data))
+              .attr("stroke", color)
+              .attr("stroke-width", "2.5")
+              .attr("fill", "none");
+
+            var totalLength = path.node().getTotalLength();
+          
+            path
+              .attr("stroke-dasharray", totalLength + " " + totalLength)
+              .attr("stroke-dashoffset", totalLength)
+              .transition()
+                .duration(2000) // TODO: make variable?
+                .delay(1000) 
+                .ease("linear")
+                .attr("stroke-dashoffset", 0);
+          } else { // raise style
+             
+             var path = g.selectAll('.asdad').data([seriesName]).enter().append("path")
+              .attr("d", startingLine(data))
+              .attr("stroke", color)
+              .attr("stroke-width", "2.5")
+              .attr("fill", "none")
+              .attr("opacity", 0);
+
+            path.transition()
+              .duration(3000)
+              .attr("d", line(data))
+              .attr("opacity", 1);
+          }
+
+          g.selectAll(".allCircles")
+          .data(data)
+          .enter().append("circle")
+          .attr("class", "circle circle-" + seriesName)
+          .attr("r", 0)
+          .attr("fill", that.colors.foreground) 
+          .attr("stroke", color)
+          .attr("stroke-width", 2)
+          .attr("cx", function(d) { return  x(d.label); })
+          .attr("cy", function(d) { return -1 * y(d.value); })
+          .on("mouseover", function(d) {      
+            d3.select(this).transition().duration(500).attr("r", 4);
+            tooltip.transition()        
+                .duration(200)      
+                .style("opacity", 1);      
+            tooltip.html(d.tooltip);  
+            })
+          .on("mouseout", function(d) {
+            d3.select(this).transition().duration(500).attr("r", 3);      
+            tooltip.transition()        
+                .duration(200)      
+                .style("opacity", 0);      
+            })
+          .on("click", function(d){
+            // TODO: fix conflict with mouseout event
+            g.selectAll(".circle").classed("selected", false);
+            d3.select(this).classed("selected", true)
+              .transition().duration(500).attr("r", 4);      
+            tooltip.transition()        
+                .duration(200)      
+                .style("opacity", 1);    
+            })
+          .transition()
+            .duration(500)
+            .delay(3000) // TODO: make variable?
+            .attr("r", function(d){ 
+              return (d.tooltip ? 3 : 0); // Only if datapoint has tooltip, a marker will be drawn
+            }
+          );
+        }
+
+
+        function animateAxis(){
+          yAxis.transition()
+            .duration(1000)
+            .attr("y1", -1 * y(0))
+            .attr("y2", -1 * y(maxValue))
+            .attr("opacity", 1);
+
+          yLabels.transition()
+            .duration(1000)
+            .attr("y", function(d) { return -1 * y(d) })
+            .attr("opacity", 1);
+
+          yTicks.transition()
+            .duration(1000)
+            .attr("y1", function(d) { return -1 * y(d) })
+            .attr("y2", function(d) { return -1 * y(d) })
+            .attr("opacity", 1);
+        }
+
+        animateAxis(1000);
+        for (var prop in that.chartData) {
+          drawLine(prop, that.chartData[prop], that.colors.accents[prop], that.animateStyle); // color will break if series name is changed
+        } 
+
+        // TODO
+        // add color background to highlight part of the data?
+        // progressively show more data by tapping next button?
+        // use variables for timing of events
+        // make chart-type dynamic (bar vs line)
+        // make it so you can name a series anything (not by index)
+        // reset function
+        // refactor
+      }
+    });
+  </script>
+
+</polymer-element>
