@@ -130,18 +130,18 @@
         // x-axis
         g.append("line")
           .attr("x1", x(0))
-          .attr("y1", -1 * y(0))
+          .attr("y1", -y(0))
           .attr("x2", x(data.length)) // this needs to be more dynamic
-          .attr("y2", -1 * y(0))
+          .attr("y2", -y(0))
           .attr("stroke", that.colors.foreground)
           .attr("stroke-width", 2);
         
         // y-axis
         var yAxis = g.append("line")
           .attr("x1", x(0))
-          .attr("y1", 0)
+          .attr("y1", y(0))
           .attr("x2", x(0))
-          .attr("y2", 0)
+          .attr("y2", y(0))
           .attr("stroke", that.colors.foreground)
           .attr("stroke-width", 2)
           .attr("opacity", 0);
