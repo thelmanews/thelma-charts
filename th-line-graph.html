@@ -337,6 +337,50 @@
           drawLine(prop, that.chartData[prop], that.colors.accents[prop], that.animateStyle); // color will break if series name is changed
         } 
 
+
+        var slider = svg.selectAll('g.slider')
+            .data([{x: 100, y : 20}])
+            .enter()
+                .append('g')
+                .attr("class", "slider")
+                .attr("height", 200)
+                .attr("widht", 300)
+                .attr('transform', 'translate(20, 10)');
+
+        var drag = d3.behavior.drag()
+            .origin(Object)
+            .on("drag", dragMove)
+            .on('dragend', dragEnd);
+
+
+        var rect = slider.append('rect')
+                    .attr('y', 17)
+                    .attr("height", 5)
+                    .attr("width", 280)
+                    .attr('fill', '#C0C0C0');
+
+        slider.append("circle")
+            .attr("r", 15)
+            .attr("cx", 100)
+            .attr("cy", 20)
+            .attr("fill", "#fff")
+            .call(drag);
+
+        function dragMove(d) {
+            d3.select(this)
+                .attr("opacity", 0.6)
+                .attr("cx", d.x = Math.max(0, Math.min(280, d3.event.x)))
+                .attr("cy", d.y = 20);
+        }
+
+        function dragEnd() {
+            d3.select(this)
+                .attr('opacity', 1)
+        }
+
+
+
+
         // TODO
         // add color background to highlight part of the data?
         // progressively show more data by tapping next button?
