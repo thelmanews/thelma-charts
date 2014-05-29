@@ -30,6 +30,25 @@
       circle {
         cursor: pointer;
       }
+      @-webkit-keyframes pulse {
+        from {
+         fill: rgba(255, 255, 255, 0.9);
+        }
+        50% {
+          fill: rgba(255, 255, 255, 0.3);
+        }
+        to {
+          fill: rgba(255, 255, 255, 0.9);      
+        }
+      }
+
+
+      .pulse {
+        -webkit-animation-name: pulse;
+        -webkit-animation-duration: 3s;
+        -webkit-animation-iteration-count: infinite;
+        animation-timing-function: linear;
+      }
 
     </style>
     <content></content>
@@ -105,7 +124,7 @@
         var maxLabel = getMax(that.chartData, "label");
         var minLabel = getMin(that.chartData, "label");
 
-        var y = d3.scale.linear().domain([minValue, maxValue]).range([yMargin, h ]), 
+        var y = d3.scale.linear().domain([minValue, maxValue]).range([yMargin, (h-20) ]), //20 to make room for the slider
             x = d3.scale.linear().domain([minLabel, maxLabel]).range([xMargin, w ]); 
             
         // container
@@ -113,6 +132,7 @@
         var svg = d3.select(chart_svg)
           .attr("width", w)
           .attr("height", h);
+
      
         var g = svg.append("g")
           .attr("transform", "translate(0,"+ h +")");
@@ -333,70 +353,132 @@
         } 
 
         // Slider
+        var currentPos = 20; // random starting x position for the slider
         var slider = svg.selectAll('g.slider')
-            .data([{x: 500, y : 20}]) //??
+            .data([{x: currentPos, y : 20}]) //??
             .enter()
                 .append('g')
                 .attr("class", "slider")
                 .attr("height", 200)
                 .attr("width", w)
-                .attr('transform', 'translate(20, 0)'); // make variable / move up and move chart down
+                .attr('transform', 'translate(0, 0)'); 
 
         var drag = d3.behavior.drag()
             .origin(Object)
             .on("drag", dragMove)
             .on('dragend', dragEnd);
 
-
-        var rect = slider.append('rect')
-                          .attr('y', 5)
-                          .attr("height", 3)
-                          .attr("width", w)
-                          .attr('fill', '#C0C0C0')
-                          .attr('opacity', 0.5);
+        
 
         slider.append("circle")
-            .attr("class", "slider")
+            .attr("class", "target")
             .attr("r", 10)
-            .attr("cx", 100)
+            .attr("cx", currentPos)
             .attr("cy", 5)
+            .attr("class", "pulse")
             .attr("fill", "#fff")
             .call(drag);
 
+        slider.append('rect')
+                          .attr('y', 15)
+                          .attr('x', currentPos-1)
+                          .attr("height", h-33)
+                          .attr("width", 2)
+                          .attr('fill', '#fff')
+                          .attr('opacity', 0.4);
+
+        var lastPos = slider.select("circle").attr("cx");
+        var direction;
+        var points = g.selectAll('.circle');
+        var closestPoint;
+      
         function dragMove(d) {
-            
+
+            // move the circle
             d3.select(this)
-              .attr("opacity", 0.6)
-              .attr("cx", d.x = Math.max(0, Math.min(w, d3.event.x)))
+              .attr("class", "")
+              .attr("cx", d.x = Math.max(20, Math.min(w, d3.event.x))) // 20 min bc of margin
               .attr("cy", d.y = 5);
-            var sliderPosMin = d3.select(this).attr("cx") - 5;
-            var sliderPosMax = d3.select(this).attr("cx") + 5;
-            d3.select('rect')
+            
+            // define current position
+            currentPos = d3.select(this).attr("cx");
+            
+            // move the line
+            slider.select('rect')
+              .attr('x', currentPos-1)
               .attr('opacity', 1);
+            
+            // determine direction of slide
+            if (currentPos < lastPos){
+              direction = "left";
+              lastPos = currentPos;
+            } else {
+              direction ="right";
+              lastPos = currentPos;
+            }
+
+            var currentTooltip;
+
+            // determine which circles/tooltips are displayed
             g.selectAll(".circle")
               .attr("r", function(d){
-                // console.log(slider);
-                if (d3.select(this).attr("cx") > sliderPosMin && d3.select(this).attr("cx") < sliderPosMax) {
-                  return 4;
+                if ( (x(d.label)<(parseInt(currentPos)+5)) && (x(d.label)>(parseInt(currentPos)-5))){ // this is a temporary solution until I get the snapping to work
+                  currentTooltip = d.tooltip;
+                  return 3;
                 } else {
                   return 0;
                 }
-                // return 4;
-              })
+              });
+            
+            // show tooltip
+            tooltip.transition()        
+                .duration(200)      
+                .style("opacity", 1);      
+            tooltip.html(currentTooltip);  
+          
+            // find the closest point
+            var selectedPoints = points.filter(function(d){ // returns all points to the left/right of the slider (array of array)
+              // console.log(d);
+              if(direction=="right"){
+                return ((parseInt(d.label) - x.invert(currentPos)) > 0);
+              } else {
+                console.log(x.invert(currentPos) - (parseInt(d.label)));
+                return (x.invert(currentPos) - (parseInt(d.label)) > 0);
+              }
+            });
+
+            // finds the closest position of the post nearest the slider 
+            if (direction == "right"){
+              closestPoint = d3.min(selectedPoints[0], function(d){
+                return parseInt(d3.select(d).attr("cx"));
+              });
+            } else {
+              closestPoint = d3.max(selectedPoints[0], function(d){
+                return parseInt(d3.select(d).attr("cx"));
+              });
+            }
+
+         
         }
 
         function dragEnd() {
             d3.select(this)
-                .attr('opacity', 1);
+              .attr('class','pulse')
+              .attr('cx', closestPoint);
+            slider.select('rect')
+              .attr('x', closestPoint-1) // adjusted bc of thickness of line
+              .attr('opacity', 0.4);
+
         }
 
         // TODO
-        // add color background to highlight part of the data?
-        // progressively show more data by tapping next button?
         // use variables for timing of events
         // make chart-type dynamic (bar vs line)
         // make it so you can name a series anything (not by index)
         // reset function
+        // snap to nearest data point
+        // fix the offset problem (smthg w/margin?)
+
         // refactor
       }
     });
