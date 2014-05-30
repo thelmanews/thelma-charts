@@ -229,6 +229,7 @@
         that.startingLine = startingLine;
         that.w = w;
         that.h = h;
+
       },
       reset: function() {
         // var that = this;
@@ -305,26 +306,26 @@
           .attr("stroke-width", 2)
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); })
-          .on("mouseover", function(d) {      
-            d3.select(this).transition().duration(500).attr("r", 4);
-            tooltip.transition()        
-                .duration(200)      
-                .style("opacity", 1);      
-            tooltip.html(d.tooltip);  
-            })
-          .on("mouseout", function(d) {
-            d3.select(this).transition().duration(500).attr("r", 3);      
-            tooltip.transition()        
-                .duration(200)      
-                .style("opacity", 0);      
-            })
-          .transition()
-            .duration(500)
-            .delay(3000) // TODO: make variable?
-            .attr("r", function(d){ 
-              return (d.tooltip ? 3 : 0); // Only if datapoint has tooltip, a marker will be drawn
-            }
-          );
+          // .on("mouseover", function(d) {      
+          //   d3.select(this).transition().duration(500).attr("r", 4);
+          //   tooltip.transition()        
+          //       .duration(200)      
+          //       .style("opacity", 1);      
+          //   tooltip.html(d.tooltip);  
+          //   })
+          // .on("mouseout", function(d) {
+          //   d3.select(this).transition().duration(500).attr("r", 3);      
+          //   tooltip.transition()        
+          //       .duration(200)      
+          //       .style("opacity", 0);      
+          //   })
+          // .transition()
+          //   .duration(500)
+          //   .delay(3000) // TODO: make variable?
+          //   .attr("r", function(d){ 
+          //     return (d.tooltip ? 3 : 0); // Only if datapoint has tooltip, a marker will be drawn
+          //   }
+          // );
         }
 
 
@@ -352,10 +353,11 @@
           drawLine(prop, that.chartData[prop], that.colors.accents[prop], that.animateStyle); // color will break if series name is changed
         } 
 
+
         // Slider
         var currentPos = 20; // random starting x position for the slider
         var slider = svg.selectAll('g.slider')
-            .data([{x: currentPos, y : 20}]) //??
+            .data([{x: currentPos}]) //??
             .enter()
                 .append('g')
                 .attr("class", "slider")
@@ -368,8 +370,6 @@
             .on("drag", dragMove)
             .on('dragend', dragEnd);
 
-        
-
         slider.append("circle")
             .attr("class", "target")
             .attr("r", 10)
@@ -380,17 +380,19 @@
             .call(drag);
 
         slider.append('rect')
-                          .attr('y', 15)
-                          .attr('x', currentPos-1)
-                          .attr("height", h-33)
-                          .attr("width", 2)
-                          .attr('fill', '#fff')
-                          .attr('opacity', 0.4);
+            .attr('y', 15)
+            .attr('x', currentPos-1)
+            .attr("height", h-33)
+            .attr("width", 2)
+            .attr('fill', '#fff')
+            .attr('opacity', 0.4);
 
         var lastPos = slider.select("circle").attr("cx");
         var direction;
         var points = g.selectAll('.circle');
         var closestPoint;
+        var currentTooltip;
+
       
         function dragMove(d) {
 
@@ -408,7 +410,7 @@
               .attr('x', currentPos-1)
               .attr('opacity', 1);
             
-            // determine direction of slide
+            // determine direction of slide movement
             if (currentPos < lastPos){
               direction = "left";
               lastPos = currentPos;
@@ -416,13 +418,11 @@
               direction ="right";
               lastPos = currentPos;
             }
-
-            var currentTooltip;
-
-            // determine which circles/tooltips are displayed
+            
+            // determine which circles/tooltips are to be displayed
             g.selectAll(".circle")
               .attr("r", function(d){
-                if ( (x(d.label)<(parseInt(currentPos)+5)) && (x(d.label)>(parseInt(currentPos)-5))){ // this is a temporary solution until I get the snapping to work
+                if ( (x(d.label)<(parseInt(currentPos)+5)) && (x(d.label)>(parseInt(currentPos)-5))){ 
                   currentTooltip = d.tooltip;
                   return 3;
                 } else {
@@ -438,16 +438,14 @@
           
             // find the closest point
             var selectedPoints = points.filter(function(d){ // returns all points to the left/right of the slider (array of array)
-              // console.log(d);
               if(direction=="right"){
-                return ((parseInt(d.label) - x.invert(currentPos)) > 0);
+                return ((parseInt(d.label) - x.invert(currentPos)) >= 0);
               } else {
-                console.log(x.invert(currentPos) - (parseInt(d.label)));
-                return (x.invert(currentPos) - (parseInt(d.label)) > 0);
+                return (x.invert(currentPos) - (parseInt(d.label)) >= 0);
               }
             });
 
-            // finds the closest position of the post nearest the slider 
+            // find the closest position of the post nearest the slider 
             if (direction == "right"){
               closestPoint = d3.min(selectedPoints[0], function(d){
                 return parseInt(d3.select(d).attr("cx"));
@@ -458,17 +456,39 @@
               });
             }
 
+            console.log("*****");
+            console.log(selectedPoints);
+            console.log(closestPoint);
+
          
         }
 
         function dragEnd() {
             d3.select(this)
               .attr('class','pulse')
-              .attr('cx', closestPoint);
+              .transition()
+                .duration(400)
+                .attr('cx', closestPoint);
             slider.select('rect')
-              .attr('x', closestPoint-1) // adjusted bc of thickness of line
-              .attr('opacity', 0.4);
-
+              .transition()
+                .duration(400)
+                .attr('x', closestPoint-1) // adjusted bc of thickness of line
+                .attr('opacity', 0.4);
+            g.selectAll(".circle")
+              .attr("r", function(d){
+                if (parseInt(x(d.label))==parseInt(closestPoint)){ 
+                  currentTooltip = d.tooltip;
+                  return 3;
+                } else {
+                  return 0;
+                }
+              });
+            // show tooltip
+            tooltip.transition()        
+                .duration(200)      
+                .style("opacity", 1);      
+            tooltip.html(currentTooltip);  
+          
         }
 
         // TODO
@@ -476,9 +496,6 @@
         // make chart-type dynamic (bar vs line)
         // make it so you can name a series anything (not by index)
         // reset function
-        // snap to nearest data point
-        // fix the offset problem (smthg w/margin?)
-
         // refactor
       }
     });
