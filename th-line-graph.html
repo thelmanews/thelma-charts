@@ -307,8 +307,6 @@
           .attr("stroke-width", 2)
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); })
-
-
         }
 
 
@@ -331,6 +329,7 @@
             .attr("opacity", 1);
         }
 
+        animateAxis();
 
         for (var prop in that.chartData) {
           drawLine(prop, that.chartData[prop], that.colors.accents[prop], that.animateStyle); // color will break if series name is changed
