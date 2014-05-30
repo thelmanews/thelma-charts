@@ -262,9 +262,10 @@
           .attr("class", "tooltip");
 
         function drawLine(seriesName, data, color, animationStyle){
-          
+          var seriesNameSafe = seriesName.replace(/\s+/g,'_');
+
           if (animationStyle === "draw"){
-            var path = g.selectAll('.asdad').data([seriesName]).enter().append("path")
+            var path = g.selectAll('.asdad').data([seriesNameSafe]).enter().append("path")
               .attr("d", line(data))
               .attr("stroke", color)
               .attr("stroke-width", "2.5")
@@ -283,7 +284,7 @@
                 .attr("stroke-dashoffset", 0);
           } else { // raise style
              
-             var path = g.selectAll('.asdad').data([seriesName]).enter().append("path")
+             var path = g.selectAll('.asdad').data([seriesNameSafe]).enter().append("path")
               .attr("d", startingLine(data))
               .attr("stroke", color)
               .attr("stroke-width", "2.5")
@@ -296,36 +297,18 @@
               .attr("opacity", 1);
           }
 
-          g.selectAll(".allCircles")
+          g.selectAll(".circle-"+seriesNameSafe)
           .data(data)
           .enter().append("circle")
-          .attr("class", "circle circle-" + seriesName)
+          .attr("class", "circle circle-" + seriesNameSafe)
           .attr("r", 0)
           .attr("fill", that.colors.foreground) 
           .attr("stroke", color)
           .attr("stroke-width", 2)
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); })
-          // .on("mouseover", function(d) {      
-          //   d3.select(this).transition().duration(500).attr("r", 4);
-          //   tooltip.transition()        
-          //       .duration(200)      
-          //       .style("opacity", 1);      
-          //   tooltip.html(d.tooltip);  
-          //   })
-          // .on("mouseout", function(d) {
-          //   d3.select(this).transition().duration(500).attr("r", 3);      
-          //   tooltip.transition()        
-          //       .duration(200)      
-          //       .style("opacity", 0);      
-          //   })
-          // .transition()
-          //   .duration(500)
-          //   .delay(3000) // TODO: make variable?
-          //   .attr("r", function(d){ 
-          //     return (d.tooltip ? 3 : 0); // Only if datapoint has tooltip, a marker will be drawn
-          //   }
-          // );
+
+
         }
 
 
@@ -348,14 +331,14 @@
             .attr("opacity", 1);
         }
 
-        animateAxis(1000);
+
         for (var prop in that.chartData) {
           drawLine(prop, that.chartData[prop], that.colors.accents[prop], that.animateStyle); // color will break if series name is changed
         } 
 
 
         // Slider
-        var currentPos = 20; // random starting x position for the slider
+        var currentPos = 236; // random starting x position for the slider
         var slider = svg.selectAll('g.slider')
             .data([{x: currentPos}]) //??
             .enter()
@@ -376,7 +359,7 @@
             .attr("cx", currentPos)
             .attr("cy", 5)
             .attr("class", "pulse")
-            .attr("fill", "#fff")
+            .attr("fill", that.colors.foreground)
             .call(drag);
 
         slider.append('rect')
@@ -384,7 +367,7 @@
             .attr('x', currentPos-1)
             .attr("height", h-33)
             .attr("width", 2)
-            .attr('fill', '#fff')
+            .attr('fill', that.colors.foreground)
             .attr('opacity', 0.4);
 
         var lastPos = slider.select("circle").attr("cx");
@@ -393,7 +376,6 @@
         var closestPoint;
         var currentTooltip;
 
-      
         function dragMove(d) {
 
             // move the circle
@@ -476,19 +458,23 @@
                 .attr('opacity', 0.4);
             g.selectAll(".circle")
               .attr("r", function(d){
-                if (parseInt(x(d.label))==parseInt(closestPoint)){ 
-                  currentTooltip = d.tooltip;
-                  return 3;
-                } else {
-                  return 0;
-                }
+                return selectPoints(d);
               });
+            
             // show tooltip
             tooltip.transition()        
                 .duration(200)      
                 .style("opacity", 1);      
             tooltip.html(currentTooltip);  
-          
+        }
+
+        function selectPoints(d){
+          if (parseInt(x(d.label))==parseInt(closestPoint)){ 
+            currentTooltip = d.tooltip;
+            return 3;
+          } else {
+            return 0;
+          }
         }
 
         // TODO
