@@ -67,7 +67,7 @@
       },
       chartData: { 
         '0': [ 
-          {'label': 0, 'value': 1, 'tooltip': 'This is a tooltip' },
+          {'label': 0, 'value': 1 },
           {'label': 1, 'value': 5, 'tooltip': 'This is a tooltip' },
           {'label': 2, 'value': 2 },
           {'label': 3, 'value': 7 },
@@ -93,6 +93,7 @@
           {'label': 10, 'value': 4 }
         ]
       },
+      config: {animateAxis: false, interpolate: false},
       init: function() {
         var that = this;
         var data = that.chartData['0'], // this needs to encompass all data
@@ -140,13 +141,17 @@
         // line data
         var line = d3.svg.line()
           .x(function(d) { return x(d.label); })
-          .y(function(d) { return -y(d.value); })
-          .interpolate(that.lineStyle);
+          .y(function(d) { return -y(d.value); });
+
+        if(that.config.interpolate) {
+          line.interpolate(that.lineStyle);
+        }
 
         var startingLine = d3.svg.line()
           .x(function(d) { return x(d.label); })
-          .y(-yMargin)
-          .interpolate(that.lineStyle);
+          .y(-yMargin);
+          
+        
         // x-axis
         g.append("line")
           .attr("x1", x(0))
@@ -159,12 +164,12 @@
         // y-axis
         var yAxis = g.append("line")
           .attr("x1", x(0))
-          .attr("y1", y(0))
           .attr("x2", x(0))
-          .attr("y2", y(0))
+          .attr("y1", function(d) { return that.config.animateAxis ? y(0) : -1 * y(0); })
+          .attr("y2", function(d) { return that.config.animateAxis ? y(0) : -1 * y(maxValue); })
           .attr("stroke", that.colors.foreground)
           .attr("stroke-width", 2)
-          .attr("opacity", 0);
+          .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
 
         // x labels
         g.selectAll(".xLabel")
@@ -184,11 +189,33 @@
           .attr("class", "yLabel")
           .text(String)
           .attr("x", 0)
-          .attr("y", 0)
+          .attr("y", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
           .attr("text-anchor", "right")
           .attr("dy", 4)
           .attr("fill", that.colors.foreground)
-          .attr("opacity", 0);
+          .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
+
+          /*
+
+          yAxis.transition()
+            .duration(1000)
+            .attr("y1", -1 * y(0))
+            .attr("y2", -1 * y(maxValue))
+            .attr("opacity", 1);
+
+          yLabels.transition()
+            .duration(1000)
+            .attr("y", function(d) { return -1 * y(d) })
+            .attr("opacity", 1);
+
+          yTicks.transition()
+            .duration(1000)
+            .attr("y1", function(d) { return -1 * y(d) })
+            .attr("y2", function(d) { return -1 * y(d) })
+            .attr("opacity", 1);
+
+
+          */
 
 
         // x tick marks
@@ -207,12 +234,12 @@
           .data(y.ticks(4)) // TODO: Replace with formula (number of tickmarks)
           .enter().append("line")
           .attr("class", "yTicks")
-          .attr("y1", 0)
+          .attr("y1", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
           .attr("x1", x(-0.2))
-          .attr("y2", 0)
+          .attr("y2", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
           .attr("x2", x(0))
           .attr("stroke", that.colors.foreground)
-          .attr("opacity", 0);
+          .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
         
        
         // make variables accessible in other methods
@@ -278,8 +305,8 @@
               .attr("stroke-dasharray", totalLength + " " + totalLength)
               .attr("stroke-dashoffset", totalLength)
               .transition()
-                .duration(2000) // TODO: make variable?
-                .delay(1000) 
+                .duration(1000) // TODO: make variable?
+                //.delay(1000) 
                 .ease("linear")
                 .attr("stroke-dashoffset", 0);
           } else { // raise style
@@ -329,15 +356,26 @@
             .attr("opacity", 1);
         }
 
-        animateAxis();
+        if(that.config.animateAxis) {
+          animateAxis();
+        }
 
+        var firstTooltip = Number.MAX_VALUE;
         for (var prop in that.chartData) {
           drawLine(prop, that.chartData[prop], that.colors.accents[prop], that.animateStyle); // color will break if series name is changed
+
+          var setFirstTooltip = d3.min(that.chartData[prop], function(d) {
+              return d.tooltip ? d.label : Number.MAX_VALUE;
+          });
+
+          firstTooltip = d3.min([setFirstTooltip,firstTooltip]);
+
         } 
 
 
         // Slider
-        var currentPos = 236; // random starting x position for the slider
+         
+        var currentPos = x(firstTooltip); // random starting x position for the slider
         var slider = svg.selectAll('g.slider')
             .data([{x: currentPos}]) //??
             .enter()
@@ -378,10 +416,10 @@
         function dragMove(d) {
 
             // move the circle
+            
             d3.select(this)
-              .attr("class", "")
-              .attr("cx", d.x = Math.max(20, Math.min(w, d3.event.x))) // 20 min bc of margin
-              .attr("cy", d.y = 5);
+              .attr("cx", d.x = Math.max(20, Math.min(w, d3.event.x))); // 20 min bc of margin
+
             
             // define current position
             currentPos = d3.select(this).attr("cx");
@@ -403,9 +441,10 @@
             // determine which circles/tooltips are to be displayed
             g.selectAll(".circle")
               .attr("r", function(d){
-                if ( (x(d.label)<(parseInt(currentPos)+5)) && (x(d.label)>(parseInt(currentPos)-5))){ 
+                if ( Math.abs(x(d.label) - parseInt(currentPos)) < 5) {
+                //(x(d.label)<(parseInt(currentPos)+5)) && (x(d.label)>(parseInt(currentPos)-5))){ 
                   currentTooltip = d.tooltip;
-                  return 3;
+                  return 4;
                 } else {
                   return 0;
                 }
@@ -418,6 +457,9 @@
             tooltip.html(currentTooltip);  
           
             // find the closest point
+
+            /*
+            
             var selectedPoints = points.filter(function(d){ // returns all points to the left/right of the slider (array of array)
               if(direction=="right"){
                 return ((parseInt(d.label) - x.invert(currentPos)) >= 0);
@@ -425,6 +467,7 @@
                 return (x.invert(currentPos) - (parseInt(d.label)) >= 0);
               }
             });
+
 
             // find the closest position of the post nearest the slider 
             if (direction == "right"){
@@ -437,9 +480,34 @@
               });
             }
 
-            console.log("*****");
-            console.log(selectedPoints);
-            console.log(closestPoint);
+
+            //var closestPoint2 = null;
+
+            */
+
+            
+            // a shorter (and kind of faster) version of above which does the compare and filter at the same time.
+
+            if (direction == "right"){
+              closestPoint = d3.min(points[0], function(d){
+                var cx = parseInt(d3.select(d).attr("cx")); 
+                return (cx - currentPos >= 0) ? cx : Number.MAX_VALUE  ;
+              });
+            } else {
+              closestPoint = d3.max(points[0], function(d){
+                var cx = parseInt(d3.select(d).attr("cx")); 
+                return (cx - currentPos < 0) ? cx : Number.MIN_VALUE  ;
+              });
+            }
+
+            
+
+            /*
+            closestPoint = d3.min(points[0], function(d){
+                var cx = parseInt(d3.select(d).attr("cx")); 
+                return Math.abs(cx - currentPos);// >= 0) ? cx : Number.MAX_VALUE  ;
+            });
+            */
 
          
         }
@@ -448,11 +516,11 @@
             d3.select(this)
               .attr('class','pulse')
               .transition()
-                .duration(400)
+                .duration(50)
                 .attr('cx', closestPoint);
             slider.select('rect')
               .transition()
-                .duration(400)
+                .duration(50)
                 .attr('x', closestPoint-1) // adjusted bc of thickness of line
                 .attr('opacity', 0.4);
             g.selectAll(".circle")
@@ -462,7 +530,7 @@
             
             // show tooltip
             tooltip.transition()        
-                .duration(200)      
+                .duration(100)      
                 .style("opacity", 1);      
             tooltip.html(currentTooltip);  
         }
@@ -470,7 +538,7 @@
         function selectPoints(d){
           if (parseInt(x(d.label))==parseInt(closestPoint)){ 
             currentTooltip = d.tooltip;
-            return 3;
+            return 5;
           } else {
             return 0;
           }
