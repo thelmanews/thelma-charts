@@ -1,0 +1,594 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-line-graph-single" extends="th-d3-chart" attributes="lineStyle, animateStyle, colors">
+  <template>
+    <style>
+      :host {
+        font-size: 0.875em;
+        color: white;
+      }
+
+      #chart {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      .xLabel, .yLabel {
+        font-size: 0.65em;
+        font-weight: 300;
+      }
+
+      .tooltip {
+        width: 100%;
+        position: relative;
+        box-sizing: border-box;
+        padding: 0px 20px;
+      }
+
+      circle {
+        cursor: pointer;
+      }
+
+      @-webkit-keyframes pulse {
+        from {
+         stroke: rgba(255, 255, 255, 0.9);
+        }
+        50% {
+          stroke: rgba(255, 255, 255, 0.3);
+        }
+        to {
+          stroke: rgba(255, 255, 255, 0.9);      
+        }
+      }
+
+
+      .pulse {
+        -webkit-animation-name: pulse;
+        -webkit-animation-duration: 3s;
+        -webkit-animation-iteration-count: infinite;
+        animation-timing-function: linear;
+        fill: none;
+      }
+
+    </style>
+    <content></content>
+    <svg id="chart"></svg> 
+    <div id="info"></div> 
+  </template> 
+  
+  <script>
+    Polymer('th-line-graph-single', {
+      lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
+      animateStyle: "draw", // options: raise, draw
+      colors: {
+        foreground: "white", // axis color
+        background: "#2a94cb", // TODO: make variable to match card background
+        accents: ["#1EC4E6","#2D5B8C", "#EDE374"] // line colors
+      },
+      chartData: [
+        {'label': 2010, 'value': 4 },
+        {'label': 2011, 'value': 8 },
+        {'label': 2012, 'value': 7, 'tooltip': 'This is a tooltip'},
+        {'label': 2013, 'value': 10, 'tooltip': 'This is a tooltip',},
+        {'label': 2014, 'value': 12, 'tooltip': 'This is a tooltip'}
+      ],
+      config: {animateAxis: false, interpolate: true},
+      init: function() {
+        var that = this;
+        var data = that.chartData, 
+            xMargin = 10,// space btw labels and axis
+            yMargin = 30,// space btw labels and axis
+            w = that.chartWidth - xMargin*2,
+            h = that.chartHeight + yMargin,
+            series = data.reduce(function(allSeries, dataRow) {
+              for(name in dataRow) {
+                if(['tooltip','label'].indexOf(name)<0 && allSeries.indexOf(name)<0 ) {
+                  allSeries.push(name);
+                }
+              }
+              return allSeries;
+            }, []);      
+
+
+        function boundaryValue(property, boundary){ // takes an object where keys are equal to arrays of data objects
+          return boundary(data, function(d){
+            return d[property];
+          })
+        }
+   
+        var maxLabel = boundaryValue("label", d3.max);
+        var minLabel = boundaryValue("label", d3.min);
+        var maxValue = d3.max(series.map(function(i){ return boundaryValue(i, d3.max)}));
+        var minValue = d3.min(series.map(function(i){ return boundaryValue(i, d3.min)}));
+
+
+
+        var y = d3.scale.linear().domain([minValue, maxValue]).range([yMargin, (h-(yMargin*2)) ]), //30 to make room for the slider
+            x = d3.scale.linear().domain([minLabel, maxLabel]).range([xMargin, (w) ]); 
+            
+        // container
+        var chart_svg = that.$.chart;
+        var svg = d3.select(chart_svg)
+          .attr("width", w)
+          .attr("height", h); 
+
+     
+        var g = svg.append("g")
+          .attr("transform", "translate(0,"+ (h-yMargin) +")");
+        
+        // line data
+        var line = d3.svg.line()
+          .x(function(d) { return x(d.label); })
+          .y(function(d) { return -y(d.value); }); 
+
+        if(that.config.interpolate) {
+          line.interpolate(that.lineStyle);
+        }
+
+        var startingLine = d3.svg.line()
+          .x(function(d) { return x(d.label); })
+          .y(-yMargin);
+          
+        
+        // x-axis
+        g.append("line")
+          .attr("x1", x(minLabel))
+          .attr("y1", -y(0))
+          .attr("x2", x(maxLabel)) 
+          .attr("y2", -y(0));
+          // .attr("stroke", that.colors.foreground)
+          // .attr("stroke-width", 2);
+        
+        // y-axis
+        var yAxis = g.append("line")
+          .attr("x1", x(0))
+          .attr("x2", x(0))
+          .attr("y1", function(d) { return that.config.animateAxis ? y(0) : -1 * y(0); }) // Use 0 instead of minValue for default
+          .attr("y2", function(d) { return that.config.animateAxis ? y(0) : -1 * y(maxValue); });
+          // .attr("stroke", that.colors.foreground)
+          // .attr("stroke-width", 2)
+          // .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
+
+        // x labels
+        g.selectAll(".xLabel")
+          .data(x.ticks(5))// TODO: Replace with formula (number of labels)
+          .enter().append("text")
+          .attr("class", "xLabel")
+          .text(String)
+          .attr("x", function(d) { return x(d) })
+          .attr("y", yMargin/2)
+          .attr("text-anchor", "middle")
+          .attr("fill", that.colors.foreground);
+        
+        // y labels
+        var yLabels = g.selectAll(".yLabel")
+          .data(y.ticks(4)) // TODO: Replace with formula (number of labels)
+          .enter().append("text")
+          .attr("class", "yLabel")
+          .text(String)
+          .attr("x", 0)
+          .attr("y", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
+          .attr("text-anchor", "right")
+          .attr("dy", 4)
+          .attr("fill", that.colors.foreground)
+          .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; })
+          .style("text-anchor", "start");
+
+        // x tick marks
+        g.selectAll(".xTicks")
+          .data(x.ticks(5)) // TODO: Replace with formula (number of tickmarks)
+          .enter().append("line")
+          .attr("class", "xTicks")
+          .attr("x1", function(d) { return x(d); })
+          .attr("y1", -1 * y(0))
+          .attr("x2", function(d) { return x(d); })
+          .attr("y2", -1 * y(-0.5));
+          // .attr("stroke", that.colors.foreground);
+        
+        // y tick marks
+        var yTicks = g.selectAll(".yTicks")
+          .data(y.ticks(4)) // TODO: Replace with formula (number of tickmarks)
+          .enter().append("line")
+          .attr("class", "yTicks")
+          .attr("y1", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
+          .attr("x1", x(-0.2))
+          .attr("y2", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
+          .attr("x2", x(0));
+          // .attr("stroke", that.colors.foreground)
+          // .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
+        
+       
+        // make variables accessible in other methods
+        that.svg = svg;
+        that.data = data;
+        that.g = g;
+        that.line = line;
+        that.x = x;
+        that.y = y;
+        that.minLabel = minLabel;
+        that.maxLabel = maxLabel;
+        that.minValue = minValue;
+        that.maxValue = maxValue;
+        that.yAxis = yAxis;
+        that.yTicks = yTicks;
+        that.yLabels = yLabels;
+        that.startingLine = startingLine;
+        that.w = w;
+        that.h = h;
+        that.series = series;
+
+      },
+      reset: function() {
+        var that = this,
+            g = that.g,
+            svg = that.svg;
+        
+        // removes the lines, slider and data/tooltips
+        g.selectAll("path, circle").remove();     
+        d3.select(that.$.info).selectAll("div, li").remove();  
+        svg.selectAll(".slider").remove();   
+
+      },
+      
+      animate: function() {
+        var that = this;
+        var g = that.g,
+            svg = that.svg,
+            series = that.series,
+            data = that.data,
+            line = that.line,
+            x = that.x,
+            y = that.y,
+            minLabel = that.minLabel,
+            maxLabel = that.maxLabel,
+            minValue = that.minValue,
+            maxValue = that.maxValue,
+            startingLine = that.startingLine,
+            yAxis = that.yAxis,
+            yLabels = that.yLabels,
+            yTicks = that.yTicks,
+            h = that.h,
+            w = that.w;
+
+        var info_area = that.$.info;
+        var tooltip = d3.select(info_area)
+          .append("div")   
+          .attr("class", "tooltip");
+
+        var path;
+        var currentPos;
+        var currentTooltip;
+        var currentValues;
+        var currentValue = 30;
+
+
+        function drawLine(data, color, animationStyle){
+          var data = that.data
+          // var seriesNameSafe = seriesName.replace(/\s+/g,'_');
+
+          // unable to pass seriesName as parameter to line, so create custom data object for each line
+          // var lineData = data.map(function(datapoint){ 
+          //   return {
+          //     'label': datapoint.label,
+          //     'value': datapoint[seriesName] ? datapoint[seriesName] : 0,
+          //     'tooltip': datapoint.tooltip ? datapoint.tooltip : null
+          //   }
+          // });
+
+          if (animationStyle === "draw"){
+            
+          
+
+            var area = d3.svg.area()
+              .x(function(d) { return x(d.label); })
+              .y1(function(d) { return -y(d.value); }).interpolate(that.lineStyle);
+
+
+            g.append("path")
+              .datum(data)
+              .attr("class", "area")
+              .attr("opacity", 0)
+              .attr("fill", color)
+              .transition()
+                .duration(1000) // TODO: make variable?
+                //.delay(1000) 
+                .ease("linear")
+                .attr("stroke-dashoffset", 0)
+              .attr("d", area)
+              .attr("fill", color)
+              .attr("opacity", 0.7);
+
+            path = g.selectAll('.dummy').data(data)
+              .enter().append("path")
+              .attr("d", line(data)) 
+              .attr("stroke", color)
+              .attr("stroke-width", "3")
+              .attr("fill", "none");
+
+            var totalLength = path.node().getTotalLength();
+           
+            path
+              .attr("stroke-dasharray", totalLength + " " + totalLength)
+              .attr("stroke-dashoffset", totalLength)
+              .transition()
+                .duration(1000) // TODO: make variable?
+                //.delay(1000) 
+                .ease("linear")
+                .attr("stroke-dashoffset", 0);
+          } else { // raise style - UGH this isnt working properly anymore.
+             
+            var areaStart = d3.svg.area()
+              .x(function(d) { return x(d.label); })
+              // .y0(y(h))
+              .y1(function(d) { return -y(d.value); }).interpolate(that.lineStyle);
+              // .attr("fill", "blue");             
+
+             var area = d3.svg.area()
+              .x(function(d) { return x(d.label); })
+              // .y0(y(h))
+              .y1(function(d) { return -y(d.value); }).interpolate(that.lineStyle);
+              // .attr("fill", "blue");
+
+            g.append("path")
+              .datum(lineData)
+              .attr("class", "area")
+              .attr("opacity", 0)
+              .attr("fill", color)
+              .attr("d", areaStart)
+              .transition()
+                .duration(1000) // TODO: make variable?
+                //.delay(1000) 
+                .ease("linear")
+                .attr("stroke-dashoffset", 0)
+              .attr("d", area)
+              .attr("fill", color)
+              .attr("opacity", 0.7);
+
+
+             var path = g.selectAll('.dummy').data([seriesNameSafe]).enter().append("path")
+              .attr("d", startingLine(lineData))
+              .attr("stroke", color)
+              .attr("stroke-width", "2.5")
+              .attr("fill", "none")
+              .attr("opacity", 0);
+
+            path.transition()
+              .duration(3000)
+              .attr("d", line(lineData)) 
+              .attr("opacity", 1);
+          }
+
+          g.selectAll(".circle")
+          .data(data)
+          .enter().append("circle")
+          .attr("class", "circle")
+          .attr("r", 0)
+          .attr("fill", color) 
+          .attr("stroke", that.colors.foreground)
+          .attr("stroke-width", 3)
+          .attr("cx", function(d) { return  x(d.label); })
+          .attr("cy", function(d) { return -1 * y(d.value); })
+
+        
+        }
+
+        function animateAxis(){
+          yAxis.transition()
+            .duration(1000)
+            .attr("y1", -1 * y(0))
+            .attr("y2", -1 * y(maxValue))
+            .attr("opacity", 1);
+
+          yLabels.transition()
+            .duration(1000)
+            .attr("y", function(d) { return -1 * y(d) })
+            .attr("opacity", 1);
+
+          yTicks.transition()
+            .duration(1000)
+            .attr("y1", function(d) { return -1 * y(d) })
+            .attr("y2", function(d) { return -1 * y(d) })
+            .attr("opacity", 1);
+        }
+
+        if(that.config.animateAxis) {
+          animateAxis();
+        }
+
+        // CALL THE DRAWLINES FUNCTION AND PASS IN ALL THE SERIES
+          drawLine(data, that.colors.accents[0], that.animateStyle);
+        
+
+
+        // FIND THE FIRST TOOLTIP AND SET THAT AS CURRENT POSITION
+
+
+        for (var i=0; i<data.length; i++){
+          if (data[i].tooltip){
+            currentPos = data[i].label;
+            currentTooltip = data[i].tooltip;
+            currentValue = data[i].value;
+            break;
+          } else {
+            currentPos = data[2].label;
+            currentTooltip = data[2].tooltip;
+            currentValue = data[2].value;
+          }
+        }
+
+        var data_area = g.append('g').append('text')
+          .attr("font-size", h/2)
+          .attr("x", 20)
+          .attr("y", -h/2.5)
+          .attr("fill", that.colors.foreground)
+          .attr("opacity", 0.7)
+          .text(currentValue);
+
+
+        console.log("^^^^^^^");
+        console.log(currentPos);
+        console.log(currentTooltip);
+        console.log(currentValue);
+
+        function getCurrentValues(position, firstTime){
+          currentValue;
+          g.selectAll(".circle")
+                .transition()
+                .delay(function(){ return firstTime ? 1000 : 0})
+                .duration(300)
+                .attr("r", function(d){
+                  if (parseInt(d.label)==parseInt(position)){ 
+                    currentTooltip = d.tooltip;
+                    currentValue = d.value;
+                    return 4;
+                  } else {
+                    return 0;
+                  }
+                });
+        }
+
+        function showCurrentValues(tooltipInfo, value){
+          // show tooltip 
+            tooltip.transition() 
+                .duration(100)      
+                .style("opacity", 1);      
+            tooltip.html(tooltipInfo);  
+            // show value
+            data_area.text(value);
+            // need to update the line/area so it comes back in front?? 
+
+        }
+
+        getCurrentValues(currentPos, firstTime=true);
+        showCurrentValues(currentTooltip, currentValue);
+
+
+        // Slider
+        var currentPosX = x(currentPos);  
+        var slider = svg.selectAll('g.slider')
+            .data([{x: currentPosX}]) //??
+            .enter()
+                .append('g')
+                .attr("class", "slider")
+                .attr("height", 200)
+                .attr("width", w);
+
+        var drag = d3.behavior.drag()
+            .origin(Object)
+            .on("drag", dragMove)
+            .on('dragend', dragEnd);
+
+        slider.append("circle")
+            .attr("class", "target")
+            .attr("r", 8)
+            .attr("cx", currentPosX)
+            .attr("cy", 12)
+            .attr("class", "pulse")
+            .attr("fill", "none")
+            .attr("stroke", that.colors.foreground)
+            .attr("stroke-width", 4.5)
+            .call(drag);
+
+        slider.append('rect')
+            .attr('y', 22)
+            .attr('x', currentPosX-1.5)
+            .attr("height", y(maxValue)+8)
+            .attr("width", 3)
+            .attr('fill', that.colors.foreground)
+            .attr('opacity', 0.4);
+
+        var lastPos = slider.select("circle").attr("cx");
+        var direction;
+        var points = g.selectAll('.circle');
+        var closestPoint;  
+
+        function dragMove(d) {
+
+            // move the circle
+            d3.select(this)
+              .attr("class", "")
+              .attr("cx", d.x = Math.max(0, Math.min(w, d3.event.x))); 
+       
+            // define current position
+            currentPosX = d3.select(this).attr("cx");
+
+            // move the line
+            slider.select('rect')
+              .attr('x', currentPosX-1)
+              .attr('opacity', 1);
+
+            
+            // determine direction of slide movement
+            if (currentPosX < lastPos){
+              direction = "left";
+              lastPos = currentPosX;
+            } else {
+              direction ="right";
+              lastPos = currentPosX;
+            }
+            
+            // determine which circles/tooltips are to be displayed
+            g.selectAll(".circle")
+              .attr("r", function(d){
+                if ( Math.abs(x(d.label) - parseInt(currentPosX)) < 5) {
+                //(x(d.label)<(parseInt(currentPosX)+5)) && (x(d.label)>(parseInt(currentPosX)-5))){ 
+                  currentTooltip = d.tooltip;
+                  return 4;
+                } else {
+                  return 0;
+                }
+              });
+           
+
+            // Find the closest point to the slider
+            if (direction == "right"){
+              closestPoint = d3.min(points[0], function(d){
+                var cx = parseInt(d3.select(d).attr("cx")); 
+                return (cx - currentPosX >= 0) ? cx : Number.MAX_VALUE  ;
+              });
+            } else {
+              closestPoint = d3.max(points[0], function(d){
+                var cx = parseInt(d3.select(d).attr("cx")); 
+                return (cx - currentPosX < 0) ? cx : Number.MIN_VALUE  ;
+              });
+            }
+         
+        }
+
+        function dragEnd() {
+      
+            // Lock the slider in place
+            d3.select(this)
+              .attr('class','pulse')
+              .transition()
+                .duration(50)
+                .attr('cx', closestPoint);
+            slider.select('rect')
+              .transition()
+                .duration(50)
+                .attr('x', closestPoint-1) // adjusted bc of thickness of line
+                .attr('opacity', 0.4);
+
+
+
+            // Update the info below chart
+            getCurrentValues(x.invert(closestPoint));
+            showCurrentValues(currentTooltip, currentValue);
+            
+        }
+
+
+
+  
+    
+        // TODO
+        // restyle the axes/labels/slider based on design
+        // use variables for timing of events
+        // refactor and move one-time animation into setupChart function
+      }
+    });
+  </script>
+
+</polymer-element>
