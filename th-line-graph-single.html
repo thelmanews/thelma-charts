@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-line-graph-single" extends="th-d3-chart" attributes="lineStyle, animateStyle, colors">
+<polymer-element name="th-line-graph-single" extends="th-d3-chart" attributes="chartOptions, colors">
   <template>
     <style>
       :host {
@@ -49,7 +49,7 @@
         -webkit-animation-duration: 3s;
         -webkit-animation-iteration-count: infinite;
         animation-timing-function: linear;
-        fill: none;
+        fill: {{colors.background}};
       }
 
     </style>
@@ -60,37 +60,33 @@
   
   <script>
     Polymer('th-line-graph-single', {
-      lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
-      animateStyle: "draw", // options: raise, draw
+      chartOptions: {
+        lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
+        animateStyle: "draw", // options: raise, draw
+        animateAxis: false, // need to restyle the axis
+        fillArea: true, // TODO: this is not functional yet
+        dataPosition: "left", // options: left, right
+        dataUnit: "bn" // TODO: just a thought -- we could show in small letters next to the large number
+      },
       colors: {
         foreground: "white", // axis color
         background: "#2a94cb", // TODO: make variable to match card background
         accents: ["#1EC4E6","#2D5B8C", "#EDE374"] // line colors
       },
       chartData: [
-        {'label': 2010, 'value': 4 },
-        {'label': 2011, 'value': 8 },
-        {'label': 2012, 'value': 7, 'tooltip': 'This is a tooltip'},
-        {'label': 2013, 'value': 10, 'tooltip': 'This is a tooltip',},
-        {'label': 2014, 'value': 12, 'tooltip': 'This is a tooltip'}
+        {'label': 2010, 'value': 104 },
+        {'label': 2011, 'value': 108 },
+        {'label': 2012, 'value': 107, 'tooltip': 'This is a tooltip'},
+        {'label': 2013, 'value': 110, 'tooltip': 'This is a tooltip',},
+        {'label': 2014, 'value': 112, 'tooltip': 'This is a tooltip'}
       ],
-      config: {animateAxis: false, interpolate: true},
       init: function() {
         var that = this;
         var data = that.chartData, 
-            xMargin = 10,// space btw labels and axis
+            xMargin = 10,// space btw labels and axis 
             yMargin = 30,// space btw labels and axis
             w = that.chartWidth - xMargin*2,
-            h = that.chartHeight + yMargin,
-            series = data.reduce(function(allSeries, dataRow) {
-              for(name in dataRow) {
-                if(['tooltip','label'].indexOf(name)<0 && allSeries.indexOf(name)<0 ) {
-                  allSeries.push(name);
-                }
-              }
-              return allSeries;
-            }, []);      
-
+            h = that.chartHeight + yMargin;
 
         function boundaryValue(property, boundary){ // takes an object where keys are equal to arrays of data objects
           return boundary(data, function(d){
@@ -100,32 +96,27 @@
    
         var maxLabel = boundaryValue("label", d3.max);
         var minLabel = boundaryValue("label", d3.min);
-        var maxValue = d3.max(series.map(function(i){ return boundaryValue(i, d3.max)}));
-        var minValue = d3.min(series.map(function(i){ return boundaryValue(i, d3.min)}));
-
-
-
+        var maxValue = boundaryValue("value", d3.max);
+        var minValue = boundaryValue("value", d3.min);
+        
         var y = d3.scale.linear().domain([minValue, maxValue]).range([yMargin, (h-(yMargin*2)) ]), //30 to make room for the slider
-            x = d3.scale.linear().domain([minLabel, maxLabel]).range([xMargin, (w) ]); 
+            x = d3.scale.linear().domain([minLabel, maxLabel]).range([0, w ]); 
             
         // container
         var chart_svg = that.$.chart;
         var svg = d3.select(chart_svg)
           .attr("width", w)
           .attr("height", h); 
-
      
         var g = svg.append("g")
-          .attr("transform", "translate(0,"+ (h-yMargin) +")");
+          .attr("transform", "translate(0,"+ (h-yMargin/2) +")");
         
         // line data
         var line = d3.svg.line()
           .x(function(d) { return x(d.label); })
-          .y(function(d) { return -y(d.value); }); 
-
-        if(that.config.interpolate) {
-          line.interpolate(that.lineStyle);
-        }
+          .y(function(d) { return -y(d.value); })
+          .interpolate(that.chartOptions.lineStyle);
+        
 
         var startingLine = d3.svg.line()
           .x(function(d) { return x(d.label); })
@@ -135,21 +126,21 @@
         // x-axis
         g.append("line")
           .attr("x1", x(minLabel))
-          .attr("y1", -y(0))
+          .attr("y1", 0)
           .attr("x2", x(maxLabel)) 
-          .attr("y2", -y(0));
-          // .attr("stroke", that.colors.foreground)
-          // .attr("stroke-width", 2);
+          .attr("y2", 0)
+          .attr("stroke", that.colors.foreground)
+          .attr("stroke-width", 2);
         
         // y-axis
         var yAxis = g.append("line")
-          .attr("x1", x(0))
-          .attr("x2", x(0))
-          .attr("y1", function(d) { return that.config.animateAxis ? y(0) : -1 * y(0); }) // Use 0 instead of minValue for default
-          .attr("y2", function(d) { return that.config.animateAxis ? y(0) : -1 * y(maxValue); });
+          .attr("x1", 0)
+          .attr("x2", 0)
+          .attr("y1", function(d) { return that.chartOptions.animateAxis ? y(0) : 0; }) // Use 0 instead of minValue for default
+          .attr("y2", function(d) { return that.chartOptions.animateAxis ? y(0) : -1 * y(maxValue); });
           // .attr("stroke", that.colors.foreground)
           // .attr("stroke-width", 2)
-          // .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
+          // .attr("opacity", function(d) { return that.chartOptions.animateAxis ? 0 : 1; });
 
         // x labels
         g.selectAll(".xLabel")
@@ -169,11 +160,12 @@
           .attr("class", "yLabel")
           .text(String)
           .attr("x", 0)
-          .attr("y", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
+          .attr("y", function(d) { return that.chartOptions.animateAxis ? 0 : -1 * y(d); })
           .attr("text-anchor", "right")
           .attr("dy", 4)
           .attr("fill", that.colors.foreground)
-          .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; })
+          .attr("opacity", function(d) { return that.chartOptions.animateAxis ? 0 : 1; })
+          // .attr("opacity", 0)
           .style("text-anchor", "start");
 
         // x tick marks
@@ -192,14 +184,14 @@
           .data(y.ticks(4)) // TODO: Replace with formula (number of tickmarks)
           .enter().append("line")
           .attr("class", "yTicks")
-          .attr("y1", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
-          .attr("x1", x(-0.2))
-          .attr("y2", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
-          .attr("x2", x(0));
-          // .attr("stroke", that.colors.foreground)
-          // .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
+          .attr("y1", function(d) { return that.chartOptions.animateAxis ? 0 : -1 * y(d); })
+          .attr("x1", 0)
+          .attr("y2", function(d) { return that.chartOptions.animateAxis ? 0 : -1 * y(d); })
+          .attr("x2", w)
+          .attr("stroke", that.colors.foreground)
+          .attr("opacity", function(d) { return that.chartOptions.animateAxis ? 0 : 0.3; });
         
-       
+
         // make variables accessible in other methods
         that.svg = svg;
         that.data = data;
@@ -217,8 +209,8 @@
         that.startingLine = startingLine;
         that.w = w;
         that.h = h;
-        that.series = series;
-
+        that.xMargin = xMargin;
+        that.yMargin = yMargin;
       },
       reset: function() {
         var that = this,
@@ -226,7 +218,7 @@
             svg = that.svg;
         
         // removes the lines, slider and data/tooltips
-        g.selectAll("path, circle").remove();     
+        g.selectAll("path, circle, text").remove();     
         d3.select(that.$.info).selectAll("div, li").remove();  
         svg.selectAll(".slider").remove();   
 
@@ -236,7 +228,6 @@
         var that = this;
         var g = that.g,
             svg = that.svg,
-            series = that.series,
             data = that.data,
             line = that.line,
             x = that.x,
@@ -249,6 +240,8 @@
             yAxis = that.yAxis,
             yLabels = that.yLabels,
             yTicks = that.yTicks,
+            xMargin = that.xMargin,
+            yMargin = that.yMargin,
             h = that.h,
             w = that.w;
 
@@ -266,25 +259,13 @@
 
         function drawLine(data, color, animationStyle){
           var data = that.data
-          // var seriesNameSafe = seriesName.replace(/\s+/g,'_');
-
-          // unable to pass seriesName as parameter to line, so create custom data object for each line
-          // var lineData = data.map(function(datapoint){ 
-          //   return {
-          //     'label': datapoint.label,
-          //     'value': datapoint[seriesName] ? datapoint[seriesName] : 0,
-          //     'tooltip': datapoint.tooltip ? datapoint.tooltip : null
-          //   }
-          // });
 
           if (animationStyle === "draw"){
-            
-          
-
+  
+            // area to fill under line
             var area = d3.svg.area()
               .x(function(d) { return x(d.label); })
-              .y1(function(d) { return -y(d.value); }).interpolate(that.lineStyle);
-
+              .y1(function(d) { return -y(d.value); }).interpolate(that.chartOptions.lineStyle);
 
             g.append("path")
               .datum(data)
@@ -317,22 +298,19 @@
                 //.delay(1000) 
                 .ease("linear")
                 .attr("stroke-dashoffset", 0);
-          } else { // raise style - UGH this isnt working properly anymore.
+          } else { // raise style 
              
             var areaStart = d3.svg.area()
               .x(function(d) { return x(d.label); })
-              // .y0(y(h))
-              .y1(function(d) { return -y(d.value); }).interpolate(that.lineStyle);
-              // .attr("fill", "blue");             
-
-             var area = d3.svg.area()
+              .y1(0).interpolate(that.chartOptions.lineStyle);
+                  
+            var area = d3.svg.area()
               .x(function(d) { return x(d.label); })
-              // .y0(y(h))
-              .y1(function(d) { return -y(d.value); }).interpolate(that.lineStyle);
-              // .attr("fill", "blue");
+              .y1(function(d) { return -y(d.value); })
+              .interpolate(that.chartOptions.lineStyle);
 
             g.append("path")
-              .datum(lineData)
+              .datum(data)
               .attr("class", "area")
               .attr("opacity", 0)
               .attr("fill", color)
@@ -347,16 +325,16 @@
               .attr("opacity", 0.7);
 
 
-             var path = g.selectAll('.dummy').data([seriesNameSafe]).enter().append("path")
-              .attr("d", startingLine(lineData))
+             var path = g.selectAll('.dummy').data(data).enter().append("path")
+              // .attr("d", startingLine(data))
+              .attr("d", line(data))
               .attr("stroke", color)
               .attr("stroke-width", "2.5")
               .attr("fill", "none")
               .attr("opacity", 0);
 
             path.transition()
-              .duration(3000)
-              .attr("d", line(lineData)) 
+              .duration(5000)
               .attr("opacity", 1);
           }
 
@@ -370,14 +348,13 @@
           .attr("stroke-width", 3)
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); })
-
         
         }
 
         function animateAxis(){
           yAxis.transition()
             .duration(1000)
-            .attr("y1", -1 * y(0))
+            .attr("y1", -1 * 0)
             .attr("y2", -1 * y(maxValue))
             .attr("opacity", 1);
 
@@ -393,18 +370,15 @@
             .attr("opacity", 1);
         }
 
-        if(that.config.animateAxis) {
+        if(that.chartOptions.animateAxis) {
           animateAxis();
         }
 
-        // CALL THE DRAWLINES FUNCTION AND PASS IN ALL THE SERIES
-          drawLine(data, that.colors.accents[0], that.animateStyle);
-        
+        // CALL THE DRAWLINES FUNCTION AND PASS IN THE DATA
+        drawLine(data, that.colors.accents[0], that.chartOptions.animateStyle);
 
 
         // FIND THE FIRST TOOLTIP AND SET THAT AS CURRENT POSITION
-
-
         for (var i=0; i<data.length; i++){
           if (data[i].tooltip){
             currentPos = data[i].label;
@@ -412,25 +386,25 @@
             currentValue = data[i].value;
             break;
           } else {
-            currentPos = data[2].label;
-            currentTooltip = data[2].tooltip;
-            currentValue = data[2].value;
+            currentPos = data[0].label;
+            currentTooltip = data[0].tooltip;
+            currentValue = data[0].value;
           }
         }
 
         var data_area = g.append('g').append('text')
-          .attr("font-size", h/2)
-          .attr("x", 20)
-          .attr("y", -h/2.5)
+          .attr("font-size", h/3)
+          .attr("x", function(){
+            return that.chartOptions.dataPosition === "left" ? xMargin : (w-xMargin);
+           })
+          .attr("text-anchor", function(){
+            return that.chartOptions.dataPosition === "left" ? "start" : "end";
+           })
+          .attr("y", -(h/2))
           .attr("fill", that.colors.foreground)
           .attr("opacity", 0.7)
           .text(currentValue);
 
-
-        console.log("^^^^^^^");
-        console.log(currentPos);
-        console.log(currentTooltip);
-        console.log(currentValue);
 
         function getCurrentValues(position, firstTime){
           currentValue;
@@ -458,12 +432,10 @@
             // show value
             data_area.text(value);
             // need to update the line/area so it comes back in front?? 
-
         }
 
         getCurrentValues(currentPos, firstTime=true);
         showCurrentValues(currentTooltip, currentValue);
-
 
         // Slider
         var currentPosX = x(currentPos);  
@@ -486,7 +458,7 @@
             .attr("cx", currentPosX)
             .attr("cy", 12)
             .attr("class", "pulse")
-            .attr("fill", "none")
+            .attr("fill", that.colors.background)
             .attr("stroke", that.colors.foreground)
             .attr("stroke-width", 4.5)
             .call(drag);
@@ -494,12 +466,12 @@
         slider.append('rect')
             .attr('y', 22)
             .attr('x', currentPosX-1.5)
-            .attr("height", y(maxValue)+8)
+            .attr("height", h-36)
             .attr("width", 3)
             .attr('fill', that.colors.foreground)
             .attr('opacity', 0.4);
 
-        var lastPos = slider.select("circle").attr("cx");
+        var lastPosX = slider.select("circle").attr("cx");
         var direction;
         var points = g.selectAll('.circle');
         var closestPoint;  
@@ -519,22 +491,25 @@
               .attr('x', currentPosX-1)
               .attr('opacity', 1);
 
-            
             // determine direction of slide movement
-            if (currentPosX < lastPos){
+            if (currentPosX < lastPosX){
               direction = "left";
-              lastPos = currentPosX;
+              lastPosX = currentPosX;
             } else {
               direction ="right";
-              lastPos = currentPosX;
+              lastPosX = currentPosX;
             }
             
+
+            console.log(direction);
+
             // determine which circles/tooltips are to be displayed
             g.selectAll(".circle")
               .attr("r", function(d){
-                if ( Math.abs(x(d.label) - parseInt(currentPosX)) < 5) {
-                //(x(d.label)<(parseInt(currentPosX)+5)) && (x(d.label)>(parseInt(currentPosX)-5))){ 
+                if ( Math.abs(x(d.label) - parseInt(currentPosX)) < 10) {
+                // (x(d.label)<(parseInt(currentPosX)+5)) && (x(d.label)>(parseInt(currentPosX)-5))){ 
                   currentTooltip = d.tooltip;
+                  currentValue = d.value;
                   return 4;
                 } else {
                   return 0;
@@ -546,14 +521,20 @@
             if (direction == "right"){
               closestPoint = d3.min(points[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx")); 
+
+
                 return (cx - currentPosX >= 0) ? cx : Number.MAX_VALUE  ;
               });
+          
             } else {
               closestPoint = d3.max(points[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx")); 
                 return (cx - currentPosX < 0) ? cx : Number.MIN_VALUE  ;
               });
             }
+
+            console.log("*********");
+            console.log(x.invert(closestPoint));
          
         }
 
@@ -571,22 +552,18 @@
                 .attr('x', closestPoint-1) // adjusted bc of thickness of line
                 .attr('opacity', 0.4);
 
-
-
-            // Update the info below chart
+             // Update the info below chart
             getCurrentValues(x.invert(closestPoint));
             showCurrentValues(currentTooltip, currentValue);
-            
+
         }
 
+        // BUGS
+        // When u click the joystick, it jumps to the last position you let go at
+        // the axis/ margin is funky. do we want to show lines? y labels?
+        // redesign chart options? add option for fill or no fill?
 
 
-  
-    
-        // TODO
-        // restyle the axes/labels/slider based on design
-        // use variables for timing of events
-        // refactor and move one-time animation into setupChart function
       }
     });
   </script>
