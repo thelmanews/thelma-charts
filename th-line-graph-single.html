@@ -120,8 +120,7 @@
 
         var startingLine = d3.svg.line()
           .x(function(d) { return x(d.label); })
-          .y(-yMargin);
-          
+          .y(0).interpolate(that.chartOptions.lineStyle);
         
         // x-axis
         g.append("line")
@@ -262,24 +261,26 @@
 
           if (animationStyle === "draw"){
   
-            // area to fill under line
-            var area = d3.svg.area()
-              .x(function(d) { return x(d.label); })
-              .y1(function(d) { return -y(d.value); }).interpolate(that.chartOptions.lineStyle);
+            if (that.chartOptions.fillArea){
+              // area to fill under line
+              var area = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(function(d) { return -y(d.value); }).interpolate(that.chartOptions.lineStyle);
 
-            g.append("path")
-              .datum(data)
-              .attr("class", "area")
-              .attr("opacity", 0)
-              .attr("fill", color)
-              .transition()
-                .duration(1000) // TODO: make variable?
-                //.delay(1000) 
-                .ease("linear")
-                .attr("stroke-dashoffset", 0)
-              .attr("d", area)
-              .attr("fill", color)
-              .attr("opacity", 0.7);
+              g.append("path")
+                .datum(data)
+                .attr("class", "area")
+                .attr("opacity", 0)
+                .attr("fill", color)
+                .transition()
+                  .duration(1000) // TODO: make variable?
+                  //.delay(1000) 
+                  .ease("linear")
+                  .attr("stroke-dashoffset", 0)
+                .attr("d", area)
+                .attr("fill", color)
+                .attr("opacity", 0.7);
+            }
 
             path = g.selectAll('.dummy').data(data)
               .enter().append("path")
@@ -299,42 +300,42 @@
                 .ease("linear")
                 .attr("stroke-dashoffset", 0);
           } else { // raise style 
-             
-            var areaStart = d3.svg.area()
-              .x(function(d) { return x(d.label); })
-              .y1(0).interpolate(that.chartOptions.lineStyle);
-                  
-            var area = d3.svg.area()
-              .x(function(d) { return x(d.label); })
-              .y1(function(d) { return -y(d.value); })
-              .interpolate(that.chartOptions.lineStyle);
+            
+            if (that.chartOptions.fillArea){ 
+              var areaStart = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(0).interpolate(that.chartOptions.lineStyle);
+                    
+              var area = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(function(d) { return -y(d.value); })
+                .interpolate(that.chartOptions.lineStyle);
 
-            g.append("path")
-              .datum(data)
-              .attr("class", "area")
-              .attr("opacity", 0)
-              .attr("fill", color)
-              .attr("d", areaStart)
-              .transition()
-                .duration(1000) // TODO: make variable?
-                //.delay(1000) 
-                .ease("linear")
-                .attr("stroke-dashoffset", 0)
-              .attr("d", area)
-              .attr("fill", color)
-              .attr("opacity", 0.7);
-
+              g.append("path")
+                .datum(data)
+                .attr("class", "area")
+                .attr("opacity", 0)
+                .attr("fill", color)
+                .attr("d", areaStart)
+                .transition()
+                  .duration(1000)
+                  .ease("linear")
+                  .attr("stroke-dashoffset", 0)
+                .attr("d", area)
+                .attr("fill", color)
+                .attr("opacity", 0.7);
+            }
 
              var path = g.selectAll('.dummy').data(data).enter().append("path")
-              // .attr("d", startingLine(data))
-              .attr("d", line(data))
+              .attr("d", function(){ return that.chartOptions.fillArea ? line(data) : startingLine(data);})
               .attr("stroke", color)
               .attr("stroke-width", "2.5")
               .attr("fill", "none")
-              .attr("opacity", 0);
+              .attr("opacity", function(){ return that.chartOptions.fillArea ? 0 : 1;});
 
             path.transition()
-              .duration(5000)
+              .duration(function(){ return that.chartOptions.fillArea ? 5000 : 1000;})
+              .attr("d", line(data))
               .attr("opacity", 1);
           }
 
