@@ -27,9 +27,20 @@
       .center-background {
         fill: #FFF;
       }
+
+      #data_errors {
+        font-size: 14px;
+        color: red;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
     </style>
 
       <svg id="chart"></svg>
+
+      <ul id="data_errors">
+      </ul>
   </template>
   <script>
 
@@ -148,6 +159,16 @@
               });
 
               this._prevProgress = progress; 
+        },
+        chartSpecificDataValidate: function() {
+          console.log('donut chart validation');
+          var errors = [];
+          console.log(this.chartData.value);
+          if(this.chartData.value === undefined) {
+            errors.push('provide value for chart data e.g. {value: 10}');
+          }
+          console.log(errors);
+          return errors;
         }
         
       });

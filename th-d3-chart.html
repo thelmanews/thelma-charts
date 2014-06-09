@@ -16,20 +16,33 @@
       #chart text {
         font-size: 14px;
       }
+
+      #data-errors {
+        display: none;
+      }
+
     </style>
 
-      <svg id="chart">
-      </svg>
+      
     
   </template>
   <script src="../bower_components/d3/d3.min.js"></script> 
+  <script src="utility.js"></script> 
   <script>
 
-      Polymer('th-d3-chart', {
+      Polymer('th-d3-chart', Platform.mixin({
          chartData: [{label: 'medicaid', value: 20, display_value: '$20'},{label: 'gap', value: 40, display_value: '$40'},{label: 'sub', value: 10, display_value: '$10'}],  // default data just for demo 
          chartWidth: 200,
          chartHeight: 300,
+         observe: {
+           // chartData: this.validateChartData  // this is not working,
+         },
+         chartDataChanged: function() {
+            this.validateChartData(this);
+         },
          extractElementDataPoints : function() {
+
+              //setupMargins();
               var barInfos = this.querySelectorAll('th-data-point');
               var dataFromElements = [];
               [].forEach.call(barInfos, function(dataPointEl) {
@@ -47,7 +60,6 @@
               this.chartData= dataFromElements;
             }
 
-
           },
           validateElementDataPoints : function(data) {
              
@@ -56,7 +68,8 @@
               }
               return true;
           }
-      });
+      }, Thelma.chartValidation));
+
 
   </script>
 
