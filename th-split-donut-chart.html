@@ -1,0 +1,147 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-split-donut-chart" extends="th-d3-chart">
+  <template>
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+
+      #chart text {
+        font-size: 14px;
+      }
+      
+    </style>
+
+      <svg id="chart"></svg>
+  </template>
+  <script>
+
+      Polymer('th-split-donut-chart', {
+        chartData: {value1: 26, value2: 43 },
+        colors: { foreground: "#fff" , background: "#eee", accents: ["#00c3d9", "#00D9BC"]},
+        init: function() {
+          var margin = {
+                top : 8,
+                right : 0,
+                bottom : 10,
+                left : 0,
+                label: 3
+            }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.95 - margin.top - margin.bottom,
+            pi = Math.PI,
+            progress = 0,
+            total = 100,
+            formatPercent = d3.format(".0%"),
+            outerRadius = height*0.39,
+            innerRadius = height*0.25;
+            this._prevProgress = 0;
+
+            this.height = height;
+
+            var foreground, foreground2, text, arc, circle;
+
+
+            arc = d3.svg.arc()
+              .startAngle(0*(Math.PI/180))
+              .endAngle(180*(Math.PI/180))
+              .innerRadius(innerRadius)
+              .outerRadius(outerRadius);
+
+
+            var chart_svg = this.$.chart;
+            var svg = d3.select(chart_svg);
+
+            var container = svg.attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" +(width / 2 ) + "," + (height * 0.4) + ")");
+            
+            var meter = container.append("g")
+                .attr("class", "progress-meter");
+            
+            meter.append("path")
+                .attr("fill", this.colors.foreground)
+                .attr("transform", "rotate(90) scale(-1,-1)")
+                .attr("d", arc);
+            
+            foreground = meter.append("path")
+                .attr("fill", this.colors.accents[0])
+                .attr("stroke", this.colors.accents[0])
+                .attr("transform", "rotate(90) scale(-1,-1)");
+            
+            text = meter.append("text")
+                .attr("fill", this.colors.accents[0])
+                .attr("text-anchor", "middle")
+                .attr("dy", "-1.5em");
+
+
+            meter.append("path")
+                .attr("fill", this.colors.foreground)
+                .attr("transform", "translate(0, 5) rotate(90) scale(1,-1)")
+                .attr("d", arc);
+            
+            foreground2 = meter.append("path")
+                .attr("fill", this.colors.accents[1])
+                .attr("stroke", this.colors.accents[1])
+                .attr("transform", "translate(0, 5) rotate(90) scale(1,-1)");
+            
+            text2 = meter.append("text")
+                .attr("fill", this.colors.accents[1])
+                .attr("text-anchor", "middle")
+                .attr("dy", "2em");
+
+            this.foreground = foreground;
+            this.foreground2 = foreground2;
+            this.formatPercent = formatPercent;
+            this.arc = arc;
+            this.pi = pi;
+            this.text = text;
+            this.text2 = text2;
+
+
+        },
+        reset: function() {
+            
+            
+        },
+        
+        animate: function() {
+
+              var progress = this.chartData.value1;
+              var progress2 = this.chartData.value2;
+              var total = 100;
+              var that = this;
+         
+              var i = d3.interpolate(that._prevProgress/total, progress/total);//d3.event.loaded / total);
+              var j = d3.interpolate(that._prevProgress/total, progress2/total);//d3.event.loaded / total);
+              
+              d3.transition().delay(1000).duration(1000)
+                .tween("progress", function() {
+                  return function(t) {
+                    progress = i(t);
+                    that.foreground.attr("d", that.arc.endAngle(that.pi * progress));
+                    that.text.text(that.formatPercent(progress));
+                  };
+                })
+                .tween("progress2", function() {
+                  return function(t) {
+                    progress2 = j(t);
+                    that.foreground2.attr("d", that.arc.endAngle(that.pi * progress2));
+                    that.text2.text(that.formatPercent(progress2));
+                  };
+                });
+
+              this._prevProgress = progress; 
+
+
+        }
+        
+      });
+
+
+
+  </script>
+</polymer-element>
