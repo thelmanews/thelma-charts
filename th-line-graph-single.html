@@ -252,8 +252,7 @@
         var path;
         var currentPos;
         var currentTooltip;
-        var currentValues;
-        var currentValue = 30;
+        var currentValue;
 
 
         function drawLine(data, color, animationStyle){
@@ -425,14 +424,15 @@
         }
 
         function showCurrentValues(tooltipInfo, value){
-          // show tooltip 
+            // show tooltip 
             tooltip.transition() 
                 .duration(100)      
                 .style("opacity", 1);      
             tooltip.html(tooltipInfo);  
+            
             // show value
             data_area.text(value);
-            // need to update the line/area so it comes back in front?? 
+            
         }
 
         getCurrentValues(currentPos, firstTime=true);
@@ -481,6 +481,7 @@
 
             // move the circle
             d3.select(this)
+
               .attr("class", "")
               .attr("cx", d.x = Math.max(0, Math.min(w, d3.event.x))); 
        
@@ -502,8 +503,6 @@
             }
             
 
-            console.log(direction);
-
             // determine which circles/tooltips are to be displayed
             g.selectAll(".circle")
               .attr("r", function(d){
@@ -522,8 +521,6 @@
             if (direction == "right"){
               closestPoint = d3.min(points[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx")); 
-
-
                 return (cx - currentPosX >= 0) ? cx : Number.MAX_VALUE  ;
               });
           
@@ -534,9 +531,6 @@
               });
             }
 
-            console.log("*********");
-            console.log(x.invert(closestPoint));
-         
         }
 
         function dragEnd() {
@@ -562,7 +556,7 @@
         // BUGS
         // When u click the joystick, it jumps to the last position you let go at
         // the axis/ margin is funky. do we want to show lines? y labels?
-        // redesign chart options? add option for fill or no fill?
+      
 
 
       }
