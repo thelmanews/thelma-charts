@@ -165,11 +165,11 @@
               currentVal = this.chartData.value;
 
           if(currentVal === undefined) {
-            errors.push({inputVal: currentVal, msg: 'Please provide a value for the chart.'});
+            errors.push({input: currentVal, msg: 'Please provide a value for the chart.'});
           } else if (currentVal > 100 || currentVal < 1){
             errors.push({ inputVal: currentVal, 
                           msg: currentVal + ' is invalid. You must enter a number between 1 and 100.', 
-                          correctVal: (function(){ return currentVal > 100 ? 100 : 1; })()});
+                          corrected: (function(){ return currentVal > 100 ? 100 : 1; })()});
           }
           
           return errors;

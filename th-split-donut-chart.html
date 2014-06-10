@@ -130,7 +130,7 @@
                   
                   return function(t) {
                     var progress = i(t);
-                    console.log(progress);
+                    
                     meter.selectAll("text.label").text(function(d){
                       return progress > d/total ? that.formatPercent(d/total) : that.formatPercent(progress);
                     
@@ -139,8 +139,9 @@
                     return that.arc.endAngle(that.pi * progress)();
                     
                   };
+                  this._prevProgress = progress; 
                 })
-              this._prevProgress = progress; 
+              
 
 
         }
