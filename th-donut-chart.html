@@ -161,13 +161,17 @@
               this._prevProgress = progress; 
         },
         chartSpecificDataValidate: function() {
-          console.log('donut chart validation');
-          var errors = [];
-          console.log(this.chartData.value);
-          if(this.chartData.value === undefined) {
-            errors.push('provide value for chart data e.g. {value: 10}');
+          var errors = [],
+              currentVal = this.chartData.value;
+
+          if(currentVal === undefined) {
+            errors.push({inputVal: currentVal, msg: 'Please provide a value for the chart.'});
+          } else if (currentVal > 100 || currentVal < 1){
+            errors.push({ inputVal: currentVal, 
+                          msg: currentVal + ' is invalid. You must enter a number between 1 and 100.', 
+                          correctVal: (function(){ return currentVal > 100 ? 100 : 1; })()});
           }
-          console.log(errors);
+          
           return errors;
         }
         

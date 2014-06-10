@@ -17,6 +17,7 @@ Thelma.chartValidation = {
 		console.log(' ---- chart validation ---- ')
 
 		var errors = polymerObject.errors;
+		var i = 0;
 		if(!polymerObject.chartData) {
 			errors.push('no chart data');
 		}
@@ -24,11 +25,15 @@ Thelma.chartValidation = {
 		console.log(errors);
 
 		if(errors.length>0) {
-			console.log(polymerObject.$.chart);
-			polymerObject.$.chart.style.opacity = 0.5;
-			polymerObject.$.data_errors.innerHTML = errors[0];
-			polymerObject.$.data_errors.style.display = 'block';
+			polymerObject.$.chart.style.opacity = 0.5; // this is for testing
+			polymerObject.$.data_errors.style.display = 'block'; // this is for testing
+			
+			for (i; i < errors.length; i++){
+				polymerObject.$.data_errors.innerHTML = errors[i].msg; // this is for testing
+				polymerObject.asyncFire('error', errors[i]); // where error is an object containing details
+			}
 		}
+		
 
 	},
 	chartSpecificDataValidate: function() {
