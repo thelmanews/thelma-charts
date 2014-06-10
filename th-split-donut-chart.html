@@ -2,26 +2,11 @@
 <link rel="import" href="th-d3-chart.html">
 
 <polymer-element name="th-split-donut-chart" extends="th-d3-chart">
-  <template>
-    <style>
 
-      :host {
-        display: inline-block;
-        position: relative;
-      }
-
-      #chart text {
-        font-size: 14px;
-      }
-      
-    </style>
-
-      <svg id="chart"></svg>
-  </template>
   <script>
 
       Polymer('th-split-donut-chart', {
-        chartData: {value1: 26, value2: 43 }, // BUG: this only works when then smaller value comes first; otherwise the labels appear the same.
+        chartData: [{value: 26}, {value: 43}], // BUG: this only works when then smaller value comes first; otherwise the labels appear the same.
         colors: { foreground: "#fff" , background: "#eee", accents: ["#00c3d9", "#1f77b4"]},
         init: function() {
           var that = this,
@@ -44,7 +29,7 @@
             
             that.height = height;
             
-            var data = [that.chartData.value1, that.chartData.value2];
+            var data = [that.chartData[0].value, that.chartData[1].value];
             var foreground, text, arc;
 
             arc = d3.svg.arc()
@@ -118,32 +103,46 @@
         },
         
         animate: function() {
-              
-              var total = 100;
-              var that = this;
-              var data = this.data;
-              var meter = this.meter;
+            var total = 100;
+            var that = this;
+            var data = this.data;
+            var meter = this.meter;
 
-              meter.selectAll("path.foreground").transition().delay(1000).duration(1000)
-                .attrTween('d', function(d){
-                  var i = d3.interpolate(that._prevProgress/total, d/total);
+            meter.selectAll("path.foreground").transition().delay(1000).duration(1000)
+              .attrTween('d', function(d){
+                var i = d3.interpolate(that._prevProgress/total, d/total);
+                
+                return function(t) {
+                  var progress = i(t);
                   
-                  return function(t) {
-                    var progress = i(t);
-                    
-                    meter.selectAll("text.label").text(function(d){
-                      return progress > d/total ? that.formatPercent(d/total) : that.formatPercent(progress);
-                    
-                    })
+                  meter.selectAll("text.label").text(function(d){
+                    return progress > d/total ? that.formatPercent(d/total) : that.formatPercent(progress);
+                  })
 
-                    return that.arc.endAngle(that.pi * progress)();
-                    
-                  };
-                  this._prevProgress = progress; 
-                })
-              
+                  return that.arc.endAngle(that.pi * progress)();
+                  
+                };
+                this._prevProgress = progress; 
+              })
+        },
+        chartSpecificDataValidate: function() {
+          // There should be two values.
+          // Each value should be between 1 and 100.
 
+          var errors = [],
+              numOfSets = this.chartData.length;
+                  
+              if(numOfSets != 2) {
+                errors.push({input: numOfSets, msg: 'Please provide exactly two values for this chart.'});
+              } else {
+                for (var i=0; i < numOfSets; i++){
+                  if (this.chartData[i].value > 100 || this.chartData[i].value < 1) {
+                    errors.push({ input: this.chartData[i].value, msg: 'Values must be between 1 and 100' });
+                  }
+                }
+              }
 
+          return errors;
         }
         
       });

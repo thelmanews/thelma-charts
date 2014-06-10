@@ -25,9 +25,9 @@ Thelma.chartValidation = {
 		console.log(errors);
 
 		if(errors.length>0) {
-			
 			polymerObject.$.chart.style.opacity = 0.5; // this is for testing
 			polymerObject.$.data_errors.style.display = 'block'; // this is for testing
+			
 			for (i; i < errors.length; i++){	
 				polymerObject.$.data_errors.appendChild(document.createElement('li')).innerHTML = errors[i].msg; // this is for testing
 				polymerObject.asyncFire('error', errors[i]); // where error is an object containing details
