@@ -117,7 +117,45 @@
 		            return (Math.floor(i / _data.elementsPerRow)) * (_data.dim.height) + 5;
 		        })
 
-		}
+		},
+		chartSpecificDataValidate: function() {
+          // There should be data
+          // There should be two sets
+          // Each set should have at least a value and image
+          
+          var errors = [],
+              numOfSets = this.chartData.length,
+              valuesCheck = true,
+              imageCheck = true;
+
+              console.log("^^^^^^^^^");
+              console.log(numOfSets);
+
+
+          for (var i=0; i < numOfSets; i++){
+          	if (!this.chartData[i].value){ 
+          		valuesCheck = false; 
+          	}
+          	if (!this.chartData[i].image){ 
+          		imageCheck = false; 
+          	}
+          }
+							console.log(valuesCheck);
+              console.log(imageCheck);
+          if(numOfSets != 2) {
+            errors.push({input: numOfSets, msg: 'Please provide two comparison sets for this chart.'});
+          } else {
+          		if (!valuesCheck){
+            		errors.push({ input: this.chartData, msg: 'You must include a value for each set.'});
+          		}
+          		if (!imageCheck){
+          			errors.push({ input: this.chartData, msg: 'You must include an image for each set.'});	
+          		}
+        	}
+        
+          return errors;
+        }
+		  
 		  
 		});
 
