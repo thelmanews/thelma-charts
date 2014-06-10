@@ -101,7 +101,46 @@
 		        .style('opacity', 1)
 		        .attr('y', function(d) {return y(d.total) + 12 }); //12: font size
 
-		  }
+		  },
+		  chartSpecificDataValidate: function() {
+		  		// There should be at least one set.
+		  		// Each set should have a label and value.
+		  		// There cannot be negative numbers.
+
+          var errors = [],
+              numOfSets = this.chartData.length,
+              valuesCheck = true,
+              labelsCheck = true,
+              positivesCheck = true;
+
+          for (var i=0; i < numOfSets; i++){
+          	if (!this.chartData[i].value){ 
+          		valuesCheck = false; 
+          	} else if (this.chartData[i].value < 0){
+          		positivesCheck = false;
+          	}
+          	if (!this.chartData[i].label){ 
+          		labelsCheck = false; 
+          	}
+          }
+							
+          if(numOfSets === 0) {
+            errors.push({input: numOfSets, msg: 'Please include at least one value and label.'});
+          } else {
+          		if (!valuesCheck){
+            		errors.push({ input: this.chartData, msg: 'You must include a value for each set.'});
+          		}
+          		if (!labelsCheck){
+          			errors.push({ input: this.chartData, msg: 'You must include an label for each value.'});	
+          		}
+          		if (!positivesCheck){
+          			errors.push({ input: this.chartData, msg: 'You cannot have any negative values.'});	
+          		}
+        	}
+        
+          return errors;
+        }
+		  
 		  
 		});
 
