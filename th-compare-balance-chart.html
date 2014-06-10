@@ -215,7 +215,38 @@
 	            return d3.interpolateString(that.holderTranslate + ' rotate(' + fromAngle + ')', that.holderTranslate + '  rotate(' + toAngle + ')');
 	        }
 
-	    }
+	    },
+  		chartSpecificDataValidate: function() {
+      // There should be data
+      // There should be two sets
+      // Each set should have at least a count and image
+      
+      var errors = [],
+          numOfSets = this.chartData.length,
+          valuesCheck = true,
+          imageCheck = true;
+
+      for (var i=0; i < numOfSets; i++){
+      	if (!this.chartData[i].count){ 
+      		valuesCheck = false; 
+      	}
+      	if (!this.chartData[i].image){ 
+      		imageCheck = false; 
+      	}
+      }
+					
+      if(numOfSets != 2) {
+        errors.push({input: numOfSets, msg: 'Please provide two comparison sets for this chart.'});
+      } else {
+      		if (!valuesCheck){
+        		errors.push({ input: this.chartData, msg: 'You must include a value for each set.'});
+      		}
+      		if (!imageCheck){
+      			errors.push({ input: this.chartData, msg: 'You must include an image for each set.'});	
+      		}
+    	}
+      return errors;
+    }
 		  
 	});
 

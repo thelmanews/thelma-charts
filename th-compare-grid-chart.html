@@ -128,10 +128,6 @@
               valuesCheck = true,
               imageCheck = true;
 
-              console.log("^^^^^^^^^");
-              console.log(numOfSets);
-
-
           for (var i=0; i < numOfSets; i++){
           	if (!this.chartData[i].value){ 
           		valuesCheck = false; 
@@ -140,8 +136,7 @@
           		imageCheck = false; 
           	}
           }
-							console.log(valuesCheck);
-              console.log(imageCheck);
+							
           if(numOfSets != 2) {
             errors.push({input: numOfSets, msg: 'Please provide two comparison sets for this chart.'});
           } else {
