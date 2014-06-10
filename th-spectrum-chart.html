@@ -146,7 +146,46 @@
 		        this.values.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
 		        .style('opacity', 1);
 
-		  }
+		  },
+		  chartSpecificDataValidate: function() {
+		  		// There should be at least one range of values.
+		  		// Each range should have a min and max value.
+		  		// The max value should always be larger than the min.
+
+          var errors = [],
+              numOfSets = this.chartData.length,
+              valuesCheck = true,
+              labelsCheck = true,
+              minMaxCheck = true;
+
+          for (var i=0; i < numOfSets; i++){
+          	if (!this.chartData[i].range.min.value || !this.chartData[i].range.max.value){ 
+          		valuesCheck = false; 
+          	} 
+          	if (!this.chartData[i].label){ 
+          		labelsCheck = false; 
+          	}
+          	if (this.chartData[i].range.min.value > this.chartData[i].range.max.value) {
+          		minMaxCheck = false;
+          	}
+          }
+							
+          if(numOfSets === 0) {
+            errors.push({input: numOfSets, msg: 'Please include at least one value range and label.'});
+          } else {
+          		if (!valuesCheck){
+            		errors.push({ input: this.chartData, msg: 'You must include a min and max value for each datapoint.'});
+          		}
+          		if (!labelsCheck){
+          			errors.push({ input: this.chartData, msg: 'You must include a label for each range.'});	
+          		}
+          		if (!minMaxCheck){
+          			errors.push({ input: this.chartData, msg: 'Max value must be greater than min value.'});	
+          		}
+        	}
+        
+          return errors;
+        }
 		  
 		});
 	</script>

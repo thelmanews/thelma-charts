@@ -108,23 +108,33 @@
 
 		  },
 		  chartSpecificDataValidate: function() {
+          // There should be at least value.
+          // There should be a label and value for every bar.
+
           var errors = [],
               numOfBars = this.chartData.length,
-              valuesCheck = true;
+              valuesCheck = true,
+              labelsCheck = true;
 
           for (var i=0; i < numOfBars; i++){
           	if (!this.chartData[i].value){ 
           		valuesCheck = false; 
           	}
+          	if (!this.chartData[i].label){ 
+          		labelsCheck = false; 
+          	}
           }
 
           if(numOfBars === 0) {
             errors.push({input: numOfBars, msg: 'Please provide at least one value for the chart.'});
-          } else if (!valuesCheck){
-            errors.push({ input: this.chartData, msg: 'You must include a value for every bar.'});
-          }
-          
-					// can also check to see if values are valid (i.e. numbers and not strings)
+          } else {
+          	if (!valuesCheck){
+            	errors.push({ input: this.chartData, msg: 'You must include a value for every bar.'});
+          	}
+          	if (!labelsCheck){
+            	errors.push({ input: this.chartData, msg: 'You must include a label for every bar.'});
+          	}
+        	}
 
           return errors;
         }
