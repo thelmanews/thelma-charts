@@ -103,39 +103,32 @@
 
 		  },
 		  chartSpecificDataValidate: function() {
-		  		// There should be at least one set.
-		  		// Each set should have a label and value.
-		  		// There cannot be negative numbers.
 
           var errors = [],
-              numOfSets = this.chartData.length,
-              valuesCheck = true,
-              labelsCheck = true,
-              positivesCheck = true;
+              numOfSets = this.chartData.length;
 
-          for (var i=0; i < numOfSets; i++){
-          	if (!this.chartData[i].value){ 
-          		valuesCheck = false; 
-          	} else if (this.chartData[i].value < 0){
-          		positivesCheck = false;
-          	}
-          	if (!this.chartData[i].label){ 
-          		labelsCheck = false; 
-          	}
-          }
-							
+          // There should be at least one set.
           if(numOfSets === 0) {
             errors.push({input: numOfSets, msg: 'Please include at least one value and label.'});
           } else {
-          		if (!valuesCheck){
+            for (var i=0; i < numOfSets; i++){
+          		
+              // Each set should have a value.
+              if (!this.chartData[i].value){ 
             		errors.push({ input: this.chartData, msg: 'You must include a value for each set.'});
-          		}
-          		if (!labelsCheck){
+          		} 
+
+              // There cannot be negative numbers.
+              if (this.chartData[i].value < 0){
+                errors.push({ input: this.chartData, msg: 'You cannot have any negative values.'}); 
+              }
+          		
+              // Each set should have a label.
+              if (!this.chartData[i].label){ 
           			errors.push({ input: this.chartData, msg: 'You must include an label for each value.'});	
           		}
-          		if (!positivesCheck){
-          			errors.push({ input: this.chartData, msg: 'You cannot have any negative values.'});	
-          		}
+          		
+            }
         	}
         
           return errors;

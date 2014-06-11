@@ -108,32 +108,26 @@
 
 		  },
 		  chartSpecificDataValidate: function() {
-          // There should be at least value.
-          // There should be a label and value for every bar.
-
+        
           var errors = [],
-              numOfBars = this.chartData.length,
-              valuesCheck = true,
-              labelsCheck = true;
+              numOfBars = this.chartData.length;
 
-          for (var i=0; i < numOfBars; i++){
-          	if (!this.chartData[i].value){ 
-          		valuesCheck = false; 
-          	}
-          	if (!this.chartData[i].label){ 
-          		labelsCheck = false; 
-          	}
-          }
-
+          // There should be at least value.
           if(numOfBars === 0) {
             errors.push({input: numOfBars, msg: 'Please provide at least one value for the chart.'});
           } else {
-          	if (!valuesCheck){
-            	errors.push({ input: this.chartData, msg: 'You must include a value for every bar.'});
-          	}
-          	if (!labelsCheck){
-            	errors.push({ input: this.chartData, msg: 'You must include a label for every bar.'});
-          	}
+            for (var i=0; i < numOfBars; i++){
+              
+              // There should be a value for every bar.
+            	if (!this.chartData[i].value){ 
+              	errors.push({ input: this.chartData, msg: 'You must include a value for every bar.'});
+            	}
+              
+              // There should be a label for every bar.
+            	if (!this.chartData[i].label){ 
+              	errors.push({ input: this.chartData, msg: 'You must include a label for every bar.'});
+            	}
+            }
         	}
 
           return errors;

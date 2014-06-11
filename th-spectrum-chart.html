@@ -148,40 +148,28 @@
 
 		  },
 		  chartSpecificDataValidate: function() {
-		  		// There should be at least one range of values.
-		  		// Each range should have a min and max value.
-		  		// The max value should always be larger than the min.
 
           var errors = [],
-              numOfSets = this.chartData.length,
-              valuesCheck = true,
-              labelsCheck = true,
-              minMaxCheck = true;
+              numOfSets = this.chartData.length;
 
-          for (var i=0; i < numOfSets; i++){
-          	if (!this.chartData[i].range.min.value || !this.chartData[i].range.max.value){ 
-          		valuesCheck = false; 
-          	} 
-          	if (!this.chartData[i].label){ 
-          		labelsCheck = false; 
-          	}
-          	if (this.chartData[i].range.min.value > this.chartData[i].range.max.value) {
-          		minMaxCheck = false;
-          	}
-          }
-							
+					// There should be at least one range of values.
           if(numOfSets === 0) {
             errors.push({input: numOfSets, msg: 'Please include at least one value range and label.'});
           } else {
-          		if (!valuesCheck){
+          	for (var i=0; i < numOfSets; i++){
+          		// Each range should have a min and max value.
+          		if (!this.chartData[i].range.min.value || !this.chartData[i].range.max.value){ 
             		errors.push({ input: this.chartData, msg: 'You must include a min and max value for each datapoint.'});
           		}
-          		if (!labelsCheck){
+          		// Each range should have a label.
+          		if (!this.chartData[i].label){ 
           			errors.push({ input: this.chartData, msg: 'You must include a label for each range.'});	
           		}
-          		if (!minMaxCheck){
+          		// The max value should always be larger than the min.
+          		if (this.chartData[i].range.min.value > this.chartData[i].range.max.value) {
           			errors.push({ input: this.chartData, msg: 'Max value must be greater than min value.'});	
           		}
+          	}
         	}
         
           return errors;

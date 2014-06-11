@@ -126,15 +126,16 @@
               })
         },
         chartSpecificDataValidate: function() {
-          // There should be two values.
-          // Each value should be between 1 and 100.
 
           var errors = [],
               numOfSets = this.chartData.length;
-                  
+              
+              // There should be two values.    
               if(numOfSets != 2) {
                 errors.push({input: numOfSets, msg: 'Please provide exactly two values for this chart.'});
               } else {
+
+                // Each value should be between 1 and 100.
                 for (var i=0; i < numOfSets; i++){
                   if (this.chartData[i].value > 100 || this.chartData[i].value < 1) {
                     errors.push({ input: this.chartData[i].value, msg: 'Values must be between 1 and 100' });

@@ -1,4 +1,4 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+  <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
 <polymer-element name="th-compare-balance-chart" extends="th-d3-chart">
@@ -217,33 +217,24 @@
 
 	    },
   		chartSpecificDataValidate: function() {
-      // There should be data
-      // There should be two sets
-      // Each set should have at least a count and image
-      
+     
       var errors = [],
-          numOfSets = this.chartData.length,
-          valuesCheck = true,
-          imageCheck = true;
-
-      for (var i=0; i < numOfSets; i++){
-      	if (!this.chartData[i].count){ 
-      		valuesCheck = false; 
-      	}
-      	if (!this.chartData[i].image){ 
-      		imageCheck = false; 
-      	}
-      }
-					
+          numOfSets = this.chartData.length;
+          
+      // There should be two sets of data					
       if(numOfSets != 2) {
         errors.push({input: numOfSets, msg: 'Please provide two comparison sets for this chart.'});
       } else {
-      		if (!valuesCheck){
+        for (var i=0; i < numOfSets; i++){  
+          // Each set should have a count
+      		if (!this.chartData[i].count){ 
         		errors.push({ input: this.chartData, msg: 'You must include a value for each set.'});
       		}
-      		if (!imageCheck){
+          // Each set should have an image
+      		if (!this.chartData[i].image){ 
       			errors.push({ input: this.chartData, msg: 'You must include an image for each set.'});	
       		}
+        }
     	}
       return errors;
     }
