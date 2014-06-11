@@ -18,9 +18,9 @@
               bottom : 20,
               left : 0,
               label: 3
-          }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.55 - margin.top - margin.bottom
-             ,textLabelMargin = height*0.05;
-
+          }, 
+          width = this.chartWidth*0.95 - margin.left - margin.right, 
+          height = this.chartHeight*0.55 - margin.top - margin.bottom;
           this.height = height;
 
           // peak declarations
@@ -34,7 +34,6 @@
           var peakLine = d3.svg.line()
               .x(function(d) { return d.x; })
               .y(function(d) { return -d.y; });
-              
           this.peakLine = peakLine;
           this.peakLineStart = peakLineStart;
 
@@ -56,21 +55,18 @@
 
           y.domain([0, max]); 
           x.domain(this.chartData.map(function(d) {
-                return d.label;
+            return d.label;
           }));
  
-
           // transform chartData for paths
-          var peakData = []; // an array of arrays. Each array is a set of objects with coordinates for each peak.
           var lastEdge = 0;
-          for (var i=0; i<this.chartData.length; i++){
-            var coordinates = [];
-            coordinates.push({ x: lastEdge, y: -height}); 
-            coordinates.push({ x: lastEdge + peakWidth, y: -height});
-            coordinates.push({ x: lastEdge + peakWidth/2, y: -height+y(this.chartData[i].value)}); 
+          var peakData = this.chartData.map(function(i){
+            var coordinates = [{ x: lastEdge, y: -height},
+                               {x: lastEdge + peakWidth, y: -height},
+                               { x: lastEdge + peakWidth/2, y: -height+y(i.value)}];
             lastEdge = lastEdge + (peakWidth/overlap)/overlap;
-            peakData.push(coordinates);
-          }
+            return coordinates;
+          });
 
           // append peaks
           this.peaks = this.container.selectAll('.peak')
