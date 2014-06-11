@@ -1,67 +1,104 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-n-bar-chart" extends="th-d3-chart">
+<polymer-element name="th-n-bar-chart-horizontal" extends="th-d3-chart">
 
 	<script>
 
 
-		Polymer('th-n-bar-chart', {
+		Polymer('th-n-bar-chart-horizontal', {
 		  chartData: [
 		    {label: 'Player', value: 15, display_value: '$15'},
 		    {label: 'Vendor', value: 20, display_value: '$20'},
 		    {label: 'Mascot', value: 45, display_value: '$45'}
 		  ],
 		  init: function() {
-		    var margin = {
-		          top : 15,
-		          right : 0,
-		          bottom : 20,
-		          left : 0,
-		          label: 3
-		      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.55 - margin.top - margin.bottom
-		         , barWidth = width* 0.12 , textLabelMargin = height*0.05;
+		    
+		  	  var that = this;
+		  	  
+		  	  that.dims = that.setupDimensions(that);
 
-		      this.height = height;
+	    	  var margin = that.dims.margin,
+	    	  	  width = that.dims.width,
+	    	      height = that.dims.height;
+		      
 
-		      this.extractElementDataPoints();
-
-		      var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+		      //that.extractElementDataPoints(); //needed?
 
 
-		      var y = d3.scale.linear().range([0, height]);
-		      this.y = y;
+		      var chart_svg = that.$.chart;
 
-		      var chart_svg = this.$.chart;
 
-		      var colors = d3.scale.category10();
-		      colors.domain(this.chartData.length);
+		      //creating all the svg items
+		      that.svg = d3.select(chart_svg);
 
-		      this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
-		          .attr('height', height + margin.top + margin.bottom)
+		      that.container = that.svg
+		          .selectAll('.container')
+		          .data([1])
+		          .enter()
 		          .append('g')
-		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-		      //TODO replace with d3.max
-		      var max = d3.max(this.chartData, function(d) {return d.value});
-
-		      y.domain([0, max]); 
-		      x.domain(this.chartData.map(function(d) {
-		            return d.label;
-		      }));
-
+		          .attr('class','container');
 
 		      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
-		      //console.log(this.bars);
+
+		      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+
+		      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+
+
+		      // this is independent of size but dependent on data
+		      that.labels.text(function(d) {return d.label;});
+		      that.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+		      // creating scales
+		      var scales = that.simpleScaleBuilder(width, height, that.chartData);
+
+		      var x = scales.x;
+		      var y = scales.y;
+		      var colors = scales.colors;
+
+		      // is there a better way than exposing these?!
+		      that.y = y;
+		      that.x = x;
+		      that.colors = colors;
+
+
+		      //setting sizes
+		      that._setElementSizes();
+
+
+
+
+
+		  },
+		  //TODO make it really private
+		  _setElementSizes: function() {
+
+		  	  var that = this;
+
+	    	  var margin = that.dims.margin,
+		    	  width = that.dims.width,
+		    	  height = that.dims.height,
+		    	  colors = that.colors,
+		    	  x = that.x,
+		    	  y = that.y;
+
+			  that.svg
+		      	.attr('width', width + margin.left + margin.right)
+		        .attr('height', height + margin.top + margin.bottom);
+
+		      // setting up the size. needed for resizing
+		      that.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		      
 		      this.bars
 		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
 		        .attr('x', function(d) { return x(d.label); })
 		        .attr('y', function(d) { return height; })
-		        .attr('width',barWidth)
+		        .attr('width',that.dims.barWidth)
 		        .attr('height', 0);
 
 		      
-		      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
 		      //console.log(this.bars);
 		      this.labels
 		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
@@ -69,69 +106,135 @@
 		        .style('text-anchor','left')
 		        .attr('x', function(d) { return x(d.label); })
 		        .attr('y', height + 12) //12: font size
-		        .text(function(d) {return d.label;});
 		      
-		      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
 		      //console.log(this.bars);
 		      this.values
 		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
 		        .style('text-anchor','middle')
 		        //.style('opacity', 0)
-		        .attr('x', function(d) { return x(d.label) + barWidth/2; })
-		        .attr('y', height) //12: font size
-		        .text(function(d) {return d.display_value ? d.display_value : d.value ;});
-
-
+		        .attr('x', function(d) { return x(d.label) + that.dims.barWidth/2; })
+		        .attr('y', height);
 		        
 
-
 		  },
+
+
 		  reset: function() {
 		      
 		      var height= this.height;
-		      this.bars.transition().duration(this.animationDelay).attr('y', height).attr('height', 0);
-		      this.values.transition().duration(this.animationDelay).attr('y', height );
+		      this.bars.attr('y', height).attr('height', 0);
+		      this.values.attr('y', height );
 		      
 		  },
 		  
 		  animate: function() {
 
-		        var y = this.y;
-		        var height= this.height;
-		        this.bars.transition().duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
-		        .attr('y', function(d) { console.log(d.value); return height-y(d.value);})
+		  		var that = this;
+
+		        var y = that.y;
+		        var height= that.dims.height;
+		        this.bars.transition().duration(this.animationDelay)
+		        .attr('y', function(d) { console.log(d.value); console.log(height); console.log(y(d.value)); return height-y(d.value);})
 		        .attr('height', function(d) {return y(d.value)});
 		        
-		        this.values.transition(this.animationDelay).duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        this.values.transition(this.animationDelay).duration(this.animationDelay)
 		        //.style('opacity', 1)
 		        .attr('y', function(d) {return height - y(d.value) - 2;});
 
 		  },
+
+		  resize: function() {
+		  	  
+		  	  var that = this;
+		  	  
+		  	  that.dims = that.setupDimensions(that);
+
+	    	  var margin = that.dims.margin,
+	    	  	  width = that.dims.width,
+	    	      height = that.dims.height;
+
+	    	  var scales = that.simpleScaleBuilder(width, height, that.chartData);
+
+		      var x = scales.x;
+		      var y = scales.y;
+		      var colors = scales.colors;
+
+		      // is there a better way than exposing these?!
+		      that.y = y;
+		      that.x = x;
+		      that.colors = colors;
+
+
+		      //setting sizes
+		      that._setElementSizes();
+
+		     // that.reset();
+		      that.animate();
+
+
+		  },
+
+		  updateData: function() {
+
+		  	console.log('UPDATE DATA');
+
+		  	  var that = this;
+
+		  	  //TODO these don't do anything unless dimensions are set
+		      that.bars.data(that.chartData).enter().append('rect').attr('class','bar');
+		      that.labels.data(that.chartData).enter().append('text').attr('class','label');
+		      that.values.data(that.chartData).enter().append('text').attr('class','value');
+
+		      //TODO exit
+
+		      console.log(that.chartData);
+		      var scales = that.simpleScaleBuilder(that.dims.width, that.dims.height, that.chartData);
+
+
+		      var x = scales.x;
+		      var y = scales.y;
+		      var colors = scales.colors;
+
+		      // is there a better way than exposing these?!
+		      that.y = y;
+		      that.x = x;
+		      that.colors = colors;
+
+
+		      // this is independent of size but dependent on data
+		      that.labels.text(function(d) {return d.label;});
+		      that.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+		      //that.reset();
+		      that.animate();
+
+		  },
+
 		  chartSpecificDataValidate: function() {
-        
-          var errors = [],
-              numOfBars = this.chartData.length;
+	    
+		      var errors = [],
+		          numOfBars = this.chartData.length;
 
-          // There should be at least value.
-          if(numOfBars === 0) {
-            errors.push({input: numOfBars, msg: 'Please provide at least one value for the chart.'});
-          } else {
-            for (var i=0; i < numOfBars; i++){
-              
-              // There should be a value for every bar.
-            	if (!this.chartData[i].value){ 
-              	errors.push({ input: this.chartData, msg: 'You must include a value for every bar.'});
-            	}
-              
-              // There should be a label for every bar.
-            	if (!this.chartData[i].label){ 
-              	errors.push({ input: this.chartData, msg: 'You must include a label for every bar.'});
-            	}
-            }
-        	}
+		      // There should be at least value.
+		      if(numOfBars === 0) {
+		        errors.push({input: numOfBars, msg: 'Please provide at least one value for the chart.'});
+		      } else {
+		        for (var i=0; i < numOfBars; i++){
+		          
+		          // There should be a value for every bar.
+		        	if (!this.chartData[i].value){ 
+		          	errors.push({ input: this.chartData, msg: 'You must include a value for every bar.'});
+		        	}
+		          
+		          // There should be a label for every bar.
+		        	if (!this.chartData[i].label){ 
+		          	errors.push({ input: this.chartData, msg: 'You must include a label for every bar.'});
+		        	}
+		        }
+		      }
 
-          return errors;
-        }
+	          return errors;
+	       }
 		  
 		});
 
