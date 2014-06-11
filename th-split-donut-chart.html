@@ -2,34 +2,13 @@
 <link rel="import" href="th-d3-chart.html">
 
 <polymer-element name="th-split-donut-chart" extends="th-d3-chart">
-<<<<<<< HEAD
+
 
   <script>
 
       Polymer('th-split-donut-chart', {
         chartData: [{value: 26}, {value: 43}], // BUG: this only works when then smaller value comes first; otherwise the labels appear the same.
-=======
-  <template>
-    <style>
 
-      :host {
-        display: inline-block;
-        position: relative;
-      }
-
-      #chart text {
-        font-size: 14px;
-      }
-      
-    </style>
-
-      <svg id="chart"></svg>
-  </template>
-  <script>
-
-      Polymer('th-split-donut-chart', {
-        chartData: {value1: 26, value2: 43 }, // BUG: this only works when then smaller value comes first; otherwise the labels appear the same.
->>>>>>> d74b60e8db176c4c80d83467d7bea16965bca4dc
         colors: { foreground: "#fff" , background: "#eee", accents: ["#00c3d9", "#1f77b4"]},
         init: function() {
           var that = this,
@@ -52,11 +31,8 @@
             
             that.height = height;
             
-<<<<<<< HEAD
             var data = [that.chartData[0].value, that.chartData[1].value];
-=======
-            var data = [that.chartData.value1, that.chartData.value2];
->>>>>>> d74b60e8db176c4c80d83467d7bea16965bca4dc
+
             var foreground, text, arc;
 
             arc = d3.svg.arc()
@@ -130,7 +106,6 @@
         },
         
         animate: function() {
-<<<<<<< HEAD
             var total = 100;
             var that = this;
             var data = this.data;
@@ -172,33 +147,7 @@
               }
 
           return errors;
-=======
-              
-              var total = 100;
-              var that = this;
-              var data = this.data;
-              var meter = this.meter;
 
-              meter.selectAll("path.foreground").transition().delay(1000).duration(1000)
-                .attrTween('d', function(d){
-                  var i = d3.interpolate(that._prevProgress/total, d/total);
-                  
-                  return function(t) {
-                    var progress = i(t);
-                    console.log(progress);
-                    meter.selectAll("text.label").text(function(d){
-                      return progress > d/total ? that.formatPercent(d/total) : that.formatPercent(progress);
-                    
-                    })
-
-                    return that.arc.endAngle(that.pi * progress)();
-                    
-                  };
-                })
-              this._prevProgress = progress; 
-
-
->>>>>>> d74b60e8db176c4c80d83467d7bea16965bca4dc
         }
         
       });
