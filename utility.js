@@ -55,10 +55,15 @@ Thelma.chartUtils = {
 		          left : 0,
 		          label: 3
 		      }, 
-	    dims.width = polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right, 
-	    dims.height = polymerObj.chartHeight*0.55 - dims.margin.top - dims.margin.bottom,
-	    dims.barWidth = dims.width* 0.12 ,
+
+	    dims.width = Math.max(150,(polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right)), 
+	    dims.height = Math.max(150,(polymerObj.chartHeight*0.95 - dims.margin.top - dims.margin.bottom)),
+	    // dims.barWidth = dims.width* 0.12 ,
 	    dims.textLabelMargin = dims.height*0.05;
+
+	    dims.barGap = 0.4;
+	    dims.numBars = polymerObj.chartData.length; 
+	    dims.barWidth = Math.min(70,((dims.width / dims.numBars)/(1+dims.barGap)));
 
 	    return dims;
 
