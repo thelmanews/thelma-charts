@@ -1,12 +1,12 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-n-bar-chart-horizontal" extends="th-d3-chart">
+<polymer-element name="th-n-bar-chart" extends="th-d3-chart">
 
 	<script>
 
 
-		Polymer('th-n-bar-chart-horizontal', {
+		Polymer('th-n-bar-chart', {
 		  chartData: [
 		    {label: 'Player', value: 15, display_value: '$15'},
 		    {label: 'Vendor', value: 20, display_value: '$20'},
@@ -181,9 +181,14 @@
 		  	  var that = this;
 
 		  	  //TODO these don't do anything unless dimensions are set
-		      that.bars.data(that.chartData).enter().append('rect').attr('class','bar');
-		      that.labels.data(that.chartData).enter().append('text').attr('class','label');
-		      that.values.data(that.chartData).enter().append('text').attr('class','value');
+		      var newBars = that.bars.data(that.chartData).enter().append('rect').attr('class','bar');
+
+		      console.log('new bars');
+		      console.log(newBars);
+
+
+		      //that.labels.data(that.chartData).enter().append('text').attr('class','label');
+		      //that.values.data(that.chartData).enter().append('text').attr('class','value');
 
 		      //TODO exit
 
