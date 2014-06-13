@@ -3,6 +3,7 @@
 
 <polymer-element name="th-donut-chart" extends="th-d3-chart">
   <template>
+    <core-style ref="theme"></core-style>
     <style>
 
       :host {
@@ -14,18 +15,6 @@
       }
       #chart text {
         font-size: 14px;
-      }
-      .foreground, .percent {
-        fill: #00c3d9;
-      }
-
-      .background {
-        fill: rgba(255,255,255,0.9);
-        stroke: #FFF;
-      }
-
-      .center-background {
-        fill: #FFF;
       }
 
       #data_errors {
@@ -79,27 +68,27 @@
 
             // adding shadow 
 
-            var defs = svg.append("defs");
+            // var defs = svg.append("defs");
 
-            var filter = defs.append("filter")
-                .attr("id", "dropshadow")
+            // var filter = defs.append("filter")
+            //     .attr("id", "dropshadow")
 
-            filter.append("feGaussianBlur")
-                .attr("in", "SourceAlpha")
-                .attr("stdDeviation", 2)
-                .attr("result", "blur");
-            filter.append("feOffset")
-                .attr("in", "blur")
-                .attr("dx", 1)
-                .attr("dy", 1)
-                .attr("result", "offsetBlur");
+            // filter.append("feGaussianBlur")
+            //     .attr("in", "SourceAlpha")
+            //     .attr("stdDeviation", 2)
+            //     .attr("result", "blur");
+            // filter.append("feOffset")
+            //     .attr("in", "blur")
+            //     .attr("dx", 1)
+            //     .attr("dy", 1)
+            //     .attr("result", "offsetBlur");
 
-            var feMerge = filter.append("feMerge");
+            // var feMerge = filter.append("feMerge");
 
-            feMerge.append("feMergeNode")
-                .attr("in", "offsetBlur")
-            feMerge.append("feMergeNode")
-                .attr("in", "SourceGraphic");
+            // feMerge.append("feMergeNode")
+            //     .attr("in", "offsetBlur")
+            // feMerge.append("feMergeNode")
+            //     .attr("in", "SourceGraphic");
 
 
 
@@ -112,20 +101,20 @@
                 .attr("class", "progress-meter");
             
             meter.append("circle")
-                .attr("class", "center-background")
+                .attr("class", "fill-background")
                 .attr("r", outerRadius);
 
             
             meter.append("path")
-                .attr("class", "background")
+                .attr("class", "fill-foreground")
                 .attr("d", arc.endAngle(twoPi));
             
             foreground = meter.append("path")
-                .attr("class", "foreground")
-                .attr("filter", "url(#dropshadow)");
+                .attr("class", "data0");
+                // .attr("filter", "url(#dropshadow)");
             
             text = meter.append("text")
-                .attr('class','percent')
+                .attr('class','percent data0')
                 .attr("text-anchor", "middle")
                 .attr("dy", ".35em");
 
