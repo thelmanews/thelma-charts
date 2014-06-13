@@ -69,29 +69,36 @@ Thelma.chartUtils = {
 
 	},
 	/*
-	 *	builds simple x,y scales for charts. xAccessFun and yAccessFun are optional accessor functions.
+	 *	builds simple x,y scales for charts. labelAccessFun and valueAccessFun are optional accessor functions.
 	*/ 
-	simpleScaleBuilder: function(width, height, chartData, xAccessFun, yAccessFun) {
+	simpleScaleBuilder: function(width, height, chartData, orientation, labelAccessFun, valueAccessFun) {
+
+		  var VERTICAL = 'vertical',
+		  	  HORIZONTAL = 'horizontal';
 
 		  var scales = {};
-		  xAccessFun = xAccessFun || function(d) {return d.label}; 
-		  yAccessFun = yAccessFun || function(d) {return d.value}; 
+		  labelAccessFun = labelAccessFun || function(d) {return d.label}; 
+		  valueAccessFun = valueAccessFun || function(d) {return d.value}; 
+		  orientation = orientation || VERTICAL;
 		  
-		  scales.x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
-	      scales.y = d3.scale.linear().range([0, height]);
+		  scales.x = orientation===VERTICAL ? d3.scale.ordinal().rangeRoundBands([0, width], .1) 
+		  									: d3.scale.linear().range([0, width], .1);
+	      scales.y = orientation===VERTICAL ? d3.scale.linear().range([0, height])
+	      									: d3.scale.ordinal().rangeRoundBands([0, height]);
 
-	      var max = d3.max(this.chartData, yAccessFun);
+	      var max = d3.max(chartData, valueAccessFun);
 
-	      scales.y.domain([0, max]); 
-	      scales.x.domain(this.chartData.map(xAccessFun));
+	      scales.y.domain(orientation===VERTICAL ? [0, max] : chartData.map(labelAccessFun)); 
+	      scales.x.domain(orientation===VERTICAL ? chartData.map(labelAccessFun) : [0, max]);
 
 	      scales.colors = d3.scale.category10();
 		      
-		  scales.colors.domain(this.chartData.length);
+		  scales.colors.domain(chartData.length);
 
 
 	      return scales;
 
-	}
+	},
+
 
 }
