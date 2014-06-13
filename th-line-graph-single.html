@@ -158,13 +158,13 @@
           .enter().append("text")
           .attr("class", "yLabel")
           .text(String)
-          .attr("x", 0)
-          .attr("y", function(d) { return that.chartOptions.animateAxis ? 0 : -1 * y(d); })
-          .attr("text-anchor", "right")
+          .attr("transform", function(d){
+            var yPos = that.chartOptions.animateAxis ? 0 : -1 * y(d);
+            return "translate(0,"+ yPos +") rotate(-90)";
+          } )
           .attr("dy", 4)
           .attr("fill", that.colors.foreground)
           .attr("opacity", function(d) { return that.chartOptions.animateAxis ? 0 : 1; })
-          // .attr("opacity", 0)
           .style("text-anchor", "start");
 
         // x tick marks

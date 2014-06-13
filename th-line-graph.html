@@ -188,9 +188,11 @@
           .enter().append("text")
           .attr("class", "yLabel")
           .text(String)
-          .attr("x", 0)
-          .attr("y", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
-          .attr("text-anchor", "right")
+          .attr("text-anchor", "middle")
+          .attr("transform", function(d){
+            var yPos = that.config.animateAxis ? 0 : -1 * y(d);
+            return "translate(0,"+ yPos +") rotate(-90)";
+          } )
           .attr("dy", 4)
           .attr("fill", that.colors.foreground)
           .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
