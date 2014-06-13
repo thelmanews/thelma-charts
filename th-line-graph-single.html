@@ -12,7 +12,7 @@
       }
 
       .xLabel, .yLabel {
-        font-size: 0.65em;
+        font-size: 0.6em;
         font-weight: 300;
       }
 
@@ -75,8 +75,7 @@
             yMargin = 30,// space btw labels and axis
             w = that.chartWidth - xMargin*2,
             h = that.chartHeight + yMargin;
-            console.log("^^^^^^^^^^");
-        console.log(data);
+       
         function boundaryValue(property, boundary){ // takes an object where keys are equal to arrays of data objects
           return boundary(data, function(d){
             return d[property];
