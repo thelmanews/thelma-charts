@@ -3,12 +3,8 @@
 
 <polymer-element name="th-line-graph-single" extends="th-d3-chart">
   <template>
+    <core-style ref="theme"> </core-style>
     <style>
-      :host {
-        font-size: 0.875em;
-        color: white;
-      }
-
       #chart {
         width: 100%;
         padding: 10px;
@@ -20,18 +16,11 @@
         font-weight: 300;
       }
 
-      .tooltip {
-        width: 100%;
-        position: relative;
-        box-sizing: border-box;
-        padding: 0px 20px;
-      }
-
       circle {
         cursor: pointer;
       }
 
-      @-webkit-keyframes pulse {
+      @-webkit-keyframes pulse {  
         from {
          stroke: rgba(255, 255, 255, 0.9);
         }
@@ -43,15 +32,19 @@
         }
       }
 
+      .tooltip {
+        width: 100%;
+        position: relative;
+        box-sizing: border-box;
+        padding: 0px 20px;
+      }
 
       .pulse {
         -webkit-animation-name: pulse;
         -webkit-animation-duration: 3s;
         -webkit-animation-iteration-count: infinite;
         animation-timing-function: linear;
-        fill: {{colors.background}};
       }
-
     </style>
     <content></content>
     <svg id="chart"></svg> 
@@ -65,15 +58,15 @@
         animateStyle: "draw", // options: raise, draw
         animateAxis: false, // need to restyle the axis
         fillArea: true, 
-        dataPosition: "left", // options: left, right
-        dataUnit: "bn" // TODO: just a thought -- we could show in small letters next to the large number
+        dataPosition: "left" // options: left, right
+
       },
       chartData: [
-        {'label': 2010, 'value': 104 },
-        {'label': 2011, 'value': 108 },
-        {'label': 2012, 'value': 107, 'tooltip': 'This is a tooltip'},
-        {'label': 2013, 'value': 110, 'tooltip': 'This is a tooltip',},
-        {'label': 2014, 'value': 112, 'tooltip': 'This is a tooltip'}
+        {'label': 2010, 'value': 104,'display_value': '$104' },
+        {'label': 2011, 'value': 108,'display_value': '$108' },
+        {'label': 2012, 'value': 107,'display_value': '$107', 'tooltip': 'Enter a tooltip'},
+        {'label': 2013, 'value': 110,'display_value': '$110', 'tooltip': 'Enter a tooltip',},
+        {'label': 2014, 'value': 112,'display_value': '$112', 'tooltip': 'Enter a tooltip'}
       ],
       init: function() {
         var that = this;
@@ -82,7 +75,8 @@
             yMargin = 30,// space btw labels and axis
             w = that.chartWidth - xMargin*2,
             h = that.chartHeight + yMargin;
-
+            console.log("^^^^^^^^^^");
+        console.log(data);
         function boundaryValue(property, boundary){ // takes an object where keys are equal to arrays of data objects
           return boundary(data, function(d){
             return d[property];
@@ -123,7 +117,7 @@
           .attr("y1", 0)
           .attr("x2", x(maxLabel)) 
           .attr("y2", 0)
-          .attr("stroke", that.colors.foreground)
+          .attr("class", "axis")
           .attr("stroke-width", 2);
         
         // y-axis
@@ -132,7 +126,6 @@
           .attr("x2", 0)
           .attr("y1", function(d) { return that.chartOptions.animateAxis ? y(0) : 0; }) // Use 0 instead of minValue for default
           .attr("y2", function(d) { return that.chartOptions.animateAxis ? y(0) : -1 * y(maxValue); });
-          // .attr("stroke", that.colors.foreground)
           // .attr("stroke-width", 2)
           // .attr("opacity", function(d) { return that.chartOptions.animateAxis ? 0 : 1; });
 
@@ -140,24 +133,24 @@
         g.selectAll(".xLabel")
           .data(x.ticks(5))// TODO: Replace with formula (number of labels)
           .enter().append("text")
-          .attr("class", "xLabel")
+          .attr("class", "xLabel axis")
           .text(String)
           .attr("x", function(d) { return x(d) })
           .attr("y", yMargin/2)
-          .attr("text-anchor", "middle")
-          .attr("fill", that.colors.foreground);
+          .attr("text-anchor", "middle");
+          // .attr("fill", that.colors.foreground);
         
         // y labels
         var yLabels = g.selectAll(".yLabel")
           .data(y.ticks(4)) // TODO: Replace with formula (number of labels)
           .enter().append("text")
-          .attr("class", "yLabel")
+          .attr("class", "yLabel axis")
           .text(String)
           .attr("x", 0)
           .attr("y", function(d) { return that.chartOptions.animateAxis ? 0 : -1 * y(d); })
           .attr("text-anchor", "right")
           .attr("dy", 4)
-          .attr("fill", that.colors.foreground)
+          // .attr("fill", that.colors.foreground)
           .attr("opacity", function(d) { return that.chartOptions.animateAxis ? 0 : 1; })
           // .attr("opacity", 0)
           .style("text-anchor", "start");
@@ -182,7 +175,7 @@
           .attr("x1", 0)
           .attr("y2", function(d) { return that.chartOptions.animateAxis ? 0 : -1 * y(d); })
           .attr("x2", w)
-          .attr("stroke", that.colors.foreground)
+          // .attr("stroke", that.colors.foreground)
           .attr("opacity", function(d) { return that.chartOptions.animateAxis ? 0 : 0.3; });
         
 
@@ -250,7 +243,7 @@
         var currentValue;
 
 
-        function drawLine(data, color, animationStyle){
+        function drawLine(data, animationStyle){
           var data = that.data
 
           if (animationStyle === "draw"){
@@ -263,23 +256,23 @@
 
               g.append("path")
                 .datum(data)
-                .attr("class", "area")
+                .attr("class", "data0")
                 .attr("opacity", 0)
-                .attr("fill", color)
                 .transition()
                   .duration(1000) // TODO: make variable?
                   //.delay(1000) 
                   .ease("linear")
                   .attr("stroke-dashoffset", 0)
                 .attr("d", area)
-                .attr("fill", color)
+                // .attr("fill", color)
                 .attr("opacity", 0.7);
             }
 
             path = g.selectAll('.dummy').data(data)
               .enter().append("path")
               .attr("d", line(data)) 
-              .attr("stroke", color)
+              .attr("class", "data0 no-fill")
+              // .attr("stroke", color)
               .attr("stroke-width", "3")
               .attr("fill", "none");
 
@@ -307,22 +300,23 @@
 
               g.append("path")
                 .datum(data)
-                .attr("class", "area")
+                .attr("class", "area data0")
                 .attr("opacity", 0)
-                .attr("fill", color)
+                // .attr("fill", color)
                 .attr("d", areaStart)
                 .transition()
                   .duration(1000)
                   .ease("linear")
                   .attr("stroke-dashoffset", 0)
                 .attr("d", area)
-                .attr("fill", color)
+                // .attr("fill", color)
                 .attr("opacity", 0.7);
             }
 
              var path = g.selectAll('.dummy').data(data).enter().append("path")
               .attr("d", function(){ return that.chartOptions.fillArea ? line(data) : startingLine(data);})
-              .attr("stroke", color)
+              // .attr("stroke", color)
+              .attr("class", "data0")
               .attr("stroke-width", "2.5")
               .attr("fill", "none")
               .attr("opacity", function(){ return that.chartOptions.fillArea ? 0 : 1;});
@@ -336,10 +330,10 @@
           g.selectAll(".circle")
           .data(data)
           .enter().append("circle")
-          .attr("class", "circle")
+          .attr("class", "circle data0 stroke-foreground")
           .attr("r", 0)
-          .attr("fill", color) 
-          .attr("stroke", that.colors.foreground)
+          // .attr("fill", color) 
+          // .attr("stroke", that.colors.foreground)
           .attr("stroke-width", 3)
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); })
@@ -370,7 +364,7 @@
         }
 
         // CALL THE DRAWLINES FUNCTION AND PASS IN THE DATA
-        drawLine(data, that.colors.accents[0], that.chartOptions.animateStyle);
+        drawLine(data, that.chartOptions.animateStyle);
 
 
         // FIND THE FIRST TOOLTIP AND SET THAT AS CURRENT POSITION
@@ -378,12 +372,12 @@
           if (data[i].tooltip){
             currentPos = data[i].label;
             currentTooltip = data[i].tooltip;
-            currentValue = data[i].value;
+            currentValue = data[i].display_value ? data[i].display_value : data[i].value;
             break;
           } else {
             currentPos = data[0].label;
             currentTooltip = data[0].tooltip;
-            currentValue = data[0].value;
+            currentValue = data[0].display_value ? data[0].display_value : data[0].value;
           }
         }
 
@@ -396,7 +390,8 @@
             return that.chartOptions.dataPosition === "left" ? "start" : "end";
            })
           .attr("y", -(h/2))
-          .attr("fill", that.colors.foreground)
+          .attr("class", "fill-foreground")
+          // .attr("fill", that.colors.foreground)
           .attr("opacity", 0.7)
           .text(currentValue);
 
@@ -410,7 +405,7 @@
                 .attr("r", function(d){
                   if (parseInt(d.label)==parseInt(position)){ 
                     currentTooltip = d.tooltip;
-                    currentValue = d.value;
+                    currentValue = d.display_value ? d.display_value : d.value;
                     return 4;
                   } else {
                     return 0;
@@ -453,9 +448,9 @@
             .attr("r", 8)
             .attr("cx", currentPosX)
             .attr("cy", 12)
-            .attr("class", "pulse")
-            .attr("fill", that.colors.background)
-            .attr("stroke", that.colors.foreground)
+            .attr("class", "pulse fill-background stroke-foreground")
+            // .attr("fill", that.colors.background)
+            // .attr("stroke", that.colors.foreground)
             .attr("stroke-width", 4.5)
             .call(drag);
 
@@ -464,7 +459,8 @@
             .attr('x', currentPosX-1.5)
             .attr("height", h-36)
             .attr("width", 3)
-            .attr('fill', that.colors.foreground)
+            .attr("class", "fill-foreground")
+            // .attr('fill', that.colors.foreground)
             .attr('opacity', 0.4);
 
         var lastPosX = slider.select("circle").attr("cx");
@@ -477,7 +473,7 @@
             // move the circle
             d3.select(this)
 
-              .attr("class", "")
+              .attr("class", "fill-background stroke-foreground")
               .attr("cx", d.x = Math.max(0, Math.min(w, d3.event.x))); 
        
             // define current position
@@ -504,7 +500,7 @@
                 if ( Math.abs(x(d.label) - parseInt(currentPosX)) < 10) {
                 // (x(d.label)<(parseInt(currentPosX)+5)) && (x(d.label)>(parseInt(currentPosX)-5))){ 
                   currentTooltip = d.tooltip;
-                  currentValue = d.value;
+                  currentValue = d.display_value ? d.display_value : d.value;
                   return 4;
                 } else {
                   return 0;
