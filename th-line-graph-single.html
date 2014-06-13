@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-line-graph-single" extends="th-d3-chart" attributes="chartOptions, colors">
+<polymer-element name="th-line-graph-single" extends="th-d3-chart">
   <template>
     <style>
       :host {
@@ -67,11 +67,6 @@
         fillArea: true, 
         dataPosition: "left", // options: left, right
         dataUnit: "bn" // TODO: just a thought -- we could show in small letters next to the large number
-      },
-      colors: {
-        foreground: "white", // axis color
-        background: "#aaa", // TODO: make variable to match card background
-        accents: ["#1EC4E6","#2D5B8C", "#EDE374"] // line colors
       },
       chartData: [
         {'label': 2010, 'value': 104 },
