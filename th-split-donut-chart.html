@@ -3,13 +3,10 @@
 
 <polymer-element name="th-split-donut-chart" extends="th-d3-chart">
 
-
   <script>
 
       Polymer('th-split-donut-chart', {
         chartData: [{value: 26}, {value: 43}], // BUG: this only works when then smaller value comes first; otherwise the labels appear the same.
-
-        colors: { foreground: "#fff" , background: "#eee", accents: ["#00c3d9", "#1f77b4"]},
         init: function() {
           var that = this,
               margin = {
@@ -56,8 +53,7 @@
                 .data(data)
                 .enter()
                   .append("path")
-                  .attr("fill", that.colors.foreground)
-                  .attr("class", "background")
+                  .attr("class", "background fill-foreground")
                   .attr("transform", function(d,i){
                     return i > 0 ? "translate(0, 5) rotate(90) scale(1,-1)" : "rotate(90) scale(-1,-1)";
                   })
@@ -67,13 +63,7 @@
                 .data(data)
                 .enter()
                   .append("path")
-                  .attr("fill", function(d,i){
-                    return that.colors.accents[i];
-                  })
-                  .attr("stroke", function(d,i){
-                    return that.colors.accents[i];
-                  })
-                  .attr("class", "foreground")
+                  .attr("class", function(d,i){ return ("foreground data"+i); })
                   .attr("transform", function(d,i){
                     return i > 0 ? "translate(0, 5) rotate(90) scale(1,-1)" : "rotate(90) scale(-1,-1)";
                   });
@@ -82,10 +72,7 @@
                 .data(data)
                 .enter()
                   .append("text")
-                  .attr("class", "label")
-                  .attr("fill", function(d,i){
-                    return that.colors.accents[i];
-                  })
+                  .attr("class", function(d,i){ return ("label data"+i); })
                   .attr("text-anchor", "middle")
                   .attr("dy", function(d,i){
                     return i > 0 ? "2em" : "-1.5em";
