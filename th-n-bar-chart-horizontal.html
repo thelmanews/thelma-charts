@@ -89,20 +89,13 @@
 
 		      var x = scales.x;
 		      var y = scales.y;
-		      var colors = scales.colors;
 
 		      // is there a better way than exposing these?!
 		      self.y = y;
 		      self.x = x;
-		      self.colors = colors;
-
 
 		      //setting sizes
 		      self._setElementSizes();
-
-
-
-
 
 		  },
 		  //TODO make it really private
@@ -113,7 +106,6 @@
 	    	  var margin = self.dims.margin,
 		    	  width = self.dims.width,
 		    	  height = self.dims.height,
-		    	  colors = self.colors,
 		    	  x = self.x,
 		    	  y = self.y;
 
@@ -130,7 +122,7 @@
 
 		      
 		      this.bars
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr("class", function(d,i){return "data"+i;})
 		        .attr('x', x(0)) //function(d) { return x(d.label); })  rev
 		        .attr('y', function(d) { console.log(y(d.label)); return y(d.label); }) //function(d) { return height; })  rev
 		        .attr('width', 0)
@@ -139,7 +131,7 @@
 		      
 		      //console.log(this.bars);
 		      this.labels
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr("class", function(d,i){return "data"+i;})
 		        //.style('opacity', 0)
 		        .style('text-anchor','left')
 		        .attr('y', function(d) { return y(d.label) + self.dims.barWidth + self.dims.labelHeight* 0.6; })
@@ -147,7 +139,7 @@
 
 		      //console.log(this.bars);
 		      this.values
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr("class", function(d,i){return "data"+i;})
 		        .style('text-anchor','end')
 		        //.style('opacity', 0)
 		        .attr('y', function(d) { return y(d.label) + self.dims.barWidth/2 + self.dims.valueHeight* 0.4; })
@@ -197,12 +189,10 @@
 
 		      var x = scales.x;
 		      var y = scales.y;
-		      var colors = scales.colors;
 
 		      // is there a better way than exposing these?!
 		      self.y = y;
 		      self.x = x;
-		      self.colors = colors;
 
 
 		      //setting sizes
@@ -227,12 +217,10 @@
 
 		      var x = scales.x;
 		      var y = scales.y;
-		      var colors = scales.colors;
 
 		      // is there a better way than exposing these?!
 		      self.y = y;
 		      self.x = x;
-		      self.colors = colors;
 
 		      var width = self.dims.width,
 		      	 height = self.dims.height;	  	  
@@ -260,20 +248,20 @@
 			    }
 
 			      self.bars
-			        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+			        .attr("class", function(d,i){return "data"+i;})
 			        .attr('x', function(d) { return x(d.label); })
 			        .attr('width',self.dims.barWidth);
 
 
 			      
 			      self.labels
-			        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+			        .attr("class", function(d,i){return "data"+i;})
 			        .style('text-anchor','left')
 			        .attr('x', function(d) { return x(d.label); })
 			        .attr('y', height + 12); //12: font size
 			      
 			      self.values
-			        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+			        .attr("class", function(d,i){return "data"+i;})
 			        .style('text-anchor','middle')
 			        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; });
 				  
