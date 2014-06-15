@@ -8,10 +8,9 @@
 
 		Polymer('th-n-bar-chart', {
 		  chartData: [
-		    {label: 'Player', value: 15},
-		    {label: 'Vendor', value: 20},
-		    {label: 'Mascot', value: 45}
-		    
+		    {label: 'Player', value: 15, display_value: '$15'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Mascot', value: 45, display_value: '$45'}
 		  ],
 		  // for making orientation a attribute
 		  dimensions: {'horizontal': 
@@ -22,20 +21,10 @@
 		  	  var self = this;
 		  	  
 		  	  self.dims = self.setupDimensions(self);
-		  	  console.log("&&&&&&&");
-		  	  console.log(self.dims);
+
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
 	    	      height = self.dims.height;
-		      
-
-	    	  
-	    	  // self.dims.
-	    	 	// var maxValueLength = d3.max(self.chartData, function(d){return d.display_value.length});
-	    	 	// self.dims.valueSize = (self.dims.barWidth*0.8) / maxValueLength / 0.6;
-	    	 	// console.log(maxValueLength);
-	    	 	// console.log(self.dims.valueSize);
-	    	 	
 
 
 		      //self.extractElementDataPoints(); //needed?
@@ -112,9 +101,15 @@
 		      this.labels
 		        .attr("class", function(d,i){return "label data"+i;})
 		        //.style('opacity', 0)
-		        .style('text-anchor','middle')
-		        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; })
-		        .attr('y', height + 16) //12: font size
+		        .style('text-anchor',function(){ return self.dims.labelAngle > 0 ? "left" : "middle"})
+		        .attr('transform', function(d,i){
+			        	var xPos = x(d.label) + self.dims.barWidth/2;
+			        	var yPos = height + 16;
+			        	var rotation = self.dims.labelAngle;
+			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
+			        });
+		        // .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; })
+		        // .attr('y', height + 16) //12: font size
 		      
 		      //console.log(this.bars);
 		      this.values
@@ -235,14 +230,20 @@
 			      
 			      self.labels
 			        .attr("class", function(d,i){return "label data"+i;})
-			        .style('text-anchor','left')
-			        .attr('x', function(d) { return x(d.label); })
-			        .attr('y', height + 12); //12: font size
+			        .style('text-anchor',function(){ return self.dims.labelAngle > 0 ? "left" : "middle"})
+			        .attr('transform', function(d,i){
+			        	var xPos = x(d.label) + self.dims.barWidth/2;
+			        	var yPos = height + 16;
+			        	var rotation = self.dims.angle;
+			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
+			        });
+			        // .attr('x', function(d) { return x(d.label); })
+			        // .attr('y', height + 12); //12: font size
 			      
 			      self.values
 			        .attr("class", function(d,i){return "value data"+i;})
 			        .style('text-anchor','middle')
-			        .attr('font-size', '25px')
+			        .attr('font-size', self.dims.valueSize+"px")
 			        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; });
 				  
 
