@@ -26,9 +26,6 @@
 
 		      var chart_svg = this.$.chart;
 
-		      var colors = d3.scale.category10();
-		      colors.domain(this.chartData.length);
-
 		      console.log(d3.select(chart_svg));
 		      this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
 		          .attr('height', height + margin.top + margin.bottom)
@@ -48,7 +45,7 @@
 		      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
 		      //console.log(this.bars);
 		      this.bars
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr("class", function(d,i){ return "data"+i; })
 		        .attr('x', width/2 - barWidth/2)
 		        //.attr('y', 0)
 		        .attr('y', height)
@@ -58,7 +55,7 @@
 		      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
 		      //console.log(this.bars);
 		      this.labels
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr("class", function(d,i){return "data"+i;})
 		        .style('opacity', 0)
 		        .style('text-anchor','end')
 		        .attr('x', width/2 - barWidth/2 - margin.label)
@@ -68,7 +65,7 @@
 		      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
 		      //console.log(this.bars);
 		      this.values
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr("class", function(d,i){return "data"+i;})
 		        .style('opacity', 0)
 		        .attr('x', width/2 + barWidth/2 + margin.label)
 		        .attr('y', height) //12: font size
