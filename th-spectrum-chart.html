@@ -30,8 +30,8 @@
 
 		      var chart_svg = this.$.chart;
 
-		      var colors = d3.scale.category10();
-		      colors.domain(this.chartData.length);
+		      // var colors = d3.scale.category10();
+		      // colors.domain(this.chartData.length);
 
 
 		      var svg = d3.select(chart_svg);
@@ -94,7 +94,8 @@
 		      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
 		      //console.log(this.bars);
 		      this.bars
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        // .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr("class", function(d,i){ return "data"+i; })
 		        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
 		        .attr('x', width/2 - barWidth/2)
 		        //.attr('y', 0)
@@ -106,17 +107,20 @@
 		      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
 		      //console.log(this.bars);
 		      this.labels
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        .attr("class", function(d,i){return "data"+i;})
+		        // .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
 		        .style('opacity', 0)
 		        .style('text-anchor','end')
 		        .attr('x', width/2 - barWidth/2 - margin.label)
 		        .attr('y', function(d) {return height -  y(d.range.max.value) + 12;}) 
 		        .text(function(d) {return d.label;});
 		      
-		      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+		      this.values = this.container.selectAll('.value').data(this.chartData).enter()
+		      	.append('text')
+		      	.attr('class', function(d,i){return "value data"+i;});
 		      //console.log(this.bars);
 		      this.values
-		        .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+		        // .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
 		        .style('opacity', 0)
 		        .attr('x', width/2 + barWidth/2 + margin.label)
 		        .attr('y', function(d) {return height - y(d.range.max.value) + 12;}) 
