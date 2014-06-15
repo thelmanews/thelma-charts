@@ -53,10 +53,10 @@ Thelma.chartUtils = {
 		          right : 0,
 		          bottom : 18,
 		          left : 0,
-		          label: 3
+		          label: 10
 		      }, 
 
-	    dims.width = Math.max(150,(polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right)), 
+	    dims.width = Math.max(100,(polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right)), 
 	    dims.height = Math.max(150,(polymerObj.chartHeight*0.95 - dims.margin.top - dims.margin.bottom)),
 	    dims.textLabelMargin = dims.height*0.05;
 
@@ -65,6 +65,9 @@ Thelma.chartUtils = {
 	    dims.numBars = polymerObj.chartData.length;  // DEPENDANT ON CHARTDATA
 	    dims.barWidth = Math.min(70,((dims.width / dims.numBars)/(1+dims.barGap)));
 	    
+
+	    // SHOULD THESE GO IN BARCHART?
+	    // -----
 	    // Value dimensions
 	    dims.maxValueLength = d3.max(polymerObj.chartData, function(d){  // DEPENDANT ON CHARTDATA
 	    	return  d.display_value ? d.display_value.length : d.value.toString().length;
@@ -89,6 +92,7 @@ Thelma.chartUtils = {
 	    } else {
 	    	dims.labelAngle = 0;
 	    }
+	    // -----
 
 	    return dims;
 

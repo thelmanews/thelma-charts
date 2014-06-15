@@ -8,95 +8,98 @@
 		Polymer('th-stacked-chart', {
 
 		  init: function() {
-		    var margin = {
-		          top : 5,
-		          right : 0,
-		          bottom : 10,
-		          left : 0,
-		          label: 3
-		      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.55 - margin.top - margin.bottom
-		         , barWidth = width* 0.12 , textLabelMargin = height*0.05;
+          var self = this;
+          
+          // setup dimensions
+          self.dims = self.setupDimensions(self);
+          var margin = self.dims.margin,
+              width = self.dims.width,
+              height = self.dims.height,
+              barWidth = Math.min(90,(self.dims.width/3)); // override the default
 
-		      this.height = height;
+          // setup scales
+          var scales = self.simpleScaleBuilder(width, height, self.chartData),
+              x = scales.x,
+              y = scales.y;
 
-		      this.x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+          self.y = y;
+          self.x = x;
+		      
+          // setup chart area
+          var chart_svg = this.$.chart;
+          self.svg = d3.select(chart_svg);
 
-		      var y = d3.scale.linear().range([0, height]);
-		      this.y = y;
-
-		      var chart_svg = this.$.chart;
-
-		      console.log(d3.select(chart_svg));
-		      this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
+		      self.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
 		          .attr('height', height + margin.top + margin.bottom)
 		          .append('g')
 		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
 		      var total = 0;
-		      this.chartData.forEach(function(d) {
+		      self.chartData.forEach(function(d) {
 		          d.total = total;
-		          total+=d.value;
-		          console.log(d);
+		          total+=parseInt(d.value);
 		      });
-		      
+
 		      y.domain([0, total]); 
 
-
-		      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
-		      //console.log(this.bars);
-		      this.bars
-		        .attr("class", function(d,i){ return "data"+i; })
+          // set up initial state of data
+		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
+		      
+		      self.bars
+		        .attr("class", function(d,i){ return "bar data"+i; })
 		        .attr('x', width/2 - barWidth/2)
 		        //.attr('y', 0)
 		        .attr('y', height)
 		        .attr('width',barWidth)
 		        .attr('height', 0);
 
-		      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
-		      //console.log(this.bars);
-		      this.labels
-		        .attr("class", function(d,i){return "data"+i;})
+		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+		      
+		      self.labels
+		        .attr("class", function(d,i){return "label data"+i;})
 		        .style('opacity', 0)
 		        .style('text-anchor','end')
 		        .attr('x', width/2 - barWidth/2 - margin.label)
-		        .attr('y', height) //12: font size
+		        .attr('y', height) 
 		        .text(function(d) {return d.label;});
 		      
-		      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
-		      //console.log(this.bars);
-		      this.values
-		        .attr("class", function(d,i){return "data"+i;})
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+		      
+		      self.values
+		        .attr("class", function(d,i){return "value data"+i;})
 		        .style('opacity', 0)
+            .attr('font-size', '13px')
+            .attr('font-weight', '300')
 		        .attr('x', width/2 + barWidth/2 + margin.label)
-		        .attr('y', height) //12: font size
+		        .attr('y', height) 
 		        .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
 
 		  },
 		  reset: function() {
-		      
+		      var self = this;
 		      var height= this.height;
-		      this.bars.transition().duration(this.animationDelay).attr('y', height).attr('height', 0);
-		      this.labels.transition().duration(this.animationDelay).attr('y', height ).style('opacity', 0);
-		      this.values.transition().duration(this.animationDelay).attr('y', height ).style('opacity', 0);
+		      self.bars.transition().duration(self.animationDelay).attr('y', height).attr('height', 0);
+		      self.labels.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+		      self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
 		      
 		  },
 		  
 		  animate: function() {
-
-		        var y = this.y;
-		        console.log(this.animationDelay)
-		        this.bars.transition().duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+            var self = this;
+		        var y = self.y;
+		        
+		        self.bars.transition().duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
 		        .attr('y', function(d) {return y(d.total)})
 		        .attr('height', function(d) {return y(d.value)});
 
-		        this.labels.transition(this.animationDelay).duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        self.labels.transition(self.animationDelay).duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
 		        .style('opacity', 1)
-		        .attr('y', function(d) {return y(d.total) + 12 }); //12: font size
+		        .attr('y', function(d) {return y(d.total + d.value/2) + 6; }); //12: font size
 		        
-		        this.values.transition(this.animationDelay).duration(this.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        self.values.transition(self.animationDelay).duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
 		        .style('opacity', 1)
-		        .attr('y', function(d) {return y(d.total) + 12 }); //12: font size
+		        .attr('y', function(d) {return y(d.total + d.value/2) + 6 }); //12: font size
 
 		  },
 		  chartSpecificDataValidate: function() {
