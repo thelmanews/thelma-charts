@@ -94,7 +94,6 @@
 		      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
 		      //console.log(this.bars);
 		      this.bars
-		        // .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
 		        .attr("class", function(d,i){ return "data"+i; })
 		        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
 		        .attr('x', width/2 - barWidth/2)
@@ -108,7 +107,6 @@
 		      //console.log(this.bars);
 		      this.labels
 		        .attr("class", function(d,i){return "data"+i;})
-		        // .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
 		        .style('opacity', 0)
 		        .style('text-anchor','end')
 		        .attr('x', width/2 - barWidth/2 - margin.label)
@@ -120,7 +118,6 @@
 		      	.attr('class', function(d,i){return "value data"+i;});
 		      //console.log(this.bars);
 		      this.values
-		        // .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
 		        .style('opacity', 0)
 		        .attr('x', width/2 + barWidth/2 + margin.label)
 		        .attr('y', function(d) {return height - y(d.range.max.value) + 12;}) 
