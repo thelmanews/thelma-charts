@@ -1,8 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-line-graph" extends="th-d3-chart" attributes="lineStyle, animateStyle, colors">
+<polymer-element name="th-line-graph" extends="th-d3-chart" attributes="lineStyle, animateStyle">
   <template>
+    <core-style ref="theme"></core-style>
     <style>
       :host {
         font-size: 0.875em;
@@ -32,13 +33,13 @@
       }
       @-webkit-keyframes pulse {
         from {
-         fill: rgba(255, 255, 255, 0.9);
+         stroke: rgba(255, 255, 255, 0.9);
         }
         50% {
-          fill: rgba(255, 255, 255, 0.3);
+          stroke: rgba(255, 255, 255, 0.3);
         }
         to {
-          fill: rgba(255, 255, 255, 0.9);      
+          stroke: rgba(255, 255, 255, 0.9);      
         }
       }
 
@@ -60,11 +61,6 @@
     Polymer('th-line-graph', {
       lineStyle: "linear", // options: linear, basis, cardinal, monotone, step-before/after
       animateStyle: "draw", // options: raise, draw
-      colors: {
-        foreground: "white", // axis color
-        background: "#2a94cb", // TODO: make variable to match card background
-        accents: ["#1EC4E6","#2D5B8C", "#EDE374"] // line colors
-      },
       chartData: { 
         '0': [ 
           {'label': 0, 'value': 1 },
@@ -158,7 +154,7 @@
           .attr("y1", -y(0))
           .attr("x2", x(data.length)) // this needs to be more dynamic
           .attr("y2", -y(0))
-          .attr("stroke", that.colors.foreground)
+          .attr('class', "no-fill stroke-foreground")          
           .attr("stroke-width", 2);
         
         // y-axis
@@ -167,7 +163,7 @@
           .attr("x2", x(0))
           .attr("y1", function(d) { return that.config.animateAxis ? y(0) : -1 * y(0); })
           .attr("y2", function(d) { return that.config.animateAxis ? y(0) : -1 * y(maxValue); })
-          .attr("stroke", that.colors.foreground)
+          .attr('class', "no-fill stroke-foreground")
           .attr("stroke-width", 2)
           .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
 
@@ -175,18 +171,18 @@
         g.selectAll(".xLabel")
           .data(x.ticks(5))// TODO: Replace with formula (number of labels)
           .enter().append("text")
-          .attr("class", "xLabel")
+          .attr("class", "xLabel fill-foreground")
           .text(String)
           .attr("x", function(d) { return x(d) })
           .attr("y", 0)
-          .attr("text-anchor", "middle")
-          .attr("fill", that.colors.foreground);
+          .attr("text-anchor", "middle");
+          
         
         // y labels
         var yLabels = g.selectAll(".yLabel")
           .data(y.ticks(4)) // TODO: Replace with formula (number of labels)
           .enter().append("text")
-          .attr("class", "yLabel")
+          .attr("class", "yLabel fill-foreground")
           .text(String)
           .attr("text-anchor", "middle")
           .attr("transform", function(d){
@@ -194,7 +190,6 @@
             return "translate(0,"+ yPos +") rotate(-90)";
           } )
           .attr("dy", 4)
-          .attr("fill", that.colors.foreground)
           .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
 
           /*
@@ -224,23 +219,22 @@
         g.selectAll(".xTicks")
           .data(x.ticks(5)) // TODO: Replace with formula (number of tickmarks)
           .enter().append("line")
-          .attr("class", "xTicks")
+          .attr("class", "xTicks stroke-foreground")
           .attr("x1", function(d) { return x(d); })
           .attr("y1", -1 * y(0))
           .attr("x2", function(d) { return x(d); })
-          .attr("y2", -1 * y(-0.5))
-          .attr("stroke", that.colors.foreground);
+          .attr("y2", -1 * y(-0.5));
+          
         
         // y tick marks
         var yTicks = g.selectAll(".yTicks")
           .data(y.ticks(4)) // TODO: Replace with formula (number of tickmarks)
           .enter().append("line")
-          .attr("class", "yTicks")
+          .attr("class", "yTicks stroke-foreground")
           .attr("y1", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
           .attr("x1", x(-0.2))
           .attr("y2", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
-          .attr("x2", x(0))
-          .attr("stroke", that.colors.foreground)
+          .attr("x2", x(0))          
           .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
         
        
@@ -290,13 +284,14 @@
           .append("div")   
           .attr("class", "tooltip");
 
-        function drawLine(seriesName, data, color, animationStyle){
+        var index = 0;
+        function drawLine(seriesName, data,  animationStyle){
           var seriesNameSafe = seriesName.replace(/\s+/g,'_');
 
           if (animationStyle === "draw"){
             var path = g.selectAll('.asdad').data([seriesNameSafe]).enter().append("path")
               .attr("d", line(data))
-              .attr("stroke", color)
+              .attr('class', function(){return "no-fill data"+index;})
               .attr("stroke-width", "2.5")
               .attr("fill", "none");
 
@@ -315,7 +310,7 @@
              
              var path = g.selectAll('.asdad').data([seriesNameSafe]).enter().append("path")
               .attr("d", startingLine(data))
-              .attr("stroke", color)
+              .attr('class', function(){return "no-fill data"+index;})
               .attr("stroke-width", "2.5")
               .attr("fill", "none")
               .attr("opacity", 0);
@@ -329,13 +324,13 @@
           g.selectAll(".circle-"+seriesNameSafe)
           .data(data)
           .enter().append("circle")
-          .attr("class", "circle circle-" + seriesNameSafe)
+          .attr("class", "circle circle-" + seriesNameSafe + "no-fill stroke-foreground")
           .attr("r", 0)
-          .attr("fill", that.colors.foreground) 
-          .attr("stroke", color)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", 3)
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); })
+
+          index++;
         }
 
 
@@ -364,7 +359,7 @@
 
         var firstTooltip = Number.MAX_VALUE;
         for (var prop in that.chartData) {
-          drawLine(prop, that.chartData[prop], that.colors.accents[prop], that.animateStyle); // color will break if series name is changed
+          drawLine(prop, that.chartData[prop],  that.animateStyle); // color will break if series name is changed
 
           var setFirstTooltip = d3.min(that.chartData[prop], function(d) {
               return d.tooltip ? d.label : Number.MAX_VALUE;
@@ -393,20 +388,19 @@
             .on('dragend', dragEnd);
 
         slider.append("circle")
-            .attr("class", "target")
-            .attr("r", 10)
+            .attr("class", "target pulse stroke-foreground fill-background")
+            .attr("r", 8)
+            .attr("stroke-width", 4.5)
             .attr("cx", currentPos)
-            .attr("cy", 5)
-            .attr("class", "pulse")
-            .attr("fill", that.colors.foreground)
+            .attr("cy", 5)            
             .call(drag);
 
         slider.append('rect')
             .attr('y', 15)
             .attr('x', currentPos-1)
             .attr("height", h-33)
-            .attr("width", 2)
-            .attr('fill', that.colors.foreground)
+            .attr("width", 3)
+            .attr("class", "fill-foreground")
             .attr('opacity', 0.4);
 
         var lastPos = slider.select("circle").attr("cx");
@@ -420,6 +414,7 @@
             // move the circle
             
             d3.select(this)
+              .attr("class", "fill-background stroke-foreground")
               .attr("cx", d.x = Math.max(20, Math.min(w, d3.event.x))); // 20 min bc of margin
 
             
@@ -516,7 +511,7 @@
 
         function dragEnd() {
             d3.select(this)
-              .attr('class','pulse')
+              .attr('class','pulse stroke-foreground no-fill')
               .transition()
                 .duration(50)
                 .attr('cx', closestPoint);
