@@ -44,8 +44,6 @@
 
           // chart positioning
           var chart_svg = this.$.chart;
-          var colors = d3.scale.category10();
-          colors.domain(this.chartData.length);
 
           this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
               .attr('height', height + margin.top + margin.bottom)
@@ -61,9 +59,9 @@
           // transform chartData for paths
           var lastEdge = 0;
           var peakData = this.chartData.map(function(i){
-            var coordinates = [{ x: lastEdge, y: -height},
-                               {x: lastEdge + peakWidth, y: -height},
-                               { x: lastEdge + peakWidth/2, y: -height+y(i.value)}];
+          var coordinates = [{ x: lastEdge, y: -height},
+                             {x: lastEdge + peakWidth, y: -height},
+                             { x: lastEdge + peakWidth/2, y: -height+y(i.value)}];
             lastEdge = lastEdge + (peakWidth/overlap)/overlap;
             return coordinates;
           });
@@ -73,8 +71,7 @@
             .data(peakData)
             .enter()
             .append('path')
-              .attr('class','peak')
-              .attr('fill', function(d,i) {return d.color ? d.color : colors(i);})
+              .attr('class', function(d,i){return "peak data"+i;})
               .attr('d', peakLineStart)
               .attr('opacity', 0);
       
@@ -82,8 +79,7 @@
           this.labels = this.container.selectAll('.label')
             .data(this.chartData)
             .enter().append('text')
-              .attr('class','label')
-              .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+              .attr('class', function(d,i){return "label data"+i;})
               //.style('opacity', 0)
               .style('text-anchor','middle')
               .attr('x', function(d,i) { return ((peakWidth/2) + (peakWidth/overlap*i/overlap)); })
@@ -94,8 +90,7 @@
           this.values = this.container.selectAll('.value')
             .data(this.chartData)
             .enter().append('text')
-              .attr('class','value')
-              .style('fill', function(d,i) {return d.color ? d.color : colors(i);})
+              .attr('class', function(d,i){return "value data"+i;})
               .style('text-anchor','middle')
               .style('opacity', 0)
               .attr('x', function(d,i) { return ((peakWidth/2) + (peakWidth/overlap*i/overlap)); })
