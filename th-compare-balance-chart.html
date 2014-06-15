@@ -3,6 +3,7 @@
 
 <polymer-element name="th-compare-balance-chart" extends="th-d3-chart">
   <template>
+    <core-style ref="theme"></core-style>
     <style>
 
       :host {
@@ -16,9 +17,6 @@
         font-size: 14px;
       }
 
-      .scale-bar, .triangle {
-      	fill: #333;
-      }
     </style>
 
       <svg id="chart">
@@ -85,7 +83,7 @@
 
 	        container.append('path')
 	            .attr('transform', 'translate(' + (width * 0.40) + ',' + (height *0.95) + ')')
-	            .attr('d', 'M 15 3 L 30 25 L 0 25 L 15 3').attr('class', 'triangle');
+	            .attr('d', 'M 15 3 L 30 25 L 0 25 L 15 3').attr('class', 'triangle fill-foreground');
 
 	        that.barg = container.append('g')
 	            .attr('transform', 'translate(' + width / 2 + ',' + height*0.95 + ')');
@@ -93,7 +91,7 @@
 	        var bar = that.barg.append('rect')
 	            .attr('x', -width / 2)
 	            .attr('y', 0)
-	            .attr('class', 'scale-bar')
+	            .attr('class', 'scale-bar fill-foreground')
 	            .attr('width', width)
 	            .attr('height', barWidth);
 
