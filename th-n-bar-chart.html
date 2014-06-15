@@ -8,9 +8,10 @@
 
 		Polymer('th-n-bar-chart', {
 		  chartData: [
-		    {label: 'Player', value: 15, display_value: '$15'},
-		    {label: 'Vendor', value: 20, display_value: '$20'},
-		    {label: 'Mascot', value: 45, display_value: '$45'}
+		    {label: 'Player', value: 15},
+		    {label: 'Vendor', value: 20},
+		    {label: 'Mascot', value: 45}
+		    
 		  ],
 		  // for making orientation a attribute
 		  dimensions: {'horizontal': 
@@ -21,15 +22,25 @@
 		  	  var self = this;
 		  	  
 		  	  self.dims = self.setupDimensions(self);
-
+		  	  console.log("&&&&&&&");
+		  	  console.log(self.dims);
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
 	    	      height = self.dims.height;
 		      
 
+	    	  
+	    	  // self.dims.
+	    	 	// var maxValueLength = d3.max(self.chartData, function(d){return d.display_value.length});
+	    	 	// self.dims.valueSize = (self.dims.barWidth*0.8) / maxValueLength / 0.6;
+	    	 	// console.log(maxValueLength);
+	    	 	// console.log(self.dims.valueSize);
+	    	 	
+
+
 		      //self.extractElementDataPoints(); //needed?
 
-		      self.dataLenght = self.chartData.length;
+		      self.dataLength = self.chartData.length;
 
 
 		      var chart_svg = self.$.chart;
@@ -90,7 +101,7 @@
 
 		      
 		      this.bars
-		        .attr("class", function(d,i){return "data"+i;})
+		        .attr("class", function(d,i){return "bar data"+i;})
 		        .attr('x', function(d) { return x(d.label); })
 		        .attr('y', function(d) { return height; })
 		        .attr('width',self.dims.barWidth)
@@ -99,18 +110,19 @@
 		      
 		      //console.log(this.bars);
 		      this.labels
-		        .attr("class", function(d,i){return "data"+i;})
+		        .attr("class", function(d,i){return "label data"+i;})
 		        //.style('opacity', 0)
-		        .style('text-anchor','left')
-		        .attr('x', function(d) { return x(d.label); })
-		        .attr('y', height + 12) //12: font size
+		        .style('text-anchor','middle')
+		        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; })
+		        .attr('y', height + 16) //12: font size
 		      
 		      //console.log(this.bars);
 		      this.values
-		        .attr("class", function(d,i){return "data"+i;})
+		        .attr("class", function(d,i){return "value data"+i;})
 		        .style('text-anchor','middle')
 		        //.style('opacity', 0)
 		        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; })
+		        .attr('font-size', self.dims.valueSize+"px")
 		        .attr('y', height);
 		        
 
@@ -137,7 +149,7 @@
 		        
 		        this.values.transition(this.animationDelay).duration(this.animationDelay)
 		        //.style('opacity', 1)
-		        .attr('y', function(d) {return height - y(d.value) - 2;});
+		        .attr('y', function(d) {return height - y(d.value) - self.dims.spacing;});
 
 		  },
 
@@ -196,11 +208,11 @@
 			      self.labels = self.container.selectAll('.label').data(self.chartData);
 			       self.values=self.container.selectAll('.value').data(self.chartData);
 
-		  	  if(self.dataLenght!=self.chartData.length)
+		  	  if(self.dataLength!=self.chartData.length)
 		  	  {
 		  	  	  console.log('data length changed');
 
-		  	  	  self.dataLenght = self.chartData.length;
+		  	  	  self.dataLength = self.chartData.length;
 
 			      self.bars.enter().append('rect').attr('class','bar').attr('height', 0).attr('y', height);
 
@@ -215,21 +227,22 @@
 			    }
 
 			      self.bars
-			        .attr("class", function(d,i){return "data"+i;})
+			        .attr("class", function(d,i){return "bar data"+i;})
 			        .attr('x', function(d) { return x(d.label); })
 			        .attr('width',self.dims.barWidth);
 
 
 			      
 			      self.labels
-			        .attr("class", function(d,i){return "data"+i;})
+			        .attr("class", function(d,i){return "label data"+i;})
 			        .style('text-anchor','left')
 			        .attr('x', function(d) { return x(d.label); })
 			        .attr('y', height + 12); //12: font size
 			      
 			      self.values
-			        .attr("class", function(d,i){return "data"+i;})
+			        .attr("class", function(d,i){return "value data"+i;})
 			        .style('text-anchor','middle')
+			        .attr('font-size', '25px')
 			        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; });
 				  
 

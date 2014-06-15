@@ -51,7 +51,7 @@ Thelma.chartUtils = {
 		dims.margin = {
 		          top : 16,
 		          right : 0,
-		          bottom : 16,
+		          bottom : 18,
 		          left : 0,
 		          label: 3
 		      }, 
@@ -61,9 +61,16 @@ Thelma.chartUtils = {
 	    // dims.barWidth = dims.width* 0.12 ,
 	    dims.textLabelMargin = dims.height*0.05;
 
-	    dims.barGap = 0.4;
-	    dims.numBars = polymerObj.chartData.length; 
+	    dims.barGap = 0.3;
+	    dims.numBars = polymerObj.chartData.length;  // DEPENDANT ON CHARTDATA
 	    dims.barWidth = Math.min(70,((dims.width / dims.numBars)/(1+dims.barGap)));
+	    dims.maxValueLength = d3.max(polymerObj.chartData, function(d){return  d.display_value ? d.display_value.length : d.value.toString().length;}); // DEPENDANT ON CHARTDATA
+	    dims.valueSize = Math.min(50,((dims.barWidth*0.8) / dims.maxValueLength / 0.6) );
+	    dims.spacing = dims.valueSize * 0.25;
+
+	    if ((dims.valueSize+dims.spacing) > dims.margin.top) { 
+	    	dims.margin.top = dims.valueSize+dims.spacing;
+	    }
 
 	    return dims;
 
@@ -90,11 +97,6 @@ Thelma.chartUtils = {
 
 	      scales.y.domain(orientation===VERTICAL ? [0, max] : chartData.map(labelAccessFun)); 
 	      scales.x.domain(orientation===VERTICAL ? chartData.map(labelAccessFun) : [0, max]);
-
-	      scales.colors = d3.scale.category10();
-		      
-		  scales.colors.domain(chartData.length);
-
 
 	      return scales;
 
