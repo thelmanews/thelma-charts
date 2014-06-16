@@ -64,35 +64,6 @@ Thelma.chartUtils = {
 	    dims.barGap = 0.3;
 	    dims.numBars = polymerObj.chartData.length;  // DEPENDANT ON CHARTDATA
 	    dims.barWidth = Math.min(70,((dims.width / dims.numBars)/(1+dims.barGap)));
-	    
-
-	    // SHOULD THESE GO IN BARCHART?
-	    // -----
-	    // Value dimensions
-	    dims.maxValueLength = d3.max(polymerObj.chartData, function(d){  // DEPENDANT ON CHARTDATA
-	    	return  d.display_value ? d.display_value.length : d.value.toString().length;
-	   	 });
-	    dims.valueSize = Math.min(50,((dims.barWidth*0.8) / dims.maxValueLength / 0.6) );
-	    dims.spacing = dims.valueSize * 0.25;
-
-	    // Adjust top margin as necessary
-	    if ((dims.valueSize+dims.spacing) > dims.margin.top) { 
-	    	dims.margin.top = dims.valueSize+dims.spacing;
-	    }
-
-	    // Check if labels overlap
-	    dims.maxLabelLength = d3.max(polymerObj.chartData, function(d){ return  d.label.length;}); // DEPENDANT ON CHARTDATA 
-	    dims.labelWidthEst = dims.maxLabelLength * 5.25; // This calc works with the current font-size
-
-	    // If labels are long, angle them and adjust margin
-	    if (dims.labelWidthEst > dims.barWidth) { 
-	    	dims.labelAngle = 25;
-	    	dims.margin.bottom = dims.labelWidthEst;
-	    	// need to adjust margin right when last label is long, so it does not cut off
-	    } else {
-	    	dims.labelAngle = 0;
-	    }
-	    // -----
 
 	    return dims;
 

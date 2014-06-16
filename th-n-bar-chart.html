@@ -26,6 +26,30 @@
 	    	  	  width = self.dims.width,
 	    	      height = self.dims.height;
 
+			    // Value dimensions
+			    self.dims.maxValueLength = d3.max(self.chartData, function(d){  
+			    	return  d.display_value ? d.display_value.length : d.value.toString().length;
+			   	 });
+			    self.dims.valueSize = Math.min(50,((self.dims.barWidth*0.8) / self.dims.maxValueLength / 0.6) );
+			    self.dims.spacing = self.dims.valueSize * 0.25;
+
+			    // Adjust top margin as necessary
+			    if ((self.dims.valueSize+self.dims.spacing) > self.dims.margin.top) { 
+			    	self.dims.margin.top = self.dims.valueSize+self.dims.spacing;
+			    }
+
+			    // Check if labels overlap
+			    self.dims.maxLabelLength = d3.max(self.chartData, function(d){ return  d.label.length;}); 
+			    self.dims.labelWidthEst = self.dims.maxLabelLength * 5.25; // This calc works with the current font-size
+
+			    // If labels are long, angle them and adjust margin
+			    if (self.dims.labelWidthEst > self.dims.barWidth) { 
+			    	self.dims.labelAngle = 25;
+			    	self.dims.margin.bottom = self.dims.labelWidthEst;
+			    	// need to adjust margin right when last label is long, so it does not cut off
+			    } else {
+			    	self.dims.labelAngle = 0;
+			    }
 
 		      //self.extractElementDataPoints(); //needed?
 

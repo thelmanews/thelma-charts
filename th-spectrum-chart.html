@@ -5,147 +5,140 @@
 
 	<script>
 		Polymer('th-spectrum-chart', {
-		  chartData: [{label: 'medicaid', range: { min: { value: 10, display_value: '$10'}, max: { value: 50, display_value: '$50'}}},
-		              {label: 'federal', color: '#888', pattern: 'stripe',  range: { min: { value: 40, display_value: '$40'}, max: { value: 60, display_value: '$60'}}},
-		              {label: 'medicare', range: { min: { value: 70, display_value: '$70'}, max: { value: 100, display_value: '$100'}}}],
+		  chartData: [{label: 'Medicaid', range: { min: { value: 10, display_value: '$10'}, max: { value: 50, display_value: '$50'}}},
+		              {label: 'Federal', color: '#888', pattern: 'stripe',  range: { min: { value: 40, display_value: '$40'}, max: { value: 60, display_value: '$60'}}},
+		              {label: 'Medicare', range: { min: { value: 70, display_value: '$70'}, max: { value: 100, display_value: '$100'}}}],
 		  orientation: 'vertical',
 		  init: function() {
-		    var margin = {
-		          top : 5,
-		          right : 0,
-		          bottom : 5,
-		          left : 0,
-		          label: 3
-		      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.55 - margin.top - margin.bottom
-		         , barWidth = width* 0.12 , textLabelMargin = height*0.05;
+		    var self = this;
+          
+        // setup dimensions
+        self.dims = self.setupDimensions(self);
+        var margin = self.dims.margin,
+            width = self.dims.width,
+            height = self.dims.height,
+            barWidth = Math.min(90,(self.dims.width/3)); // override the default
 
-		      console.log(this.chartData);
+        // setup scales
+        var scales = self.simpleScaleBuilder(width, height, self.chartData),
+            x = scales.x,
+            y = scales.y;
 
-		      this.height = height;
+        self.y = y;
+        self.x = x;
+	      
+        // setup chart area
+        var chart_svg = this.$.chart;
+        self.svg = d3.select(chart_svg);
 
-		      this.x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+	      /* adding stripe pattern and mask */
 
-		      var y = d3.scale.linear().range([0, height]);
-		      this.y = y;
+	      var defs = self.svg.append("defs");
+	      defs.append("pattern")
+	        .attr("id","pattern-stripe")
+	        .attr("width", 1)
+	        .attr("height", 5)
+	        .attr("patternUnits", "userSpaceOnUse")
+	        .attr("patternTransform", "rotate(45)")
+	        .append("rect")
+	          .attr("width", 1)
+	          .attr("height", 1)
+	          .attr("transform", "translate(0,0)")
+	          .attr("fill", "white");
 
-		      var chart_svg = this.$.chart;
-
-		      // var colors = d3.scale.category10();
-		      // colors.domain(this.chartData.length);
-
-
-		      var svg = d3.select(chart_svg);
-
-		      /* adding stripe pattern and mask */
-
-		      var defs = svg.append("defs");
-		      defs.append("pattern")
-		        .attr("id","pattern-stripe")
-		        .attr("width", 1)
-		        .attr("height", 5)
-		        .attr("patternUnits", "userSpaceOnUse")
-		        .attr("patternTransform", "rotate(45)")
-		        .append("rect")
-		          .attr("width", 1)
-		          .attr("height", 1)
-		          .attr("transform", "translate(0,0)")
-		          .attr("fill", "white");
-
-		      defs.append("mask")
-		      .attr("id","mask-stripe")
-		      .append("rect")
-		        .attr("width", "100%")
-		        .attr("height", "100%")
-		        .attr("x", 0)
-		        .attr("y", 0)
-		        .attr("fill", "url(#pattern-stripe)");
+	      defs.append("mask")
+	      .attr("id","mask-stripe")
+	      .append("rect")
+	        .attr("width", "100%")
+	        .attr("height", "100%")
+	        .attr("x", 0)
+	        .attr("y", 0)
+	        .attr("fill", "url(#pattern-stripe)");
 
 
-		      this.container = svg.attr('width', width + margin.left + margin.right)
-		          .attr('height', height + margin.top + margin.bottom)
-		          .append('g')
-		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+	      self.container = self.svg.attr('width', width + margin.left + margin.right)
+	          .attr('height', height + margin.top + margin.bottom)
+	          .append('g')
+	          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-		      
+	      
+	      var dataMargin = 0.1;  // 10% extra space     
 
+	      var minmin = d3.min(self.chartData, function(d) { return d.range.min.value;});
 
-		      var dataMargin = 0.1;  // 10% extra space     
+	      var maxmax = d3.max(self.chartData, function(d) { return d.range.max.value;});
 
-		      var minmin = d3.min(this.chartData, function(d) { return d.range.min.value;});
+	      var marginValue = (maxmax-minmin)* dataMargin;
+	      var wholeRange = {min : minmin-marginValue, max:  maxmax+marginValue};
+	      console.log(wholeRange);
 
-		      var maxmax = d3.max(this.chartData, function(d) { return d.range.max.value;});
+	      y.domain([wholeRange.min,wholeRange.max]); 
 
-		      var marginValue = (maxmax-minmin)* dataMargin;
-		      var wholeRange = {min : minmin-marginValue, max:  maxmax+marginValue};
-		      console.log(wholeRange);
+	      var spectrum = self.container.selectAll('.spectrum').data([wholeRange]).enter().append('rect').attr('class','spectrum');
 
-		      y.domain([wholeRange.min,wholeRange.max]); 
+	      spectrum.style('fill', function(d,i) {return '#FFF';})
+	        .attr('x', width/2 - barWidth/2)
+	        .attr('y', function(d) {return y(wholeRange.min)})
+	        .attr('width',barWidth)
+	        .attr('height', function(d) {return y(wholeRange.max)});
 
-		      var spectrum = this.container.selectAll('.spectrum').data([wholeRange]).enter().append('rect').attr('class','spectrum');
-		      console.log('spectrum');
-		      console.log(spectrum);
-		        
-		      spectrum.style('fill', function(d,i) {return '#FFF';})
-		        .attr('x', width/2 - barWidth/2)
-		        .attr('y', function(d) {return y(wholeRange.min)})
-		        .attr('width',barWidth)
-		        .attr('height', function(d) {return y(wholeRange.max)});
-
-		      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
-		      //console.log(this.bars);
-		      this.bars
-		        .attr("class", function(d,i){ return "data"+i; })
-		        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
-		        .attr('x', width/2 - barWidth/2)
-		        //.attr('y', 0)
-		        .attr('y', function(d) {return height - y(d.range.max.value)})
-		        .attr('width',barWidth)
-		        .attr('height', 0);
+	      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
+	      //console.log(this.bars);
+	      self.bars
+	        .attr("class", function(d,i){ return "bar data"+i; })
+	        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
+	        .attr('x', width/2 - barWidth/2)
+	        //.attr('y', 0)
+	        .attr('y', function(d) {return height - y(d.range.max.value)})
+	        .attr('width',barWidth)
+	        .attr('height', 0);
 
 
-		      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
-		      //console.log(this.bars);
-		      this.labels
-		        .attr("class", function(d,i){return "data"+i;})
-		        .style('opacity', 0)
-		        .style('text-anchor','end')
-		        .attr('x', width/2 - barWidth/2 - margin.label)
-		        .attr('y', function(d) {return height -  y(d.range.max.value) + 12;}) 
-		        .text(function(d) {return d.label;});
-		      
-		      this.values = this.container.selectAll('.value').data(this.chartData).enter()
-		      	.append('text')
-		      	.attr('class', function(d,i){return "value data"+i;});
-		      //console.log(this.bars);
-		      this.values
-		        .style('opacity', 0)
-		        .attr('x', width/2 + barWidth/2 + margin.label)
-		        .attr('y', function(d) {return height - y(d.range.max.value) + 12;}) 
-		        .text(function(d) {return d.range.max.display_value ? d.range.max.display_value : d.range.max.value ;});
+	      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+	      //console.log(this.bars);
+	      self.labels
+	        .attr("class", function(d,i){return "label data"+i;})
+	        .style('opacity', 0)
+	        .style('text-anchor','end')
+	        .attr('x', width/2 - barWidth/2 - margin.label)
+	        .attr('y', function(d) {return height - y(d.range.max.value - ((d.range.max.value - d.range.min.value)/2));}) 
+	        .text(function(d) {return d.label;});
+	      
+	      self.values = this.container.selectAll('.value').data(this.chartData).enter()
+	      	.append('text')
+	      	.attr('font-size', '13px')
+	      	.attr('font-weight', 300)
+	      	.attr('class', function(d,i){return "value data"+i;});
+	      //console.log(this.bars);
+	      self.values
+	        .style('opacity', 0)
+	        .attr('x', width/2 + barWidth/2 + margin.label)
+	        .attr('y', function(d) {return height - y(d.range.max.value - ((d.range.max.value - d.range.min.value)/2));}) 
+	        .text(function(d) {return d.range.max.display_value ? d.range.max.display_value : d.range.max.value ;});
 
 		  },
 		  reset: function() {
-		      
-		      var height= this.height;
-		      this.bars.transition().duration(this.animationDelay).attr('height', 0);
-		      this.labels.transition().duration(this.animationDelay).style('opacity', 0);
-		      this.values.transition().duration(this.animationDelay).style('opacity', 0);
+	      var self = this;
+	      var height= this.height;
+	      self.bars.transition().duration(this.animationDelay).attr('height', 0);
+	      self.labels.transition().duration(this.animationDelay).style('opacity', 0);
+	      self.values.transition().duration(this.animationDelay).style('opacity', 0);
 		      
 		  },
 		  
 		  animate: function() {
+	  		var self = this;
+        var y = self.y;
+        var labels = self.labels;
+        var delay = self.animationDelay;
+        self.bars.transition().duration(delay).delay(function(d,i) { return i*delay;})
+        .attr('height', function(d) {return y(d.range.max.value - d.range.min.value)});
 
-		        var y = this.y;
-		        var labels = this.labels;
-		        var delay = this.animationDelay;
-		        this.bars.transition().duration(delay).delay(function(d,i) { return i*delay;})
-		        .attr('height', function(d) {return y(d.range.max.value - d.range.min.value)});
-
-		        this.labels.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
-		        .style('opacity', 1);
-		        
-		        this.values.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
-		        .style('opacity', 1);
+        self.labels.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
+        .style('opacity', 1);
+	        
+	        self.values.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
+	        .style('opacity', 1);
 
 		  },
 		  chartSpecificDataValidate: function() {
