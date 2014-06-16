@@ -250,15 +250,13 @@
 			        .attr('x', function(d) { return x(d.label); })
 			        .attr('width',self.dims.barWidth);
 
-
-			      
 			      self.labels
 			        .attr("class", function(d,i){return "label data"+i;})
 			        .style('text-anchor',function(){ return self.dims.labelAngle > 0 ? "left" : "middle"})
 			        .attr('transform', function(d,i){
 			        	var xPos = x(d.label) + self.dims.barWidth/2;
 			        	var yPos = height + 16;
-			        	var rotation = self.dims.angle;
+			        	var rotation = self.dims.labelAngle;
 			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
 			        });
 			        // .attr('x', function(d) { return x(d.label); })

@@ -22,7 +22,7 @@
 
           self.height = height;
 
-          // peak declarations
+          // peak formats
           var numOfPeaks = self.chartData.length, 
               overlap = 1.2, // the higher the number, the more overlap
               peakWidth = (width / numOfPeaks)*overlap,
@@ -36,10 +36,41 @@
           self.peakLine = peakLine;
           self.peakLineStart = peakLineStart;
 
-          // scales
-          var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
-          var y = d3.scale.linear().range([0, height]);
+          // Value dimensions
+          self.dims.maxValueLength = d3.max(self.chartData, function(d){  
+            return  d.display_value ? d.display_value.length : d.value.toString().length;
+           });
+          self.dims.valueSize = Math.min(30,((peakWidth/2) / self.dims.maxValueLength / 0.6) );
+          self.dims.spacing = self.dims.valueSize * 0.25;
+
+          // Adjust top margin as necessary
+          if ((self.dims.valueSize+self.dims.spacing) > self.dims.margin.top) { 
+            self.dims.margin.top = self.dims.valueSize+self.dims.spacing;
+          }
+
+          // Check if labels overlap
+          self.dims.maxLabelLength = d3.max(self.chartData, function(d){ return  d.label.length;}); 
+          self.dims.labelWidthEst = self.dims.maxLabelLength * 5.25; // This calc works with the font-size 13px
+
+          // If labels are long, angle them and adjust margin
+          if (self.dims.labelWidthEst > peakWidth/1.5) { 
+            self.dims.labelAngle = 25;
+            self.dims.margin.bottom = self.dims.labelWidthEst;
+            // need to adjust margin right when last label is long, so it does not cut off
+          } else {
+            self.dims.labelAngle = 0;
+          }
+
+
+          // creating scales
+          var scales = self.simpleScaleBuilder(width, height, self.chartData);
+
+          var x = scales.x;
+          var y = scales.y;
+
+          // is there a better way than exposing these?!
           self.y = y;
+          self.x = x;
 
           // chart positioning
           var chart_svg = self.$.chart;
@@ -49,11 +80,6 @@
               .append('g')
               .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
           var max = d3.max(self.chartData, function(d) {return d.value});
-
-          y.domain([0, max]); 
-          x.domain(self.chartData.map(function(d) {
-            return d.label;
-          }));
  
           // transform chartData for paths
           var lastEdge = 0;
@@ -78,11 +104,14 @@
           self.labels = self.container.selectAll('.label')
             .data(self.chartData)
             .enter().append('text')
-              .attr('class', function(d,i){return "label data"+i;})
-              //.style('opacity', 0)
-              .style('text-anchor','middle')
-              .attr('x', function(d,i) { return ((peakWidth/2) + (peakWidth/overlap*i/overlap)); })
-              .attr('y', height + 14) //12: font size
+              .attr('class', function(d,i){return "label data"+i;})              
+              .style('text-anchor', function(){ return self.dims.labelAngle > 0 ? "left" : "middle"})
+              .attr('transform', function(d,i){
+                var xPos = (peakWidth/2) + (peakWidth/overlap*i/overlap);
+                var yPos = height + 16;
+                var rotation = self.dims.labelAngle;
+                return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
+              })
               .text(function(d) {return d.label;});
             
           // append values  
@@ -91,6 +120,7 @@
             .enter().append('text')
               .attr('class', function(d,i){return "value data"+i;})
               .style('text-anchor','middle')
+              .attr('font-size', self.dims.valueSize)
               .style('opacity', 0)
               .attr('x', function(d,i) { return ((peakWidth/2) + (peakWidth/overlap*i/overlap)); })
               .text(function(d) {return d.display_value ? d.display_value : d.value ;});
@@ -116,7 +146,7 @@
             
             self.values.transition(self.animationDelay)
               .duration(self.animationDelay)
-              .attr('y', function(d) {return height - y(d.value) - 2;})
+              .attr('y', function(d) {return height - y(d.value) - self.dims.spacing;})
               .style('opacity', 1);
 
       },
