@@ -9,7 +9,10 @@
         {label: 'Platinum', value: 50, display_value: '$50'},
         {label: 'Gold', value: 45, display_value: '$45'},
         {label: 'Silver', value: 30, display_value: '$30'},
-        {label: 'Bronze', value: 25, display_value: '$25'}   
+        {label: 'Bronze', value: 25, display_value: '$25'}
+        
+        
+
       ],
       init: function() {
         var self = this;
@@ -53,7 +56,7 @@
           self.dims.labelWidthEst = self.dims.maxLabelLength * 5.25; // This calc works with the font-size 13px
 
           // If labels are long, angle them and adjust margin
-          if (self.dims.labelWidthEst > peakWidth/1.5) { 
+          if (self.dims.labelWidthEst > peakWidth/1.6) { 
             self.dims.labelAngle = 25;
             self.dims.margin.bottom = self.dims.labelWidthEst;
             // need to adjust margin right when last label is long, so it does not cut off
