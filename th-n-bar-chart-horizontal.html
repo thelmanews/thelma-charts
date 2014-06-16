@@ -11,9 +11,7 @@
 		    {label: 'Player of the day', value: 15, display_value: '$15'},
 		    {label: 'Vendor of the night', value: 20, display_value: '$20'},
 		    {label: 'Cheerleader', value: 40, display_value: '$40'},
-		    {label: 'Designer', value: 70, display_value: '$70'},
-		    {label: 'Mascot of the lunch ', value: 45, display_value: '$45'},
-		    {label: ' of the lunch time', value: 15, display_value: '$45'}
+		    {label: 'Designer', value: 70, display_value: '$70'}
 		  ],
 		  // for making orientation a attribute
 		  dimensions: {'horizontal': 
@@ -34,18 +32,17 @@
 
 		      //self.extractElementDataPoints(); //needed?
 
-		      self.dataLenght = self.chartData.length;
+		      self.dataLength = self.chartData.length;
 
 		      var maxValueLength = d3.max(self.chartData, function(d) {
 		      	return d.display_value ? d.display_value.length : d.value.length;
 		      });
 
-		      console.log('maxLabelLength');
-		      console.log(maxValueLength);
-
-		      self.dims.labelHeight = 20;
+		      self.dims.barGap = 0.7; // Make this wider than default to make room for text
+		     	self.dims.barWidth = Math.min(70,((self.dims.width / self.dims.numBars)/(1+self.dims.barGap)));
+		      self.dims.labelHeight = 25;
 		      self.dims.valueHeight = self.dims.barWidth;
-		      self.dims.valueContainerWidth = maxValueLength * self.dims.valueHeight * 0.6;  // characters x font size x 0.6 (average width/height)
+		      self.dims.valueContainerWidth = maxValueLength * self.dims.valueHeight * 0.75;  // characters x font size x 0.6 (average width/height)
 
 
 		      var chart_svg = self.$.chart;
@@ -109,20 +106,15 @@
 		    	  x = self.x,
 		    	  y = self.y;
 
-			  self.svg
+			  	self.svg
 		      	.attr('width', width + margin.left + margin.right)
 		        .attr('height', height + margin.top + margin.bottom);
 
 		      // setting up the size. needed for resizing
 		      self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-		      console.log(y);
-		      console.log(y('Player'));
-		      console.log(y(0));
-
-		      
 		      this.bars
-		        .attr("class", function(d,i){return "data"+i;})
+		        .attr("class", function(d,i){return "bar data"+i;})
 		        .attr('x', x(0)) //function(d) { return x(d.label); })  rev
 		        .attr('y', function(d) { console.log(y(d.label)); return y(d.label); }) //function(d) { return height; })  rev
 		        .attr('width', 0)
@@ -131,7 +123,7 @@
 		      
 		      //console.log(this.bars);
 		      this.labels
-		        .attr("class", function(d,i){return "data"+i;})
+		        .attr("class", function(d,i){return "label data"+i;})
 		        //.style('opacity', 0)
 		        .style('text-anchor','left')
 		        .attr('y', function(d) { return y(d.label) + self.dims.barWidth + self.dims.labelHeight* 0.6; })
@@ -139,11 +131,11 @@
 
 		      //console.log(this.bars);
 		      this.values
-		        .attr("class", function(d,i){return "data"+i;})
+		        .attr("class", function(d,i){return "value data"+i;})
 		        .style('text-anchor','end')
 		        //.style('opacity', 0)
 		        .attr('y', function(d) { return y(d.label) + self.dims.barWidth/2 + self.dims.valueHeight* 0.4; })
-		        .attr('x', self.dims.valueContainerWidth - 2)
+		        .attr('x', self.dims.valueContainerWidth - 8)
 		        .style('font-size', self.dims.valueHeight+'px');
 
 		        
@@ -229,11 +221,11 @@
 			      self.labels = self.container.selectAll('.label').data(self.chartData);
 			       self.values=self.container.selectAll('.value').data(self.chartData);
 
-		  	  if(self.dataLenght!=self.chartData.length)
+		  	  if(self.dataLength!=self.chartData.length)
 		  	  {
 		  	  	  console.log('data length changed');
 
-		  	  	  self.dataLenght = self.chartData.length;
+		  	  	  self.dataLength = self.chartData.length;
 
 			      self.bars.enter().append('rect').attr('class','bar').attr('height', 0).attr('y', height);
 
