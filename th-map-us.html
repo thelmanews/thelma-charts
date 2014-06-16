@@ -14,9 +14,18 @@
 	      	stroke: #CCC;
 	      }
 
+	      .cross {
+	      	fill: #FFF;
+	      }
+
 
 	    </style>
 	    <svg id="chart"></svg>
+
+	    <g id="cross" style="display: none">
+   			<path stroke-width="0.25pt" id="path4950" d="m100,60l-40,40l170,170l40,-40l-170,-170z"/>
+   			<path  stroke-width="0.25pt" id="path4952" d="m60,230l170,-170l40,40l-170,170l-40,-40z"/>
+  		</g>
 	</template>
 	
 	<script src="../bower_components/topojson/topojson.js"></script> 
@@ -25,14 +34,14 @@
 	
 		Polymer('th-map-us', {
 			
-		  	chartData: [
+		  	chartData: 
 		  		{ marked_states : 
 			  		['Alabama', 'Alaska', 'Florida', 'Georgia', 'Idaho', 'Indiana',
 				    'Kansas', 'Louisiana', 'Maine', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'New Hampshire',
 				    'North Carolina', 'Oklahoma', 'Pennsylvania', 'South Carolina', 'South Dakota', 'Tennessee',
 				    'Texas', 'Utah', 'Virginia', 'Wisconsin', 'Wyoming']}
 
-			],
+			,
 			dataUrls : {
                 us: "data/us.json"
                //, medicaid: "medicaid.json"
@@ -68,7 +77,7 @@
 		      	self.svg = d3.select(chart_svg);
             
             	// make a map
-	             map = self.svg.append('g')
+	             self.map = self.svg.append('g')
 	                .attr('class','states_map')
 	                .style('height', height + 'px')
 	                .style('width', width + 'px');
@@ -87,7 +96,7 @@
                 var  states = topojson.feature(us, us.objects.states);
             
             
-                var states = map.selectAll('path.state')
+                var states = self.map.selectAll('path.state')
                     .data(states.features)
                   .enter().append('path')
                     .attr('class', function(d) { 
@@ -101,7 +110,54 @@
                     });
 
                     
-             }  
+             }, 
+
+             animate : function() {
+		        //$('.state').css('fill','#2B95CA');
+
+		        var self = this;
+		        var centers = self.centers;
+
+		        var initDelay = 100;
+		        var pause = 100;
+		        //if(mark=='cross') {
+
+		        var crossSvg = this.$.cross;
+		        console.log(crossSvg);
+
+		           var scale = 0.06;
+
+
+		           var crosses = self.map.selectAll('.cross').data(self.chartData.marked_states).enter().append('g')
+		            .attr('class', function(d) {
+		                var name = d.toLowerCase().replace(/ /g,"-");
+		                return 'cross cross-'+name;
+		            })
+		            .style('opacity',0)
+		            .attr('transform', function(d, i) {
+		                var name = d.toLowerCase().replace(/ /g,"-");
+		                //TODO change to a more elegant formatting....
+		            	return 'translate ('+parseInt(centers[name][0]-7)+','+parseInt(centers[name][1]-7)+') scale('+scale+','+scale+')';
+		            })
+		            .attr('width', 12)
+		            .attr('height', 12);
+
+		            crosses.append('path')
+		            .attr('d', 'm100,60l-40,40l170,170l40,-40l-170,-170z');
+
+		            crosses.append('path')
+		            .attr('d', 'm60,230l170,-170l40,40l-170,170l-40,-40z');
+		            
+		            
+		            //whiy a new select is needed instead of working on crosses?
+		            self.map.selectAll('.cross').transition().duration(pause).delay(function(d, i) {
+		                return i * pause;
+		            })
+		            .style('opacity',1);
+		       //} 
+
+
+		   }
                 
             
             
