@@ -1,0 +1,113 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+<
+<polymer-element name="th-map-us" extends="th-d3-chart">
+	<template>
+	    <style>
+
+	      :host {
+	        display: block;
+	        position: relative;
+	      }
+	      .state {
+	      	fill: none;
+	      	stroke: #CCC;
+	      }
+
+
+	    </style>
+	    <svg id="chart"></svg>
+	</template>
+	
+	<script src="../bower_components/topojson/topojson.js"></script> 
+
+	<script>
+	
+		Polymer('th-map-us', {
+			
+		  	chartData: [
+		  		{ marked_states : 
+			  		['Alabama', 'Alaska', 'Florida', 'Georgia', 'Idaho', 'Indiana',
+				    'Kansas', 'Louisiana', 'Maine', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'New Hampshire',
+				    'North Carolina', 'Oklahoma', 'Pennsylvania', 'South Carolina', 'South Dakota', 'Tennessee',
+				    'Texas', 'Utah', 'Virginia', 'Wisconsin', 'Wyoming']}
+
+			],
+			dataUrls : {
+                us: "data/us.json"
+               //, medicaid: "medicaid.json"
+       		},
+       		centers: [],
+			init: function() {
+		    
+			  	var self = this;
+			  	  
+			  	self.dims = self.setupDimensions(self);
+
+			  	self.formats = {
+                	percent: d3.format('%')
+            	};
+
+            	var width = self.dims.width,
+            		height = self.dims.height;
+            
+	            // projection and path setup
+	            var projection = d3.geo.albersUsa()
+	                .scale(width)
+	                .translate([width / 2, height / 2]);
+	            
+	            self.path = d3.geo.path()
+	                .projection(projection);
+
+	            console.log(self.path)
+            
+			    var chart_svg = self.$.chart;
+
+
+		      	//creating all the svg items
+		      	self.svg = d3.select(chart_svg);
+            
+            	// make a map
+	             map = self.svg.append('g')
+	                .attr('class','states_map')
+	                .style('height', height + 'px')
+	                .style('width', width + 'px');
+	            
+	            d3.json(self.dataUrls.us, function(error, us) {
+	            	console.log('json loaded');
+	                self.render(error,us);
+	            
+	            });    
+
+		  	},
+
+		  	render: function(err, us) {
+            	var self = this;
+                
+                var  states = topojson.feature(us, us.objects.states);
+            
+            
+                var states = map.selectAll('path.state')
+                    .data(states.features)
+                  .enter().append('path')
+                    .attr('class', function(d) { 
+                        //console.log(this);
+                        return 'state '+d.properties.name.toLowerCase().replace(/\s/g, '-'); 
+                    })
+                    .attr('d', self.path)
+                    .attr("centroid", function(d) {
+                      var centroid = self.path.centroid(d);
+                      self.centers[d.properties.name.toLowerCase().replace(/\s/g, '-')]= centroid;
+                    });
+
+                    
+             }  
+                
+            
+            
+        });
+
+
+	</script>
+
+</polymer-element>
