@@ -12,19 +12,18 @@
         {label: 'Bronze', value: 25, display_value: '$25'}   
       ],
       init: function() {
-        var margin = {
-              top : 15,
-              right : 0,
-              bottom : 20,
-              left : 0,
-              label: 3
-          }, 
-          width = this.chartWidth*0.95 - margin.left - margin.right, 
-          height = this.chartHeight*0.55 - margin.top - margin.bottom;
-          this.height = height;
+        var self = this;
+          
+        self.dims = self.setupDimensions(self);
+
+        var margin = self.dims.margin,
+              width = self.dims.width,
+              height = self.dims.height;
+
+          self.height = height;
 
           // peak declarations
-          var numOfPeaks = this.chartData.length, 
+          var numOfPeaks = self.chartData.length, 
               overlap = 1.2, // the higher the number, the more overlap
               peakWidth = (width / numOfPeaks)*overlap,
               peakWidthOverlap = peakWidth*overlap;
@@ -34,31 +33,31 @@
           var peakLine = d3.svg.line()
               .x(function(d) { return d.x; })
               .y(function(d) { return -d.y; });
-          this.peakLine = peakLine;
-          this.peakLineStart = peakLineStart;
+          self.peakLine = peakLine;
+          self.peakLineStart = peakLineStart;
 
           // scales
           var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
           var y = d3.scale.linear().range([0, height]);
-          this.y = y;
+          self.y = y;
 
           // chart positioning
-          var chart_svg = this.$.chart;
+          var chart_svg = self.$.chart;
 
-          this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
+          self.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
               .attr('height', height + margin.top + margin.bottom)
               .append('g')
               .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-          var max = d3.max(this.chartData, function(d) {return d.value});
+          var max = d3.max(self.chartData, function(d) {return d.value});
 
           y.domain([0, max]); 
-          x.domain(this.chartData.map(function(d) {
+          x.domain(self.chartData.map(function(d) {
             return d.label;
           }));
  
           // transform chartData for paths
           var lastEdge = 0;
-          var peakData = this.chartData.map(function(i){
+          var peakData = self.chartData.map(function(i){
           var coordinates = [{ x: lastEdge, y: -height},
                              {x: lastEdge + peakWidth, y: -height},
                              { x: lastEdge + peakWidth/2, y: -height+y(i.value)}];
@@ -67,7 +66,7 @@
           });
 
           // append peaks
-          this.peaks = this.container.selectAll('.peak')
+          self.peaks = self.container.selectAll('.peak')
             .data(peakData)
             .enter()
             .append('path')
@@ -76,8 +75,8 @@
               .attr('opacity', 0);
       
           // append labels
-          this.labels = this.container.selectAll('.label')
-            .data(this.chartData)
+          self.labels = self.container.selectAll('.label')
+            .data(self.chartData)
             .enter().append('text')
               .attr('class', function(d,i){return "label data"+i;})
               //.style('opacity', 0)
@@ -87,8 +86,8 @@
               .text(function(d) {return d.label;});
             
           // append values  
-          this.values = this.container.selectAll('.value')
-            .data(this.chartData)
+          self.values = self.container.selectAll('.value')
+            .data(self.chartData)
             .enter().append('text')
               .attr('class', function(d,i){return "value data"+i;})
               .style('text-anchor','middle')
@@ -98,32 +97,33 @@
 
       },
       reset: function() {
-          var height= this.height;
-          this.peaks.transition().duration(this.animationDelay).attr('d', this.peakLineStart).attr('opacity', 0);
-          this.values.transition().duration(this.animationDelay).attr('y', height ).style('opacity', 0);
+          var self = this;
+          var height= self.height;
+          self.peaks.transition().duration(self.animationDelay).attr('d', self.peakLineStart).attr('opacity', 0);
+          self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
           
       },
       
       animate: function() {
+            var self = this;
+            var y = self.y;
+            var height= self.height;
 
-            var y = this.y;
-            var height= this.height;
-
-            this.peaks.transition()
+            self.peaks.transition()
               .attr('opacity', 0.8)
-              .duration(this.animationDelay) 
-              .attr("d", this.peakLine);
+              .duration(self.animationDelay) 
+              .attr("d", self.peakLine);
             
-            this.values.transition(this.animationDelay)
-              .duration(this.animationDelay)
+            self.values.transition(self.animationDelay)
+              .duration(self.animationDelay)
               .attr('y', function(d) {return height - y(d.value) - 2;})
               .style('opacity', 1);
 
       },
       chartSpecificDataValidate: function() {
-        
+          var self = this;
           var errors = [],
-              numOfPeaks = this.chartData.length;
+              numOfPeaks = self.chartData.length;
 
           // There should be at least value.
           if(numOfPeaks === 0) {
@@ -132,13 +132,13 @@
             for (var i=0; i < numOfPeaks; i++){
               
               // There should be a value for every bar.
-              if (!this.chartData[i].value){ 
-                errors.push({ input: this.chartData, msg: 'You must include a value for every peak.'});
+              if (!self.chartData[i].value){ 
+                errors.push({ input: self.chartData, msg: 'You must include a value for every peak.'});
               }
               
               // There should be a label for every bar.
-              if (!this.chartData[i].label){ 
-                errors.push({ input: this.chartData, msg: 'You must include a label for every peak.'});
+              if (!self.chartData[i].label){ 
+                errors.push({ input: self.chartData, msg: 'You must include a label for every peak.'});
               }
             }
           }
