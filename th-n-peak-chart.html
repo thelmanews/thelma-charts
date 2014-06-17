@@ -10,9 +10,6 @@
         {label: 'Gold', value: 45, display_value: '$45'},
         {label: 'Silver', value: 30, display_value: '$30'},
         {label: 'Bronze', value: 25, display_value: '$25'}
-        
-        
-
       ],
       init: function() {
         var self = this;
@@ -20,30 +17,29 @@
         self.dims = self.setupDimensions(self);
 
         var margin = self.dims.margin,
-              width = self.dims.width,
-              height = self.dims.height;
+            width = self.dims.width,
+            height = self.dims.height;
 
-          self.height = height;
+        self.height = height;
 
-          // peak formats
-          var numOfPeaks = self.chartData.length, 
-              overlap = 1.2, // the higher the number, the more overlap
-              peakWidth = (width / numOfPeaks)*overlap,
-              peakWidthOverlap = peakWidth*overlap;
-          var peakLineStart = d3.svg.line()
+        self.formatBars(1.3, 1);
+
+        var peakLineStart = d3.svg.line()
               .x(function(d) { return d.x; })
               .y(function(d) { return height; });
-          var peakLine = d3.svg.line()
+        var peakLine = d3.svg.line()
               .x(function(d) { return d.x; })
               .y(function(d) { return -d.y; });
           self.peakLine = peakLine;
           self.peakLineStart = peakLineStart;
 
+
+
           // Value dimensions
           self.dims.maxValueLength = d3.max(self.chartData, function(d){  
             return  d.display_value ? d.display_value.length : d.value.toString().length;
            });
-          self.dims.valueSize = Math.min(30,((peakWidth/2) / self.dims.maxValueLength / 0.6) );
+          self.dims.valueSize = Math.min(30,((self.dims.peakWidth/2) / self.dims.maxValueLength / 0.6) );
           self.dims.spacing = self.dims.valueSize * 0.25;
 
           // Adjust top margin as necessary
@@ -51,18 +47,7 @@
             self.dims.margin.top = self.dims.valueSize+self.dims.spacing;
           }
 
-          // Check if labels overlap
-          self.dims.maxLabelLength = d3.max(self.chartData, function(d){ return  d.label.length;}); 
-          self.dims.labelWidthEst = self.dims.maxLabelLength * 5.25; // This calc works with the font-size 13px
-
-          // If labels are long, angle them and adjust margin
-          if (self.dims.labelWidthEst > peakWidth/1.6) { 
-            self.dims.labelAngle = 25;
-            self.dims.margin.bottom = self.dims.labelWidthEst;
-            // need to adjust margin right when last label is long, so it does not cut off
-          } else {
-            self.dims.labelAngle = 0;
-          }
+          self.formatLabels(self.chartData, self.dims.peakWidth, self.dims);
 
 
           // creating scales
@@ -88,9 +73,9 @@
           var lastEdge = 0;
           var peakData = self.chartData.map(function(i){
           var coordinates = [{ x: lastEdge, y: -height},
-                             {x: lastEdge + peakWidth, y: -height},
-                             { x: lastEdge + peakWidth/2, y: -height+y(i.value)}];
-            lastEdge = lastEdge + (peakWidth/overlap)/overlap;
+                             {x: lastEdge + self.dims.peakWidth, y: -height},
+                             { x: lastEdge + self.dims.peakWidth/2, y: -height+y(i.value)}];
+            lastEdge = lastEdge + (self.dims.peakWidth/self.dims.overlap)/self.dims.overlap;
             return coordinates;
           });
 
@@ -128,6 +113,38 @@
               .attr('x', function(d,i) { return ((peakWidth/2) + (peakWidth/overlap*i/overlap)); })
               .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
+      },
+      formatBars: function(overlap, gap){
+          var self = this;
+          var dims = self.dims;
+          var chartData = self.chartData;
+
+          dims.bars = {};
+          dims.bars.count = chartData.length;
+          dims.overlap = overlap || 1; // the higher the number, the more overlap
+          dims.gap = gap || 1;
+          dims.peakWidth = (dims.width / dims.bars.count)* dims.overlap / dims.gap;
+          dims.peakWidthOverlap = dims.peakWidth*dims.overlap;
+          console.log(dims);
+          return dims
+      },
+      formatValues: function(chartData, dims){
+
+      },
+      formatLabels: function(chartData, peakWidth, dims){
+          // Check if labels overlap
+          dims.maxLabelLength = d3.max(chartData, function(d){ return  d.label.length;}); 
+          dims.labelWidthEst = dims.maxLabelLength * 5.25; // This calc works with the font-size 13px
+
+          // If labels are long, angle them and adjust margin
+          if (dims.labelWidthEst > peakWidth/1.6) { 
+            dims.labelAngle = 25;
+            dims.margin.bottom = dims.labelWidthEst;
+            // need to adjust margin right when last label is long, so it does not cut off
+          } else {
+            dims.labelAngle = 0;
+          }
+          return dims;
       },
       reset: function() {
           var self = this;
