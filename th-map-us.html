@@ -12,10 +12,9 @@
 	        display: block;
 	        position: relative;
 	      }
-	      .state {
-	      	fill: none;
-	      	stroke: #CCC;
-	      }
+	      
+
+
 
 	     
 
@@ -45,6 +44,7 @@
                 us: "data/us.json"  //TODO needs to be corrected!
        		},
        		centers: [],
+       		centered: false,
 			init: function() {
 		    
 			  	var self = this;
@@ -73,12 +73,14 @@
 
 		      	//creating all the svg items
 		      	self.svg = d3.select(chart_svg);
+
+		      	self.svg.style('height', height + 'px')
+	                .style('width', width + 'px');
+
             
             	// make a map
 	             self.map = self.svg.append('g')
-	                .attr('class','states_map')
-	                .style('height', height + 'px')
-	                .style('width', width + 'px');
+	                .attr('class','states_map');
 	            
 	            d3.json(self.dataUrls.us, function(error, us) {
 	            	console.log('json loaded');
@@ -94,16 +96,19 @@
                 var scale = 0.06,
 		        	centers = self.centers,
                 	states = topojson.feature(us, us.objects.states);
-            
+
+
             
                 var states = self.map.selectAll('path.state')
                     .data(states.features)
                   .enter().append('path')
                     .attr('class', function(d) { 
                         //console.log(this);
-                        return 'state '+d.properties.name.toLowerCase().replace(/\s/g, '-'); 
+                        return 'state map-border '+d.properties.name.toLowerCase().replace(/\s/g, '-'); 
                     })
                     .attr('d', self.path)
+                    //.style('fill', CoreStyle.g.theme.background)
+                    .on("click", function(d) { self._clicked(d,self); })
                     .attr("centroid", function(d) {
                       var centroid = self.path.centroid(d);
                       centers[d.properties.name.toLowerCase().replace(/\s/g, '-')]= centroid;
@@ -123,6 +128,8 @@
 	            })
 	            .attr('width', 12)
 	            .attr('height', 12);
+	            //.on("click", self.clicked);	// d is going to be state name
+
 
 	            self.crosses.append('path')
 	            .attr('d', 'm100,60l-40,40l170,170l40,-40l-170,-170z');
@@ -130,6 +137,7 @@
 	            self.crosses.append('path')
 	            .attr('d', 'm60,230l170,-170l40,40l-170,170l-40,-40z');
 
+	          
                     
              }, 
              reset : function() {
@@ -137,7 +145,37 @@
              	self.crosses.style('opacity', 0);
 
              },
+             
+             _clicked: function(d, self) {  //TODO make it realy private
+             	  //var self = this;
+             	  console.log(self);
+              	  console.log('clicked');
+              	  console.log(d);
+                  var x, y, k,
+                  	  width = self.dims.width,
+                  	  height = self.dims.height;
 
+				  if (d && self.centered !== d) {
+				    var centroid = self.path.centroid(d);
+				    x = centroid[0];
+				    y = centroid[1];
+				    k = 4;
+				    self.centered = d;
+				  } else {
+				    x = width / 2;
+				    y = height / 2;
+				    k = 1;
+				    self.centered = null;
+				  }
+
+				  self.map.selectAll("path")
+				      .classed("active", self.centered && function(d) { return d === self.centered; });
+
+				  self.map.transition()
+				      .duration(750)
+				      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+				      .style("stroke-width", 1.5 / k + "px");
+              },
              animate : function() {
 
 		        var self = this;
