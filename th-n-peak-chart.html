@@ -100,8 +100,7 @@
             .y(function(d) { return height; });
         self.peakLine = d3.svg.line()
             .x(function(d) { return d.x; })
-            .y(function(d) { return -d.y; });
-       
+            .y(function(d) { return -d.y; });    
 
         self.peaks
           .attr('d', self.peakLineStart)
@@ -110,7 +109,6 @@
         self.labels
             .style('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
             .attr('transform', function(d,i){
-            
               var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
               var yPos = height + 16;
               var rotation = labelDims.angle;
@@ -152,7 +150,25 @@
 
       },
       resize: function(){
+        var self = this;
 
+        self.setupDimensions(self);
+        self.setupContainerSize(self);
+        self.margin = self.dims.margin;
+        self.width = self.dims.width;
+        self.height = self.dims.height;
+
+        var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
+        self.x = scales.x;
+        self.y = scales.y;
+
+        self.setupBarDims(self, 1.25); // self, overlap, gap
+        self.setupLabelDims(self);
+        self.setupValueDims(self);
+        self._setElementSizes();
+        self.animate();
+
+        
       },
       updateData: function(){
         
