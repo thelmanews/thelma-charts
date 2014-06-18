@@ -21,9 +21,9 @@
         self.height = height;
 
         // format based on chartData
-        var bars = self.formatBars(1.25); // pass in overlap to override default
-        var labels = self.formatLabels();
-        var values = self.formatValues();
+        var bars = self.formatBars(self, 1.25); // pass in overlap to override default
+        var labels = self.formatLabels(self);
+        var values = self.formatValues(self);
 
         // creating scales
         var scales = self.simpleScaleBuilder(width, height, self.chartData);
@@ -97,63 +97,6 @@
             .attr('y', height)
             .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
-      },
-      formatBars: function(overlap, gap){ // MOVE TO UTILS?
-          var self = this,
-              dims = self.dims,
-              chartData = self.chartData;
-
-          dims.bars = {};
-          dims.bars.count = chartData.length;
-          dims.bars.overlap = overlap || 1; // the higher the number, the more overlap
-          dims.bars.gap = gap || 1;
-          dims.bars.width = (dims.width / dims.bars.count)* dims.bars.overlap / dims.bars.gap;
-          dims.bars.widthOverlap = dims.bars.width*dims.bars.overlap;
-       
-          return dims.bars
-      },
-      formatValues: function(){ // MOVE TO UTILS?
-        var self = this,
-            dims = self.dims,
-            chartData = self.chartData;
-        
-        dims.values = {};
-        dims.values.maxLength = d3.max(chartData, function(d){  
-          return  d.display_value ? d.display_value.length : d.value.toString().length;
-         });
-        dims.values.size = Math.min(30,((dims.bars.width/2) / dims.values.maxLength / 0.6) );
-        dims.values.spacing = dims.values.size * 0.25;
-
-        // Adjust top margin as necessary
-        if ((dims.values.size+dims.values.spacing) > dims.margin.top) { 
-          dims.margin.top = dims.values.size+dims.values.spacing;
-        }
-
-        return dims.values;
-
-      },
-      formatLabels: function(){ // MOVE TO UTILS?
-          // Check if labels overlap and angle them if they do
-          var self = this,
-              chartData = self.chartData,
-              dims = self.dims;
-          
-          dims.labels = {};
-          dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
-          dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
-
-          // If labels are long, angle them and adjust margin
-          if (dims.labels.width > dims.bars.width/1.6) { 
-            dims.labels.angle = 25;
-            dims.margin.bottom = dims.labels.width;
-            dims.margin.right = dims.labels.width;
-            
-            // need to adjust margin right when last label is long, so it does not cut off
-          } else {
-            dims.labels.angle = 0;
-          }
-
-          return dims.labels;
       },
       chartSetup: function(){
 
