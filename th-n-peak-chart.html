@@ -18,7 +18,7 @@
         self.dims = self.setupDimensions(self);
         self.width = self.dims.width;
         self.height = self.dims.height;
-        
+    
         // format chart elements based on chartData
         self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
         self.labelDims = self.setupLabelDims(self);
@@ -34,7 +34,7 @@
         self.peakData = self._setupData();
         self._setupElements();
         self._setupElementSizes();
-
+        self.dataLength = self.peakData.length;
       },
       _setupContainerSize: function(){
         var self = this,
@@ -152,25 +152,72 @@
       resize: function(){
         var self = this;
 
-        self.setupDimensions(self);
-        self.setupContainerSize(self);
-        self.margin = self.dims.margin;
+        // setup dimensions
+        self.dims = self.setupDimensions(self);
         self.width = self.dims.width;
         self.height = self.dims.height;
-
+    
+        // format chart elements based on chartData
+        self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
+        self.labelDims = self.setupLabelDims(self);
+        self.valueDims = self.setupValueDims(self);
+     
+        // create scales
         var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
         self.x = scales.x;
         self.y = scales.y;
 
-        self.setupBarDims(self, 1.25); // self, overlap, gap
-        self.setupLabelDims(self);
-        self.setupValueDims(self);
-        self._setElementSizes();
+        // setup container, rearrange data for peaks, setup starting state of peaks
+        self._setupContainerSize();
+        self._setupElementSizes();
         self.animate();
-
-        
       },
       updateData: function(){
+        var self = this;
+
+        var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
+        self.x = scales.x;
+        self.y = scales.y;
+        self.margin = self.dims.margin;
+        self.width = self.dims.width;
+        self.height = self.dims.height;
+
+        self.peakData = self._setupData();
+
+        self.peaks = self.container.selectAll('.peak').data(self.peakData);
+        self.labels = self.container.selectAll('.label').data(self.chartData);
+        self.values = self.container.selectAll('.value').data(self.chartData);
+
+
+        if(self.dataLength!=self.peakData.length) {
+          
+          // self._setupData();
+          self.dataLength = self.peakData.length;
+          self._setupContainerSize();
+
+          self.peaks.enter().append('path').attr('class',function(d,i){return "peak data"+i;}).attr('height', 0).attr('y', height);
+          self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;});
+          self.values.enter().append('text').attr('class', function(d,i){return "value data"+i;});
+
+          self.peaks.exit().remove();
+          self.labels.exit().remove();
+          self.values.exit().remove();
+
+          self.setupBarDims(self, 1.25); // self, overlap, gap
+          self.setupLabelDims(self);
+          self.setupValueDims(self);
+          // self._setElements();
+          self._setElementSizes();
+
+          }
+
+          // this is independent of size but dependent on data
+          self.labels.text(function(d) {return d.label;});
+          self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+
+          self.animate();
+
         
       },
       chartSpecificDataValidate: function() {
