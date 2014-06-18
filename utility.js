@@ -94,7 +94,7 @@ Thelma.chartUtils = {
 	    return scales;
 
 	},
-	formatValues: function(polymerObj){ 
+	setupValueDims: function(polymerObj){ 
         var dims = polymerObj.dims,
             chartData = polymerObj.chartData;
         
@@ -114,7 +114,7 @@ Thelma.chartUtils = {
 
       },
 
-   formatBars: function(polymerObj, overlap, gap){ 
+   setupBarDims: function(polymerObj, overlap, gap){ 
           var dims = polymerObj.dims,
               chartData = polymerObj.chartData;
 
@@ -127,7 +127,7 @@ Thelma.chartUtils = {
        
           return dims.bars
       },
-    formatLabels: function(polymerObj){ // MOVE TO UTILS?
+    setupLabelDims: function(polymerObj){ // MOVE TO UTILS?
           // Check if labels overlap and angle them if they do
           var chartData = polymerObj.chartData,
               dims = polymerObj.dims;
