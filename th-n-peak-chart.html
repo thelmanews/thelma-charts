@@ -13,62 +13,79 @@
       ],
       init: function() {
         var self = this;
+
+        // setup dimensions
         self.dims = self.setupDimensions(self);
+        self.width = self.dims.width;
+        self.height = self.dims.height;
+        
+        // format chart elements based on chartData
+        self.bars = self.formatBars(self, 1.25); // pass in overlap to override default
+        self.labels = self.formatLabels(self);
+        self.values = self.formatValues(self);
 
-        var margin = self.dims.margin,
+        // create scales
+        var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
+        self.x = scales.x;
+        self.y = scales.y;
+
+        // setup container, rearrange data for peaks, setup starting state of peaks
+        self._setupContainerSize();
+        self.peakData = self._setupData();
+        self._setupElements();
+
+      },
+      _setupContainerSize: function(){
+        var self = this,
+            margin = self.dims.margin,
             width = self.dims.width,
-            height = self.dims.height;
-        self.height = height;
-
-        // format based on chartData
-        var bars = self.formatBars(self, 1.25); // pass in overlap to override default
-        var labels = self.formatLabels(self);
-        var values = self.formatValues(self);
-
-        // creating scales
-        var scales = self.simpleScaleBuilder(width, height, self.chartData);
-        var x = scales.x;
-        var y = scales.y;
-        self.y = y;
-        self.x = x;
-
-        // chart positioning
-        var chart_svg = self.$.chart;
+            height = self.dims.height,
+            chart_svg = self.$.chart;
 
         self.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-        var max = d3.max(self.chartData, function(d) {return d.value});
 
+      },
+      _setupData: function(){
+        var self = this,
+            bars = self.dims.bars
+            height = self.dims.height,
+            y = self.y,
+            lastEdge = 0;
 
-        // starting and ending lines to draw peaks
-        var peakLineStart = d3.svg.line()
-              .x(function(d) { return d.x; })
-              .y(function(d) { return height; });
-        var peakLine = d3.svg.line()
-              .x(function(d) { return d.x; })
-              .y(function(d) { return -d.y; });
-          self.peakLine = peakLine;
-          self.peakLineStart = peakLineStart;
- 
-        // transform chartData for paths
-        var lastEdge = 0;
         var peakData = self.chartData.map(function(i){
           var coordinates = [{ x: lastEdge, y: -height},
-                           {x: lastEdge + self.dims.bars.width, y: -height},
-                           { x: lastEdge + self.dims.bars.width/2, y: -height+y(i.value)}];
-          lastEdge = lastEdge + (self.dims.bars.width/self.dims.bars.overlap)/self.dims.bars.overlap;
+                           {x: lastEdge + bars.width, y: -height},
+                           { x: lastEdge + bars.width/2, y: -height+y(i.value)}];
+          lastEdge = lastEdge + (bars.width/bars.overlap)/bars.overlap;
           return coordinates;
         });
+        return peakData;
+      },
+      _setupElements: function(){
+        var self = this,
+            peakData = self.peakData,
+            labels = self.labels,
+            bars = self.bars,
+            values = self.values;
 
+        // starting and ending lines to draw peaks
+        self.peakLineStart = d3.svg.line()
+              .x(function(d) { return d.x; })
+              .y(function(d) { return height; });
+        self.peakLine = d3.svg.line()
+              .x(function(d) { return d.x; })
+              .y(function(d) { return -d.y; });
+         
         // append peaks
         self.peaks = self.container.selectAll('.peak')
           .data(peakData)
           .enter()
           .append('path')
             .attr('class', function(d,i){return "peak data"+i;})
-            .attr('d', peakLineStart)
+            .attr('d', self.peakLineStart)
             .attr('opacity', 0);
     
         // append labels
@@ -98,36 +115,33 @@
             .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
       },
-      chartSetup: function(){
-
-      },
       reset: function() {
-          var self = this;
-          var height= self.height;
-          self.peaks.transition().duration(self.animationDelay).attr('d', self.peakLineStart).attr('opacity', 0);
-          self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+        var self = this,
+            height= self.height;
+        self.peaks.transition().duration(self.animationDelay).attr('d', self.peakLineStart).attr('opacity', 0);
+        self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
           
       },
       
       animate: function() {
-            var self = this;
-            var y = self.y;
-            var height= self.height;
+        var self = this,
+            y = self.y,
+            height = self.height;
 
-            self.peaks.transition()
-              .attr('opacity', 0.8)
-              .duration(self.animationDelay) 
-              .attr("d", self.peakLine);
-            
-            self.values.transition(self.animationDelay)
-              .duration(self.animationDelay)
-              .attr('y', function(d) {return height - y(d.value) - self.dims.values.spacing;})
-              .style('opacity', 1);
+        self.peaks.transition()
+          .attr('opacity', 0.8)
+          .duration(self.animationDelay) 
+          .attr("d", self.peakLine);
+        
+        self.values.transition(self.animationDelay)
+          .duration(self.animationDelay)
+          .attr('y', function(d) {return height - y(d.value) - self.dims.values.spacing;})
+          .style('opacity', 1);
 
       },
       chartSpecificDataValidate: function() {
-          var self = this;
-          var errors = [],
+          var self = this,
+              errors = [],
               numOfPeaks = self.chartData.length;
 
           // There should be at least value.
