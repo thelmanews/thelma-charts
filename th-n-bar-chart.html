@@ -23,9 +23,9 @@
 		  	  self.dims = self.setupDimensions(self);
 
 		  	  // self.setupExtraDimensions();
-		      self.formatBars(self, 1, 1.3); // self, overlap, gap
-		      self.formatLabels(self);
-		      self.formatValues(self);
+		      self.setupBarDims(self, 1, 1.3); // self, overlap, gap
+		      self.setupLabelDims(self);
+		      self.setupValueDims(self);
 
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
@@ -174,9 +174,9 @@
 		  	  self.dims = self.setupDimensions(self);
 
 		  	  // self.setupExtraDimensions();
-		  	  self.formatBars(self, 1, 1.3); // self, overlap, gap
-		      self.formatLabels(self);
-		      self.formatValues(self);
+		  	  self.setupBarDims(self, 1, 1.3); // self, overlap, gap
+		      self.setupLabelDims(self);
+		      self.setupValueDims(self);
 
 		  	  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
 
@@ -238,9 +238,9 @@
 				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
 
 				  // self.setupExtraDimensions();
-				  self.formatBars(self, 1, 1.3); // self, overlap, gap
-		      self.formatLabels(self);
-		      self.formatValues(self);
+				  self.setupBarDims(self, 1, 1.3); // self, overlap, gap
+		      self.setupLabelDims(self);
+		      self.setupValueDims(self);
 
 				  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
 
