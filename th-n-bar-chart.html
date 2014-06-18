@@ -22,7 +22,10 @@
 		  	  
 		  	  self.dims = self.setupDimensions(self);
 
-		  	  self.setupExtraDimensions();
+		  	  // self.setupExtraDimensions();
+		      self.formatBars(self, 1, 1.3); // self, overlap, gap
+		      self.formatLabels(self);
+		      self.formatValues(self);
 
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
@@ -33,10 +36,10 @@
 
 		      self._setupElements();
 
-
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
 		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
 
 		      // creating scales
 		      var scales = self.simpleScaleBuilder(width, height, self.chartData);
@@ -51,6 +54,7 @@
 		      //setting sizes
 		      self._setElementSizes();
 
+		        
 		  },
 
 		  _setupElements: function() {
@@ -110,7 +114,8 @@
 		        .attr("class", function(d,i){return "bar data"+i;})
 		        .attr('x', function(d) { return x(d.label); })
 		        .attr('y', function(d) { return height; })
-		        .attr('width',self.dims.barWidth)
+		        // .attr('width',self.dims.barWidth)
+		        .attr('width', self.dims.bars.width)
 		        .attr('height', 0);
 
 		      
@@ -118,11 +123,11 @@
 		      this.labels
 		        .attr("class", function(d,i){return "label data"+i;})
 		        //.style('opacity', 0)
-		        .style('text-anchor',function(){ return self.dims.labelAngle > 0 ? "left" : "middle"})
+		        .style('text-anchor',function(){ return self.dims.labels.angle > 0 ? "left" : "middle"})
 		        .attr('transform', function(d,i){
-			        	var xPos = x(d.label) + self.dims.barWidth/2;
+			        	var xPos = x(d.label) + self.dims.bars.width/2;
 			        	var yPos = height + 16;
-			        	var rotation = self.dims.labelAngle;
+			        	var rotation = self.dims.labels.angle;
 			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
 			        });
 		      
@@ -131,10 +136,9 @@
 		        .attr("class", function(d,i){return "value data"+i;})
 		        .style('text-anchor','middle')
 		        //.style('opacity', 0)
-		        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; })
-		        .attr('font-size', self.dims.valueSize+"px")
+		        .attr('x', function(d) { return x(d.label) + self.dims.bars.width/2; })
+		        .attr('font-size', self.dims.values.size+"px")
 		        .attr('y', height);
-		        
 
 		  },
 
@@ -153,13 +157,13 @@
 
 		        var y = self.y;
 		        var height= self.dims.height;
-		        this.bars.transition().duration(this.animationDelay)
+		        self.bars.transition().duration(this.animationDelay)
 		        .attr('y', function(d) { console.log(d.value); console.log(height); console.log(y(d.value)); return height-y(d.value);})
 		        .attr('height', function(d) {return y(d.value)});
 		        
-		        this.values.transition(this.animationDelay).duration(this.animationDelay)
+		        self.values.transition(this.animationDelay).duration(this.animationDelay)
 		        //.style('opacity', 1)
-		        .attr('y', function(d) {return height - y(d.value) - self.dims.spacing;});
+		        .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;});
 
 		  },
 
@@ -169,7 +173,10 @@
 		  	  
 		  	  self.dims = self.setupDimensions(self);
 
-		  	  self.setupExtraDimensions();
+		  	  // self.setupExtraDimensions();
+		  	  self.formatBars(self, 1, 1.3); // self, overlap, gap
+		      self.formatLabels(self);
+		      self.formatValues(self);
 
 		  	  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
 
@@ -230,7 +237,10 @@
 
 				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
 
-				  self.setupExtraDimensions();
+				  // self.setupExtraDimensions();
+				  self.formatBars(self, 1, 1.3); // self, overlap, gap
+		      self.formatLabels(self);
+		      self.formatValues(self);
 
 				  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
 
@@ -280,36 +290,36 @@
 		      }
 
 	          return errors;
-	       },
-
-	       setupExtraDimensions: function() {
-
-	       		var self = this;
-	       				    // Value dimensions
-			    self.dims.maxValueLength = d3.max(self.chartData, function(d) { 
-			    	return  d.display_value ? d.display_value.length : d.value.toString().length;
-			   	 });
-			    self.dims.valueSize = Math.min(50,((self.dims.barWidth*0.8) / self.dims.maxValueLength / 0.6) );
-			    self.dims.spacing = self.dims.valueSize * 0.25;
-
-			    // Adjust top margin as necessary
-			    if ((self.dims.valueSize+self.dims.spacing) > self.dims.margin.top) { 
-			    	self.dims.margin.top = self.dims.valueSize+self.dims.spacing;
-			    }
-
-			    // Check if labels overlap
-			    self.dims.maxLabelLength = d3.max(self.chartData, function(d){ return  d.label.length;}); 
-			    self.dims.labelWidthEst = self.dims.maxLabelLength * 5.25; // This calc works with the current font-size
-
-			    // If labels are long, angle them and adjust margin
-			    if (self.dims.labelWidthEst > self.dims.barWidth) { 
-			    	self.dims.labelAngle = 25;
-			    	self.dims.margin.bottom = self.dims.labelWidthEst;
-			    	// need to adjust margin right when last label is long, so it does not cut off
-			    } else {
-			    	self.dims.labelAngle = 0;
-			    }
 	       }
+
+	      //  setupExtraDimensions: function() {
+
+	      //  		var self = this;
+	      //  				    // Value dimensions
+			    // self.dims.maxValueLength = d3.max(self.chartData, function(d) { 
+			    // 	return  d.display_value ? d.display_value.length : d.value.toString().length;
+			   	//  });
+			    // self.dims.valueSize = Math.min(50,((self.dims.barWidth*0.8) / self.dims.maxValueLength / 0.6) );
+			    // self.dims.spacing = self.dims.valueSize * 0.25;
+
+			    // // Adjust top margin as necessary
+			    // if ((self.dims.valueSize+self.dims.spacing) > self.dims.margin.top) { 
+			    // 	self.dims.margin.top = self.dims.valueSize+self.dims.spacing;
+			    // }
+
+			    // // Check if labels overlap
+			    // self.dims.maxLabelLength = d3.max(self.chartData, function(d){ return  d.label.length;}); 
+			    // self.dims.labelWidthEst = self.dims.maxLabelLength * 5.25; // This calc works with the current font-size
+
+			    // // If labels are long, angle them and adjust margin
+			    // if (self.dims.labelWidthEst > self.dims.barWidth) { 
+			    // 	self.dims.labelAngle = 25;
+			    // 	self.dims.margin.bottom = self.dims.labelWidthEst;
+			    // 	// need to adjust margin right when last label is long, so it does not cut off
+			    // } else {
+			    // 	self.dims.labelAngle = 0;
+			    // }
+	      //  }
 
 
 		  
