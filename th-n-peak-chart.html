@@ -20,9 +20,9 @@
         self.height = self.dims.height;
         
         // format chart elements based on chartData
-        self.bars = self.setupBarDims(self, 1.25); // pass in overlap to override default
-        self.labels = self.setupLabelDims(self);
-        self.values = self.setupValueDims(self);
+        self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
+        self.labelDims = self.setupLabelDims(self);
+        self.valueDims = self.setupValueDims(self);
      
         // create scales
         var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
@@ -33,6 +33,7 @@
         self._setupContainerSize();
         self.peakData = self._setupData();
         self._setupElements();
+        self._setupElementSizes();
 
       },
       _setupContainerSize: function(){
@@ -50,73 +51,80 @@
       },
       _setupData: function(){
         var self = this,
-            bars = self.dims.bars
+            barDims = self.dims.bars
             height = self.dims.height,
             y = self.y,
             lastEdge = 0;
 
         var peakData = self.chartData.map(function(i){
           var coordinates = [{ x: lastEdge, y: -height},
-                           {x: lastEdge + bars.width, y: -height},
-                           { x: lastEdge + bars.width/2, y: -height+y(i.value)}];
-          lastEdge = lastEdge + (bars.width/bars.overlap)/bars.overlap;
+                           {x: lastEdge + barDims.width, y: -height},
+                           { x: lastEdge + barDims.width/2, y: -height+y(i.value)}];
+          lastEdge = lastEdge + (barDims.width/barDims.overlap)/barDims.overlap;
           return coordinates;
         });
         return peakData;
       },
       _setupElements: function(){
         var self = this,
-            peakData = self.peakData,
-            labels = self.labels,
-            bars = self.bars,
-            values = self.values;
+            peakData = self.peakData;
 
-        // starting and ending lines to draw peaks
-        self.peakLineStart = d3.svg.line()
-              .x(function(d) { return d.x; })
-              .y(function(d) { return height; });
-        self.peakLine = d3.svg.line()
-              .x(function(d) { return d.x; })
-              .y(function(d) { return -d.y; });
-         
-        // append peaks
         self.peaks = self.container.selectAll('.peak')
           .data(peakData)
           .enter()
           .append('path')
-            .attr('class', function(d,i){return "peak data"+i;})
-            .attr('d', self.peakLineStart)
-            .attr('opacity', 0);
-    
-        // append labels
+            .attr('class', function(d,i){return "peak data"+i;});
+
         self.labels = self.container.selectAll('.label')
           .data(self.chartData)
           .enter().append('text')
-            .attr('class', function(d,i){return "label data"+i;})              
-            .style('text-anchor', function(){ return labels.angle > 0 ? "left" : "middle"})
-            .attr('transform', function(d,i){
-              var xPos = (bars.width/2) + (bars.width/bars.overlap*i/bars.overlap);
-              var yPos = height + 16;
-              var rotation = labels.angle;
-              return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
-            })
-            .text(function(d) {return d.label;});
-          
-        // append values  
+            .attr('class', function(d,i){return "label data"+i;});              
+            
         self.values = self.container.selectAll('.value')
           .data(self.chartData)
           .enter().append('text')
-            .attr('class', function(d,i){return "value data"+i;})
-            .style('text-anchor','middle')
-            .attr('font-size', values.size)
-            .style('opacity', 0)
-            .attr('x', function(d,i) { return ((bars.width/2) + (bars.width/bars.overlap*i/bars.overlap)); })
-            .attr('y', height)
-            .text(function(d) {return d.display_value ? d.display_value : d.value ;});
-
+            .attr('class', function(d,i){return "value data"+i;});
+            
       },
 
       _setupElementSizes: function(){
+        var self = this,
+            barDims = self.barDims,
+            labelDims = self.labelDims,
+            valueDims = self.valueDims,
+            height = self.height;
+
+        // starting and ending lines to draw peaks
+        self.peakLineStart = d3.svg.line()
+            .x(function(d) { return d.x; })
+            .y(function(d) { return height; });
+        self.peakLine = d3.svg.line()
+            .x(function(d) { return d.x; })
+            .y(function(d) { return -d.y; });
+       
+
+        self.peaks
+          .attr('d', self.peakLineStart)
+          .attr('opacity', 0);
+
+        self.labels
+            .style('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
+            .attr('transform', function(d,i){
+            
+              var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
+              var yPos = height + 16;
+              var rotation = labelDims.angle;
+              return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
+            })
+            .text(function(d) {return d.label;});
+
+        self.values
+            .style('text-anchor','middle')
+            .attr('font-size', valueDims.size)
+            .style('opacity', 0)
+            .attr('x', function(d,i) { return ((barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap)); })
+            .attr('y', height)
+            .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
       },
       reset: function() {
