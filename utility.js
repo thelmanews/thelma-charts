@@ -102,7 +102,7 @@ Thelma.chartUtils = {
         dims.values.maxLength = d3.max(chartData, function(d){  
           return  d.display_value ? d.display_value.length : d.value.toString().length;
          });
-        dims.values.size = Math.min(30,((dims.bars.width/2) / dims.values.maxLength / 0.6) );
+        dims.values.size = Math.min(30,((dims.bars.width/dims.bars.overlap) / dims.values.maxLength / 0.6) );
         dims.values.margin = dims.values.size * 0.25;
 
         // Adjust top margin as necessary
@@ -110,6 +110,7 @@ Thelma.chartUtils = {
           dims.margin.top = dims.values.size+dims.values.margin;
         }
 
+        
         return dims.values;
 
       },
