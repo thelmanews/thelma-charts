@@ -23,7 +23,7 @@
 		  	  self.dims = self.setupDimensions(self);
 
 		  	  // self.setupExtraDimensions();
-		      self.setupBarDims(self, 1, 1.3); // self, overlap, gap
+		      self.setupBarDims(self, 1, 1.2); // self, overlap, gap
 		      self.setupLabelDims(self);
 		      self.setupValueDims(self);
 
@@ -174,9 +174,7 @@
 		  	  self.dims = self.setupDimensions(self);
 
 		  	  // self.setupExtraDimensions();
-		  	  self.setupBarDims(self, 1, 1.3); // self, overlap, gap
-		      self.setupLabelDims(self);
-		      self.setupValueDims(self);
+
 
 		  	  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
 
@@ -196,6 +194,9 @@
 		      self.x = x;
 
 		      //setting sizes
+		      self.setupBarDims(self, 1, 1.3); // self, overlap, gap
+		      self.setupLabelDims(self);
+		      self.setupValueDims(self);
 		      self._setElementSizes();
 
 		      self.animate();
@@ -238,9 +239,7 @@
 				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
 
 				  // self.setupExtraDimensions();
-				  self.setupBarDims(self, 1, 1.3); // self, overlap, gap
-		      self.setupLabelDims(self);
-		      self.setupValueDims(self);
+
 
 				  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
 
@@ -251,7 +250,13 @@
 			      self.bars.exit().remove();
 			      self.labels.exit().remove();
 			      self.values.exit().remove();
-			        
+			      
+
+
+
+			      self.setupBarDims(self, 1, 1.3); // self, overlap, gap
+		      	self.setupLabelDims(self);
+		      	self.setupValueDims(self);
 			      self._setElementSizes();
 
 			    }
