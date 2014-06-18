@@ -123,18 +123,27 @@
 		      this.labels
 		        .attr("class", function(d,i){return "label data"+i;})
 		        //.style('opacity', 0)
-		        .style('text-anchor',function(){ return self.dims.labels.angle > 0 ? "left" : "middle"})
+		        .attr('text-anchor',function(){ 
+		        	return self.dims.labels.angle > 0 ? "left" : "middle";
+		        	
+		        })
 		        .attr('transform', function(d,i){
-			        	var xPos = x(d.label) + self.dims.bars.width/2;
-			        	var yPos = height + 16;
+			        	var xPos = x(d.label) + self.dims.bars.width/2 ;
+			        	var yPos = height + self.dims.margin.label;
 			        	var rotation = self.dims.labels.angle;
+
+			        	//if there is an angle, move labels slightly to top left
+			        	if(rotation> 0) {
+			        		xPos = xPos -7;
+			        		yPos = yPos -3;
+			        	}
 			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
 			        });
 		      
 		      //console.log(this.bars);
 		      this.values
 		        .attr("class", function(d,i){return "value data"+i;})
-		        .style('text-anchor','middle')
+		        .attr('text-anchor','middle')
 		        //.style('opacity', 0)
 		        .attr('x', function(d) { return x(d.label) + self.dims.bars.width/2; })
 		        .attr('font-size', self.dims.values.size+"px")
