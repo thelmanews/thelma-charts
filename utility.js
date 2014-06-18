@@ -61,9 +61,9 @@ Thelma.chartUtils = {
 	    dims.textLabelMargin = dims.height*0.05;
 
 	    // Bar dimensions 
-	    dims.barGap = 0.3;
-	    dims.numBars = polymerObj.chartData.length;  // DEPENDANT ON CHARTDATA
-	    dims.barWidth = Math.min(70,((dims.width / dims.numBars)/(1+dims.barGap)));
+	    // dims.barGap = 0.3;
+	    // dims.numBars = polymerObj.chartData.length;  // DEPENDANT ON CHARTDATA
+	    // dims.barWidth = Math.min(70,((dims.width / dims.numBars)/(1+dims.barGap)));
 
 	    return dims;
 
@@ -103,11 +103,11 @@ Thelma.chartUtils = {
           return  d.display_value ? d.display_value.length : d.value.toString().length;
          });
         dims.values.size = Math.min(30,((dims.bars.width/2) / dims.values.maxLength / 0.6) );
-        dims.values.spacing = dims.values.size * 0.25;
+        dims.values.margin = dims.values.size * 0.25;
 
         // Adjust top margin as necessary
-        if ((dims.values.size+dims.values.spacing) > dims.margin.top) { 
-          dims.margin.top = dims.values.size+dims.values.spacing;
+        if ((dims.values.size+dims.values.margin) > dims.margin.top) { 
+          dims.margin.top = dims.values.size+dims.values.margin;
         }
 
         return dims.values;
@@ -139,14 +139,15 @@ Thelma.chartUtils = {
           // If labels are long, angle them and adjust margin
           if (dims.labels.width > dims.bars.width/1.6) { 
             dims.labels.angle = 25;
-            dims.margin.bottom = dims.labels.width;
+            dims.margin.bottom = dims.labels.width + dims.margin.label;
             dims.margin.right = dims.labels.width;
             
             // need to adjust margin right when last label is long, so it does not cut off
           } else {
             dims.labels.angle = 0;
           }
-
+          console.log("^^^^^^^^^");
+          console.log(dims);
           return dims.labels;
       },
 

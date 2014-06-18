@@ -135,7 +135,7 @@
         
         self.values.transition(self.animationDelay)
           .duration(self.animationDelay)
-          .attr('y', function(d) {return height - y(d.value) - self.dims.values.spacing;})
+          .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;})
           .style('opacity', 1);
 
       },
