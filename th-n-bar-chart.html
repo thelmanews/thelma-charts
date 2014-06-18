@@ -22,58 +22,16 @@
 		  	  
 		  	  self.dims = self.setupDimensions(self);
 
+		  	  self.setupExtraDimensions();
+
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
 	    	      height = self.dims.height;
 
-			    // Value dimensions
-			    self.dims.maxValueLength = d3.max(self.chartData, function(d){  
-			    	return  d.display_value ? d.display_value.length : d.value.toString().length;
-			   	 });
-			    self.dims.valueSize = Math.min(50,((self.dims.barWidth*0.8) / self.dims.maxValueLength / 0.6) );
-			    self.dims.spacing = self.dims.valueSize * 0.25;
-
-			    // Adjust top margin as necessary
-			    if ((self.dims.valueSize+self.dims.spacing) > self.dims.margin.top) { 
-			    	self.dims.margin.top = self.dims.valueSize+self.dims.spacing;
-			    }
-
-			    // Check if labels overlap
-			    self.dims.maxLabelLength = d3.max(self.chartData, function(d){ return  d.label.length;}); 
-			    self.dims.labelWidthEst = self.dims.maxLabelLength * 5.25; // This calc works with the current font-size
-
-			    // If labels are long, angle them and adjust margin
-			    if (self.dims.labelWidthEst > self.dims.barWidth) { 
-			    	self.dims.labelAngle = 25;
-			    	self.dims.margin.bottom = self.dims.labelWidthEst;
-			    	// need to adjust margin right when last label is long, so it does not cut off
-			    } else {
-			    	self.dims.labelAngle = 0;
-			    }
-
-		      //self.extractElementDataPoints(); //needed?
 
 		      self.dataLength = self.chartData.length;
 
-
-		      var chart_svg = self.$.chart;
-
-
-		      //creating all the svg items
-		      self.svg = d3.select(chart_svg);
-
-		      self.container = self.svg
-		          .selectAll('.container')
-		          .data([1])
-		          .enter()
-		          .append('g')
-		          .attr('class','container');
-
-		      this.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
-
-		      this.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
-
-		      this.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+		      self._setupElements();
 
 
 		      // this is independent of size but dependent on data
@@ -94,6 +52,45 @@
 		      self._setElementSizes();
 
 		  },
+
+		  _setupElements: function() {
+		      
+		      //creating all the svg items
+		      var self = this;
+
+		      self.svg = d3.select(self.$.chart);
+
+		      self.container = self.svg
+		          .selectAll('.container')
+		          .data([1])
+		          .enter()
+		          .append('g')
+		          .attr('class','container');
+
+		      self.bars = self.container.selectAll('.bar').data(self.chartData).enter().append('rect').attr('class','bar');
+
+		      self.labels = self.container.selectAll('.label').data(self.chartData).enter().append('text').attr('class','label');
+
+		      self.values = self.container.selectAll('.value').data(self.chartData).enter().append('text').attr('class','value');
+		  },
+
+		  _setupContainerSize: function() {
+		  	  
+		  	  var self = this,
+	    	      margin = self.dims.margin,
+		    	  width = self.dims.width,
+		    	  height = self.dims.height;
+
+
+		  	  self.svg
+		      	.attr('width', width + margin.left + margin.right)
+		        .attr('height', height + margin.top + margin.bottom);
+
+		      // setting up the size. needed for resizing
+		      self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		  },
+
 		  //TODO make it really private
 		  _setElementSizes: function() {
 
@@ -105,12 +102,8 @@
 		    	  x = self.x,
 		    	  y = self.y;
 
-			  self.svg
-		      	.attr('width', width + margin.left + margin.right)
-		        .attr('height', height + margin.top + margin.bottom);
+		      self._setupContainerSize();
 
-		      // setting up the size. needed for resizing
-		      self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
 		      
 		      this.bars
@@ -132,8 +125,6 @@
 			        	var rotation = self.dims.labelAngle;
 			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
 			        });
-		        // .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; })
-		        // .attr('y', height + 16) //12: font size
 		      
 		      //console.log(this.bars);
 		      this.values
@@ -150,7 +141,7 @@
 
 		  reset: function() {
 		      
-		      var height= this.height;
+		      var height= this.dims.height;
 		      this.bars.attr('y', height).attr('height', 0);
 		      this.values.attr('y', height );
 		      
@@ -178,6 +169,12 @@
 		  	  
 		  	  self.dims = self.setupDimensions(self);
 
+		  	  self.setupExtraDimensions();
+
+		  	  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
+
+
+
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
 	    	      height = self.dims.height;
@@ -188,15 +185,12 @@
 		      var y = scales.y;
 		      
 
-		      // is there a better way than exposing these?!
 		      self.y = y;
 		      self.x = x;
-
 
 		      //setting sizes
 		      self._setElementSizes();
 
-		     // self.reset();
 		      self.animate();
 
 
@@ -208,8 +202,7 @@
 
 		  	  var self = this;
 
-		  	  //TODO these don't do anything unless dimensions are set
-		      console.log(self.chartData);
+		      
 		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData);
 
 
@@ -223,63 +216,40 @@
 		      var width = self.dims.width,
 		      	 height = self.dims.height;	  	  
 
-			      self.bars = self.container.selectAll('.bar').data(self.chartData);
-			      self.labels = self.container.selectAll('.label').data(self.chartData);
-			       self.values=self.container.selectAll('.value').data(self.chartData);
+			  self.bars = self.container.selectAll('.bar').data(self.chartData);
+			  self.labels = self.container.selectAll('.label').data(self.chartData);
+			  self.values=self.container.selectAll('.value').data(self.chartData);
 
 		  	  if(self.dataLength!=self.chartData.length)
 		  	  {
 		  	  	  console.log('data length changed');
 
+
+
 		  	  	  self.dataLength = self.chartData.length;
 
+				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
+
+				  self.setupExtraDimensions();
+
+				  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
+
 			      self.bars.enter().append('rect').attr('class','bar').attr('height', 0).attr('y', height);
-
-					
-
 			      self.labels.enter().append('text').attr('class','label');
-			       
+			      self.values.enter().append('text').attr('class','value')
 
-			       self.values.enter().append('text').attr('class','value')
+			      self.bars.exit().remove();
+			      self.labels.exit().remove();
+			      self.values.exit().remove();
 			        
+			      self._setElementSizes();
 
 			    }
-
-			      self.bars
-			        .attr("class", function(d,i){return "bar data"+i;})
-			        .attr('x', function(d) { return x(d.label); })
-			        .attr('width',self.dims.barWidth);
-
-			      self.labels
-			        .attr("class", function(d,i){return "label data"+i;})
-			        .style('text-anchor',function(){ return self.dims.labelAngle > 0 ? "left" : "middle"})
-			        .attr('transform', function(d,i){
-			        	var xPos = x(d.label) + self.dims.barWidth/2;
-			        	var yPos = height + 16;
-			        	var rotation = self.dims.labelAngle;
-			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
-			        });
-			        // .attr('x', function(d) { return x(d.label); })
-			        // .attr('y', height + 12); //12: font size
-			      
-			      self.values
-			        .attr("class", function(d,i){return "value data"+i;})
-			        .style('text-anchor','middle')
-			        .attr('font-size', self.dims.valueSize+"px")
-			        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; });
-				  
-
-			      //TODO exit
-
-
-
 
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
 		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
-		      //self.reset();
-		      //setTimeout( function() {self.animate();},500);
 
 		      self.animate();
 		      
@@ -310,7 +280,38 @@
 		      }
 
 	          return errors;
+	       },
+
+	       setupExtraDimensions: function() {
+
+	       		var self = this;
+	       				    // Value dimensions
+			    self.dims.maxValueLength = d3.max(self.chartData, function(d) { 
+			    	return  d.display_value ? d.display_value.length : d.value.toString().length;
+			   	 });
+			    self.dims.valueSize = Math.min(50,((self.dims.barWidth*0.8) / self.dims.maxValueLength / 0.6) );
+			    self.dims.spacing = self.dims.valueSize * 0.25;
+
+			    // Adjust top margin as necessary
+			    if ((self.dims.valueSize+self.dims.spacing) > self.dims.margin.top) { 
+			    	self.dims.margin.top = self.dims.valueSize+self.dims.spacing;
+			    }
+
+			    // Check if labels overlap
+			    self.dims.maxLabelLength = d3.max(self.chartData, function(d){ return  d.label.length;}); 
+			    self.dims.labelWidthEst = self.dims.maxLabelLength * 5.25; // This calc works with the current font-size
+
+			    // If labels are long, angle them and adjust margin
+			    if (self.dims.labelWidthEst > self.dims.barWidth) { 
+			    	self.dims.labelAngle = 25;
+			    	self.dims.margin.bottom = self.dims.labelWidthEst;
+			    	// need to adjust margin right when last label is long, so it does not cut off
+			    } else {
+			    	self.dims.labelAngle = 0;
+			    }
 	       }
+
+
 		  
 		});
 
