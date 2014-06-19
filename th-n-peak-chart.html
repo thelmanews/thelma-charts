@@ -30,23 +30,28 @@
         self.y = scales.y;
 
         // setup container, rearrange data for peaks, setup starting state of peaks
-        self._setupContainerSize();
+        
         self.peakData = self._setupData();
         self._setupElements();
         self._setupElementSizes();
+
         self.dataLength = self.peakData.length;
+
       },
       _setupContainerSize: function(){
         var self = this,
             margin = self.dims.margin,
             width = self.dims.width,
-            height = self.dims.height,
-            chart_svg = self.$.chart;
+            height = self.dims.height;
+            // chart_svg = self.$.chart;
+            self.svg = d3.select(self.$.chart);
 
-        self.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        self.svg
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom);
+
+        // setting up the size. needed for resizing
+        self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
       },
       _setupData: function(){
@@ -68,6 +73,16 @@
       _setupElements: function(){
         var self = this,
             peakData = self.peakData;
+
+        self.svg = d3.select(self.$.chart);
+
+        self.container = self.svg
+            .selectAll('.container')
+            .data([1])
+            .enter()
+            .append('g')
+            .attr('class','container');
+
 
         self.peaks = self.container.selectAll('.peak')
           .data(peakData)
@@ -92,7 +107,10 @@
             barDims = self.barDims,
             labelDims = self.labelDims,
             valueDims = self.valueDims,
+            peakData = self.peakData
             height = self.height;
+
+        self._setupContainerSize();
 
         // starting and ending lines to draw peaks
         self.peakLineStart = d3.svg.line()
@@ -103,11 +121,12 @@
             .y(function(d) { return -d.y; });    
 
         self.peaks
+          .data(peakData)
           .attr('d', self.peakLineStart)
           .attr('opacity', 0);
 
         self.labels
-            .style('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
+            .attr('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
             .attr('transform', function(d,i){
               var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
               var yPos = height + 16;
@@ -117,7 +136,7 @@
             .text(function(d) {return d.label;});
 
         self.values
-            .style('text-anchor','middle')
+            .attr('text-anchor','middle')
             .attr('font-size', valueDims.size)
             .style('opacity', 0)
             .attr('x', function(d,i) { return ((barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap)); })
@@ -156,18 +175,19 @@
         self.dims = self.setupDimensions(self);
         self.width = self.dims.width;
         self.height = self.dims.height;
-    
+
         // format chart elements based on chartData
         self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
         self.labelDims = self.setupLabelDims(self);
         self.valueDims = self.setupValueDims(self);
-     
+
         // create scales
         var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
         self.x = scales.x;
         self.y = scales.y;
 
         // setup container, rearrange data for peaks, setup starting state of peaks
+        self.peakData = self._setupData();
         self._setupContainerSize();
         self._setupElementSizes();
         self.animate();
