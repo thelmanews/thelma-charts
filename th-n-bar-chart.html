@@ -123,6 +123,7 @@
 		      this.labels
 		        .attr("class", function(d,i){return "label data"+i;})
 		        //.style('opacity', 0)
+
 		        .attr('text-anchor',function(){ 
 		        	return self.dims.labels.angle > 0 ? "left" : "middle";
 		        	
@@ -242,7 +243,6 @@
 		  	  	  console.log('data length changed');
 
 
-
 		  	  	  self.dataLength = self.chartData.length;
 
 				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
@@ -255,6 +255,7 @@
 			      self.bars.enter().append('rect').attr('class','bar').attr('height', 0).attr('y', height);
 			      self.labels.enter().append('text').attr('class','label');
 			      self.values.enter().append('text').attr('class','value')
+
 
 			      self.bars.exit().remove();
 			      self.labels.exit().remove();
