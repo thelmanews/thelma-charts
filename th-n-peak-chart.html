@@ -134,14 +134,11 @@
 
         self.labels
             .attr('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
-
-            .text(function(d) {return d.label;}).style('opacity', 0);
+            .text(function(d) {return d.label;});
 
         self.values
             .attr('text-anchor','middle')
             .attr('font-size', valueDims.size)
-            .style('opacity', 0)
-            .attr('x', function(d,i) { return ((barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap)); })
             .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
       },
@@ -169,6 +166,7 @@
         self.values.transition(self.animationDelay)
           .duration(self.animationDelay)
           .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;})
+          .attr('x', function(d,i) { return ((barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap)); })
           .style('opacity', 1);
 
         self.labels.transition(self.animationDelay)
