@@ -53,7 +53,7 @@ Thelma.chartUtils = {
 		          right : 0,
 		          bottom : 18,
 		          left : 0,
-		          label: 10
+		          label: 16
 		      }, 
 
 	    dims.width = Math.max(100,(polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right)), 
@@ -137,8 +137,9 @@ Thelma.chartUtils = {
           dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
           dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
 
-          // If labels are long, angle them and adjust margin
-          if (dims.labels.width > dims.bars.width/1.6) { 
+          // If labels are long, angle them and adjust margin 
+          // 1.1 worked with well with different labels but it might be a little bit too aggressive. (larger->more conservative)
+          if (dims.labels.width > dims.bars.width/dims.bars.overlap/1.3) { 
             dims.labels.angle = 25;
             dims.margin.bottom = dims.labels.width + dims.margin.label;
             dims.margin.right = dims.labels.width;
@@ -147,7 +148,6 @@ Thelma.chartUtils = {
           } else {
             dims.labels.angle = 0;
           }
-        
           return dims.labels;
       },
     getBoundaryValue: function(polymerObj, property, d3boundary){
