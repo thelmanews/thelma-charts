@@ -151,5 +151,40 @@ Thelma.chartUtils = {
 
           return dims.labels;
       },
+    setupStackedDims: function(polymerObj){
+      var dims = {},
+          chartData = polymerObj.chartData;
+      dims.margin = {
+              top : 0,
+              right : 0,
+              bottom : 0,
+              left : 0,
+              label: 10,
+          }, 
+
+      dims.width = Math.max(100,(polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right)), 
+      dims.height = Math.max(150,(polymerObj.chartHeight*0.95 - dims.margin.top - dims.margin.bottom)),
+      
+      dims.labels = {};
+      dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
+      dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
+
+      dims.values = {};
+      dims.values.maxLength = d3.max(chartData, function(d){ return  d.range.min.display_value.length + 
+        d.range.max.display_value.length + 3;}); // 3 is for the characters separating min and max " - "
+      dims.values.width = dims.values.maxLength * 5.25; // This calc works with the font-size 13px
+
+      dims.bar = {};
+      dims.bar.minWidth = 15;
+      dims.bar.maxWidth = 100;
+      dims.bar.width = Math.min(dims.bar.maxWidth, ( (dims.width/2 - (Math.max(dims.values.width,dims.labels.width) - dims.margin.label)) *2)); 
+      dims.bar.width = dims.bar.width < dims.bar.minWidth ? dims.bar.minWidth : dims.bar.width; 
+      
+      dims.minWidth = dims.bar.minWidth + dims.values.width + dims.labels.width; // cannot resize to smaller than this;
+      // dims.minHeight - need to set this also
+
+      return dims;
+
+    }
 
 }
