@@ -54,7 +54,9 @@
       },
       _setupElements: function(){
         var self = this,
-            peakData = self.peakData;
+            peakData = self.peakData,
+            labelDims = self.labelDims,
+            barDims = self.barDims;
 
         self.svg = d3.select(self.$.chart);
 
@@ -80,12 +82,19 @@
         self.labels = self.container.selectAll('.label')
           .data(self.chartData)
           .enter().append('text')
-            .attr('class', function(d,i){return "label data"+i;});              
+            .attr('class', function(d,i){return "label data"+i;})
+            .attr('transform', function(d,i){
+              var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
+              var yPos = height + self.dims.margin.label;
+              var rotation = labelDims.angle;
+              return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
+            });              
             
         self.values = self.container.selectAll('.value')
           .data(self.chartData)
           .enter().append('text')
-            .attr('class', function(d,i){return "value data"+i;}).attr('y', height);
+            .attr('class', function(d,i){return "value data"+i;})
+            .attr('y', height);
             
       },
       _setupContainerSize: function(){ //
@@ -125,13 +134,8 @@
 
         self.labels
             .attr('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
-            .attr('transform', function(d,i){
-              var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
-              var yPos = height + 16;
-              var rotation = labelDims.angle;
-              return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
-            })
-            .text(function(d) {return d.label;});
+
+            .text(function(d) {return d.label;}).style('opacity', 0);
 
         self.values
             .attr('text-anchor','middle')
@@ -152,7 +156,10 @@
       animate: function() {
         var self = this,
             y = self.scales.y,
-            height = self.height;
+            height = self.height,
+            barDims = self.barDims,
+            labelDims = self.labelDims;
+
 
         self.peaks.transition()
           .attr('opacity', 0.8)
@@ -162,6 +169,16 @@
         self.values.transition(self.animationDelay)
           .duration(self.animationDelay)
           .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;})
+          .style('opacity', 1);
+
+        self.labels.transition(self.animationDelay)
+          .duration(self.animationDelay)
+          .attr('transform', function(d,i){
+              var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
+              var yPos = height + self.dims.margin.label;
+              var rotation = labelDims.angle;
+              return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
+            })
           .style('opacity', 1);
 
       },
@@ -187,7 +204,9 @@
         self.animate();
       },
       updateData: function(){
-        var self = this;
+        var self = this,
+            barDims = self.barDims,
+            labelDims = self.labelDims;
 
         self.peakData = self._setupData();
 
@@ -205,8 +224,16 @@
             .attr('y', height)
             .attr('d', self.peakLineStart)
             .attr('opacity', 0);
-          self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;});
-          self.values.enter().append('text').attr('class', function(d,i){return "value data"+i;}).attr('y', height);
+          self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;})
+            .attr('transform', function(d,i){
+              var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
+              var yPos = height + self.dims.margin.label;
+              var rotation = labelDims.angle;
+              return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
+            });
+          self.values.enter().append('text')
+            .attr('class', function(d,i){return "value data"+i;})
+            .attr('y', height);
 
           self.peaks.exit().remove();
           self.labels.exit().remove();
