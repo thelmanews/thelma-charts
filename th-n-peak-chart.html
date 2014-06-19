@@ -25,12 +25,9 @@
         self.valueDims = self.setupValueDims(self);
      
         // create scales
-        var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
-        self.x = scales.x;
-        self.y = scales.y;
-
-        // setup container, rearrange data for peaks, setup starting state of peaks
+        self.scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
         
+        // setup container, rearrange data for peaks, setup starting state of peaks
         self.peakData = self._setupData();
         self._setupElements();
         self._setupElementSizes();
@@ -38,27 +35,12 @@
         self.dataLength = self.peakData.length;
 
       },
-      _setupContainerSize: function(){
-        var self = this,
-            margin = self.dims.margin,
-            width = self.dims.width,
-            height = self.dims.height;
-            // chart_svg = self.$.chart;
-            self.svg = d3.select(self.$.chart);
 
-        self.svg
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom);
-
-        // setting up the size. needed for resizing
-        self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-      },
       _setupData: function(){
         var self = this,
             barDims = self.dims.bars
             height = self.dims.height,
-            y = self.y,
+            y = self.scales.y,
             lastEdge = 0;
 
         var peakData = self.chartData.map(function(i){
@@ -100,6 +82,21 @@
           .enter().append('text')
             .attr('class', function(d,i){return "value data"+i;});
             
+      },
+      _setupContainerSize: function(){ //
+        var self = this,
+            margin = self.dims.margin,
+            width = self.dims.width,
+            height = self.dims.height;
+            self.svg = d3.select(self.$.chart);
+
+        self.svg
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom);
+
+        // setting up the size. needed for resizing
+        self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
       },
 
       _setupElementSizes: function(){
@@ -154,7 +151,7 @@
       
       animate: function() {
         var self = this,
-            y = self.y,
+            y = self.scales.y,
             height = self.height;
 
         self.peaks.transition()
@@ -182,10 +179,8 @@
         self.valueDims = self.setupValueDims(self);
 
         // create scales
-        var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
-        self.x = scales.x;
-        self.y = scales.y;
-
+        self.scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
+       
         // setup container, rearrange data for peaks, setup starting state of peaks
         self.peakData = self._setupData();
         self._setupElementSizes();
@@ -193,14 +188,6 @@
       },
       updateData: function(){
         var self = this;
-
-        // var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
-        // self.x = scales.x;
-        // self.y = scales.y;
-
-        // self.margin = self.dims.margin;
-        // self.width = self.dims.width;
-        // self.height = self.dims.height;
 
         self.peakData = self._setupData();
 
@@ -220,15 +207,12 @@
           self.labels.exit().remove();
           self.values.exit().remove();
           self.resize();
-
         }
-
           // this is independent of size but dependent on data
           self.labels.text(function(d) {return d.label;});
           self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
           self.animate();
-
         
       },
       chartSpecificDataValidate: function() {
