@@ -65,12 +65,17 @@
             .append('g')
             .attr('class','container');
 
+        self.peakLineStart = d3.svg.line()
+            .x(function(d) { return d.x; })
+            .y(function(d) { return height; });
 
         self.peaks = self.container.selectAll('.peak')
           .data(peakData)
           .enter()
           .append('path')
-            .attr('class', function(d,i){return "peak data"+i;});
+            .attr('class', function(d,i){return "peak data"+i;})
+            .attr('d', self.peakLineStart)
+            .attr('opacity', 0);
 
         self.labels = self.container.selectAll('.label')
           .data(self.chartData)
@@ -80,7 +85,7 @@
         self.values = self.container.selectAll('.value')
           .data(self.chartData)
           .enter().append('text')
-            .attr('class', function(d,i){return "value data"+i;});
+            .attr('class', function(d,i){return "value data"+i;}).attr('y', height);
             
       },
       _setupContainerSize: function(){ //
@@ -110,17 +115,13 @@
         self._setupContainerSize();
 
         // starting and ending lines to draw peaks
-        self.peakLineStart = d3.svg.line()
-            .x(function(d) { return d.x; })
-            .y(function(d) { return height; });
+
         self.peakLine = d3.svg.line()
             .x(function(d) { return d.x; })
             .y(function(d) { return -d.y; });    
 
         self.peaks
-          .data(peakData)
-          .attr('d', self.peakLineStart)
-          .attr('opacity', 0);
+          .data(peakData);
 
         self.labels
             .attr('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
@@ -137,7 +138,6 @@
             .attr('font-size', valueDims.size)
             .style('opacity', 0)
             .attr('x', function(d,i) { return ((barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap)); })
-            .attr('y', height)
             .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
       },
@@ -199,9 +199,14 @@
           
           self.dataLength = self.peakData.length;
           
-          self.peaks.enter().append('path').attr('class',function(d,i){return "peak data"+i;}).attr('height', 0).attr('y', height);
+
+          self.peaks.enter().append('path').attr('class',function(d,i){return "peak data"+i;})
+            .attr('height', 0)
+            .attr('y', height)
+            .attr('d', self.peakLineStart)
+            .attr('opacity', 0);
           self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;});
-          self.values.enter().append('text').attr('class', function(d,i){return "value data"+i;});
+          self.values.enter().append('text').attr('class', function(d,i){return "value data"+i;}).attr('y', height);
 
           self.peaks.exit().remove();
           self.labels.exit().remove();
@@ -211,7 +216,6 @@
           // this is independent of size but dependent on data
           self.labels.text(function(d) {return d.label;});
           self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
-
           self.animate();
         
       },
