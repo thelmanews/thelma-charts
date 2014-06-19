@@ -142,12 +142,18 @@
             .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
       },
-      reset: function() {
+      reset: function(hard) {
         var self = this,
             height= self.height;
-        self.peaks.transition().duration(self.animationDelay).attr('d', self.peakLineStart).attr('opacity', 0);
-        self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
-          
+        if(hard) {
+          self.peaks.attr('d', self.peakLineStart).attr('opacity', 0);
+          self.values.attr('y', height ).style('opacity', 0);
+
+        }
+        else {    
+          self.peaks.transition().duration(self.animationDelay).attr('d', self.peakLineStart).attr('opacity', 0);
+          self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+        }
       },
       
       animate: function() {
