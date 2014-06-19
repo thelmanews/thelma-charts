@@ -5,6 +5,100 @@
 
 	<script>
 
+    (function() {
+
+
+      // actually static private methods ...
+      var privateMethods = Thelma.sharedPrivateMethods;
+
+      privateMethods._setElementSizes = function(self) {
+
+
+	    	  var margin = self.dims.margin,
+		    	  width = self.dims.width,
+		    	  height = self.dims.height,
+		    	  x = self.x,
+		    	  y = self.y;
+
+		      privateMethods._setupContainerSize(self);
+
+
+		      
+		      self.bars
+		        .attr("class", function(d,i){return "bar data"+i;});
+
+		      
+		      //console.log(this.bars);
+		      self.labels
+		        .attr("class", function(d,i){return "label data"+i;});
+		        //.style('opacity', 0)
+
+		      
+		      self.values
+		        .attr("class", function(d,i){return "value data"+i;})
+		        .attr('text-anchor','middle')
+		        //.style('opacity', 0)
+		        //.attr('x', function(d) { return x(d.label) + self.dims.bars.width/2; })
+		        .attr('font-size', self.dims.values.size+"px");
+		       // .attr('y', height)
+		       // .style('opacity', 0);
+
+		};
+
+		 privateMethods._setupElements = function(self) {
+		      
+		      self.svg = d3.select(self.$.chart);
+
+		      self.container = self.svg
+		          .selectAll('.container')
+		          .data([1])
+		          .enter()
+		          .append('g')
+		          .attr('class','container');
+
+		      self.bars = self.container.selectAll('.bar').data(self.chartData).enter().append('rect').attr('class','bar')
+		      .attr('height', 0)
+		      .attr('y', self.dims.height);
+
+		      self.labels = self.container.selectAll('.label').data(self.chartData).enter().append('text').attr('class','label')
+		      .attr('text-anchor',function(){ 
+		        	return self.dims.labels.angle > 0 ? "left" : "middle";
+		        	
+		        })
+		        .attr('transform', function(d,i){
+			        	var xPos = self.x(d.label) + self.dims.bars.width/2 ;
+			        	var yPos = self.dims.height + self.dims.margin.label;
+			        	var rotation = self.dims.labels.angle;
+
+			        	//if there is an angle, move labels slightly to top left
+			        	if(rotation> 0) {
+			        		xPos = xPos -7;
+			        		yPos = yPos -3;
+			        	}
+			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
+			    });
+
+		      self.values = self.container.selectAll('.value').data(self.chartData).enter().append('text').attr('class','value')
+		      .attr('y', self.dims.height)
+		      .style('opacity', 0);
+
+		  };
+
+		  privateMethods._setupContainerSize = function(self) {
+		  	  
+		  	  var margin = self.dims.margin,
+		    	  width = self.dims.width,
+		    	  height = self.dims.height;
+
+
+		  	  self.svg
+		      	.attr('width', width + margin.left + margin.right)
+		        .attr('height', height + margin.top + margin.bottom);
+
+		      // setting up the size. needed for resizing
+		      self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		  };
 
 		Polymer('th-n-bar-chart', {
 		  chartData: [
@@ -47,10 +141,10 @@
 		      self.y = y;
 		      self.x = x;
 
-		      self._setupElements();
+		      privateMethods._setupElements(self);
 
 		      //setting sizes
-		      self._setElementSizes();
+		      privateMethods._setElementSizes(self);
 
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
@@ -59,105 +153,10 @@
 		        
 		  },
 
-		  _setupElements: function() {
-		      
-		      //creating all the svg items
-		      var self = this;
-
-		      self.svg = d3.select(self.$.chart);
-
-		      self.container = self.svg
-		          .selectAll('.container')
-		          .data([1])
-		          .enter()
-		          .append('g')
-		          .attr('class','container');
-
-		      self.bars = self.container.selectAll('.bar').data(self.chartData).enter().append('rect').attr('class','bar')
-		      .attr('height', 0)
-		      .attr('y', self.dims.height);
-
-		      self.labels = self.container.selectAll('.label').data(self.chartData).enter().append('text').attr('class','label')
-		      .attr('text-anchor',function(){ 
-		        	return self.dims.labels.angle > 0 ? "left" : "middle";
-		        	
-		        })
-		        .attr('transform', function(d,i){
-			        	var xPos = self.x(d.label) + self.dims.bars.width/2 ;
-			        	var yPos = self.dims.height + self.dims.margin.label;
-			        	var rotation = self.dims.labels.angle;
-
-			        	//if there is an angle, move labels slightly to top left
-			        	if(rotation> 0) {
-			        		xPos = xPos -7;
-			        		yPos = yPos -3;
-			        	}
-			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
-			    });
-
-		      self.values = self.container.selectAll('.value').data(self.chartData).enter().append('text').attr('class','value')
-		      .attr('y', self.dims.height)
-		      .style('opacity', 0);
-
-		  },
-
-		  _setupContainerSize: function() {
-		  	  
-		  	  var self = this,
-	    	      margin = self.dims.margin,
-		    	  width = self.dims.width,
-		    	  height = self.dims.height;
-
-
-		  	  self.svg
-		      	.attr('width', width + margin.left + margin.right)
-		        .attr('height', height + margin.top + margin.bottom);
-
-		      // setting up the size. needed for resizing
-		      self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-		  },
+		 
 
 		  //TODO make it really private
-		  _setElementSizes: function() {
-
-		  	  var self = this;
-
-	    	  var margin = self.dims.margin,
-		    	  width = self.dims.width,
-		    	  height = self.dims.height,
-		    	  x = self.x,
-		    	  y = self.y;
-
-		      self._setupContainerSize();
-
-
-		      
-		      this.bars
-		        .attr("class", function(d,i){return "bar data"+i;});
-		        //.attr('x', function(d) { return x(d.label); })
-		        //.attr('y', function(d) { return height; })
-		        // .attr('width',self.dims.barWidth)
-		        //.attr('width', self.dims.bars.width)
-		       // .attr('height', 0);
-
-		      
-		      //console.log(this.bars);
-		      this.labels
-		        .attr("class", function(d,i){return "label data"+i;});
-		        //.style('opacity', 0)
-
-		      
-		      this.values
-		        .attr("class", function(d,i){return "value data"+i;})
-		        .attr('text-anchor','middle')
-		        //.style('opacity', 0)
-		        //.attr('x', function(d) { return x(d.label) + self.dims.bars.width/2; })
-		        .attr('font-size', self.dims.values.size+"px");
-		       // .attr('y', height)
-		       // .style('opacity', 0);
-
-		  },
+		 
 
 
 		  reset: function(hard) {
@@ -226,7 +225,7 @@
 		  	  // self.setupExtraDimensions();
 
 
-		  	  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
+		  	  privateMethods._setupContainerSize(self); // correct size if margins are changed (by setting the label diagonal)
 
 
 
@@ -247,7 +246,7 @@
 		      self.setupBarDims(self, 1, 1.3); // self, overlap, gap
 		      self.setupLabelDims(self);
 		      self.setupValueDims(self);
-		      self._setElementSizes();
+		      privateMethods._setElementSizes(self);
 
 		      self.animate();
 
@@ -290,7 +289,7 @@
 				  // self.setupExtraDimensions();
 
 
-				  self._setupContainerSize(); // correct size if margins are changed (by setting the label diagonal)
+				  privateMethods._setupContainerSize(self); // correct size if margins are changed (by setting the label diagonal)
 
 			      self.bars.enter().append('rect').attr('class','bar')
 			      	.attr('height', 0)
@@ -314,7 +313,7 @@
 			     // self.setupBarDims(self, 1, 1.3); // self, overlap, gap
 		      	  //self.setupLabelDims(self);
 		      	 // self.setupValueDims(self);
-			     // self._setElementSizes();
+			     // privateMethods._setElementSizes();
 
 			     self.resize();
 
@@ -361,6 +360,7 @@
 
 		  
 		});
+	})();
 
 
 	</script>

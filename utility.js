@@ -39,6 +39,13 @@ Thelma.chartValidation = {
 
 }
 
+Thelma.sharedPrivateMethods = {
+
+	privateMethod: function() {
+		alert('abc');
+	}
+}
+
 Thelma.chartUtils = {
 
 	setupDimensions: function(polymerObj) {
