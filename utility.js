@@ -139,7 +139,7 @@ Thelma.chartUtils = {
 
           // If labels are long, angle them and adjust margin 
           // 1.1 worked with well with different labels but it might be a little bit too aggressive. (larger->more conservative)
-          if (dims.labels.width > dims.bars.width/dims.bars.overlap/1.2) { 
+          if (dims.labels.width > dims.bars.width/dims.bars.overlap/1.3) { 
             dims.labels.angle = 25;
             dims.margin.bottom = dims.labels.width + dims.margin.label;
             dims.margin.right = dims.labels.width;

@@ -188,19 +188,19 @@
 
         // setup container, rearrange data for peaks, setup starting state of peaks
         self.peakData = self._setupData();
-        self._setupContainerSize();
         self._setupElementSizes();
         self.animate();
       },
       updateData: function(){
         var self = this;
 
-        var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
-        self.x = scales.x;
-        self.y = scales.y;
-        self.margin = self.dims.margin;
-        self.width = self.dims.width;
-        self.height = self.dims.height;
+        // var scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
+        // self.x = scales.x;
+        // self.y = scales.y;
+
+        // self.margin = self.dims.margin;
+        // self.width = self.dims.width;
+        // self.height = self.dims.height;
 
         self.peakData = self._setupData();
 
@@ -208,13 +208,10 @@
         self.labels = self.container.selectAll('.label').data(self.chartData);
         self.values = self.container.selectAll('.value').data(self.chartData);
 
-
         if(self.dataLength!=self.peakData.length) {
           
-          // self._setupData();
           self.dataLength = self.peakData.length;
-          self._setupContainerSize();
-
+          
           self.peaks.enter().append('path').attr('class',function(d,i){return "peak data"+i;}).attr('height', 0).attr('y', height);
           self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;});
           self.values.enter().append('text').attr('class', function(d,i){return "value data"+i;});
@@ -222,19 +219,13 @@
           self.peaks.exit().remove();
           self.labels.exit().remove();
           self.values.exit().remove();
+          self.resize();
 
-          self.setupBarDims(self, 1.25); // self, overlap, gap
-          self.setupLabelDims(self);
-          self.setupValueDims(self);
-          // self._setElements();
-          self._setElementSizes();
-
-          }
+        }
 
           // this is independent of size but dependent on data
           self.labels.text(function(d) {return d.label;});
           self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
-
 
           self.animate();
 
