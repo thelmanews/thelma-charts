@@ -34,11 +34,7 @@
 
 		      self.dataLength = self.chartData.length;
 
-		      self._setupElements();
 
-		      // this is independent of size but dependent on data
-		      self.labels.text(function(d) {return d.label;});
-		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
 
 		      // creating scales
@@ -51,8 +47,14 @@
 		      self.y = y;
 		      self.x = x;
 
+		      self._setupElements();
+
 		      //setting sizes
 		      self._setElementSizes();
+
+		      // this is independent of size but dependent on data
+		      self.labels.text(function(d) {return d.label;});
+		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
 		        
 		  },
@@ -75,7 +77,23 @@
 		      .attr('height', 0)
 		      .attr('y', self.dims.height);
 
-		      self.labels = self.container.selectAll('.label').data(self.chartData).enter().append('text').attr('class','label');
+		      self.labels = self.container.selectAll('.label').data(self.chartData).enter().append('text').attr('class','label')
+		      .attr('text-anchor',function(){ 
+		        	return self.dims.labels.angle > 0 ? "left" : "middle";
+		        	
+		        })
+		        .attr('transform', function(d,i){
+			        	var xPos = self.x(d.label) + self.dims.bars.width/2 ;
+			        	var yPos = self.dims.height + self.dims.margin.label;
+			        	var rotation = self.dims.labels.angle;
+
+			        	//if there is an angle, move labels slightly to top left
+			        	if(rotation> 0) {
+			        		xPos = xPos -7;
+			        		yPos = yPos -3;
+			        	}
+			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
+			    });
 
 		      self.values = self.container.selectAll('.value').data(self.chartData).enter().append('text').attr('class','value')
 		      .attr('y', self.dims.height)
@@ -126,27 +144,10 @@
 		      
 		      //console.log(this.bars);
 		      this.labels
-		        .attr("class", function(d,i){return "label data"+i;})
+		        .attr("class", function(d,i){return "label data"+i;});
 		        //.style('opacity', 0)
 
-		        .attr('text-anchor',function(){ 
-		        	return self.dims.labels.angle > 0 ? "left" : "middle";
-		        	
-		        })
-		        .attr('transform', function(d,i){
-			        	var xPos = x(d.label) + self.dims.bars.width/2 ;
-			        	var yPos = height + self.dims.margin.label;
-			        	var rotation = self.dims.labels.angle;
-
-			        	//if there is an angle, move labels slightly to top left
-			        	if(rotation> 0) {
-			        		xPos = xPos -7;
-			        		yPos = yPos -3;
-			        	}
-			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
-			    });
 		      
-		      //console.log(this.bars);
 		      this.values
 		        .attr("class", function(d,i){return "value data"+i;})
 		        .attr('text-anchor','middle')
@@ -193,6 +194,24 @@
 		        .attr('x', function(d) { return self.x(d.label) + self.dims.bars.width/2; })
 		        .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;})
 		        .style('opacity', 1);
+
+		        self.labels.transition(this.animationDelay).duration(this.animationDelay)
+		        .attr('text-anchor',function(){ 
+		        	return self.dims.labels.angle > 0 ? "left" : "middle";
+		        	
+		        })
+		        .attr('transform', function(d,i){
+			        	var xPos = self.x(d.label) + self.dims.bars.width/2 ;
+			        	var yPos = height + self.dims.margin.label;
+			        	var rotation = self.dims.labels.angle;
+
+			        	//if there is an angle, move labels slightly to top left
+			        	if(rotation> 0) {
+			        		xPos = xPos -7;
+			        		yPos = yPos -3;
+			        	}
+			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
+			    });
 
 		  },
 
