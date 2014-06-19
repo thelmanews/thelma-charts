@@ -12,10 +12,13 @@
           
           // setup dimensions
           self.dims = self.setupDimensions(self);
+          self.dims = self.setupStackedDims(self);
+          console.log("^^^^^^^^^");
+          console.log(self.dims);
           var margin = self.dims.margin,
               width = self.dims.width,
               height = self.dims.height,
-              barWidth = Math.min(90,(self.dims.width/3)); // override the default
+              barWidth = self.dims.bar.width;
 
           // setup scales
           var scales = self.simpleScaleBuilder(width, height, self.chartData),

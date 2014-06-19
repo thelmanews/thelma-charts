@@ -170,8 +170,20 @@ Thelma.chartUtils = {
       dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
 
       dims.values = {};
-      dims.values.maxLength = d3.max(chartData, function(d){ return  d.range.min.display_value.length + 
-        d.range.max.display_value.length + 3;}); // 3 is for the characters separating min and max " - "
+      dims.values.maxLength = d3.max(chartData, function(d){ 
+        if (d.range){
+          if (d.range.min.display_value){
+            return  d.range.min.display_value.length + d.range.max.display_value.length + 3;
+          } else {
+            return  d.range.min.value.length + d.range.max.value.length + 3;
+          }
+        } else {
+          
+          return d.display_value ? d.display_value.length : d.value.toString().length;
+        }
+      }); // 3 is for the characters separating min and max " - "
+      
+
       dims.values.width = dims.values.maxLength * 5.25; // This calc works with the font-size 13px
 
       dims.bar = {};
