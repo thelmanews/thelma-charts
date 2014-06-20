@@ -164,7 +164,7 @@ Thelma.chartUtils = {
       
       dims.labels = {};
       dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
-      dims.labels.width = dims.labels.maxLength * 8.5; // This calc usually works?
+      dims.labels.width = dims.labels.maxLength * 8; // This calc usually works?
       dims.values = {};
       dims.values.maxLength = d3.max(chartData, function(d){ 
         if (d.range){
@@ -180,18 +180,21 @@ Thelma.chartUtils = {
       }); // 3 is for the characters separating min and max " - "
       
 
-      dims.values.width = dims.values.maxLength * 8.5; // This calc usually works?
+      dims.values.width = dims.values.maxLength * 8; // This calc usually works?
       dims.bar = {};
       dims.bar.minWidth = 10;
       dims.bar.maxWidth = 100;
-      dims.bar.width = Math.min(dims.bar.maxWidth, ( (dims.width/2 - (Math.max(dims.values.width,dims.labels.width))) *2)); 
+      dims.bar.width = Math.min(dims.bar.maxWidth, ( (dims.width/2 - (Math.max(dims.values.width,dims.labels.width))-dims.margin.label) *2)); 
       dims.bar.width = dims.bar.width < dims.bar.minWidth ? dims.bar.minWidth : dims.bar.width; 
       
-      dims.minWidth = dims.bar.minWidth + dims.values.width + dims.labels.width;
+      dims.minWidth = dims.bar.minWidth + (Math.max(dims.values.width,dims.labels.width)*2);
       dims.width = dims.width < dims.minWidth ? dims.minWidth : dims.width;  // cannot resize to smaller than this;
       // dims.labels.charLimit - calculate the character limit for labels, given the min width of the bar and the width of the component
       // dims.minHeight - need to set this also
      
+     	console.log("^@@@@@@@@@@");
+     	console.log("label width: "+dims.values.width);
+     	console.log("bar width: "+ dims.bar.width);
       return dims;
 
     }
