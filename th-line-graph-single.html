@@ -359,8 +359,6 @@
             .attr("cx", self.currentPos.x)
             .attr("cy", 12)
             .attr("class", "pulse fill-background stroke-foreground")
-            // .attr("fill", self.colors.background)
-            // .attr("stroke", self.colors.foreground)
             .attr("stroke-width", 4.5)
             .call(drag);
 
@@ -370,7 +368,6 @@
             .attr("height", h-36)
             .attr("width", 3)
             .attr("class", "fill-foreground")
-            // .attr('fill', self.colors.foreground)
             .attr('opacity', 0.4);
 
         var lastPosX = slider.select("circle").attr("cx");
@@ -408,7 +405,6 @@
             g.selectAll(".circle")
               .attr("r", function(d){
                 if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
-                // (x(d.label)<(parseInt(self.currentPos.x)+5)) && (x(d.label)>(parseInt(self.currentPos.x)-5))){ 
                   self.currentPos.tooltip = d.tooltip;
                   self.currentPos.value = d.display_value ? d.display_value : d.value;
                   return 4;
@@ -554,7 +550,6 @@
             // path for starting state of line
              var path = g.selectAll('.dummy').data(data).enter().append("path")
               .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
-              // .attr("stroke", color)
               .attr("class", "data0")
               .attr("stroke-width", "2.5")
               .attr("fill", "none")
@@ -622,6 +617,10 @@
           }
         }
       },
+      drawJoystick: function(){},
+      dragMove: function(d){},
+      dragEnd: function(){},
+      showCurrentData: function(){},
       chartSpecificDataValidate: function() {
 
         }
