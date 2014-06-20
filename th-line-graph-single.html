@@ -219,6 +219,25 @@
 
       },
       resize: function(){
+        var self = this;
+
+        self.dims = self.setupDimensions(self);
+        self.width = self.dims.width;
+        self.height = self.dims.height;
+
+        // adjust the margins because labels and joystick need more space
+        self.dims.margin.right = 10;
+        self.dims.margin.left = 10;
+        self.dims.margin.top = 30;
+        self.dims.margin.bottom = 30;
+        self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
+      
+        self._scaleBuilder();
+        // self._setupElements();
+        self._setupElementSizes();
+        self.dataLength = self.chartData.length;
+
+        self.animate();
         
       },
       updateData: function(){
