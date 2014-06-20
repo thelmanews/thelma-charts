@@ -106,6 +106,7 @@
             height = self.height,
             y = self.y,
             x = self.x;
+        self.currentPos = {};
 
         self.svg = d3.select(self.$.chart);
         
@@ -200,7 +201,7 @@
           .attr("y", -(height/2))
           .attr("class", "fill-foreground")
           .attr("opacity", 0.7) // this can start as 0 and fade in after datapoint and slider appear
-          .text(self.currentValue);
+          .text(self.currentPos.value);
 
 
       },
@@ -306,15 +307,15 @@
         self.setStartingPosition(self.chartData);
    
         function showCurrentDatapoint(position, firstTime){
-          // currentValue;
+          // currentPos.value;
           g.selectAll(".circle")
                 .transition()
                 .delay(function(){ return firstTime ? 1000 : 0})
                 .duration(300)
                 .attr("r", function(d){
                   if (parseInt(d.label)==parseInt(position)){ 
-                    self.currentTooltip = d.tooltip;
-                    self.currentValue = d.display_value ? d.display_value : d.value;
+                    self.currentPos.tooltip = d.tooltip;
+                    self.currentPos.value = d.display_value ? d.display_value : d.value;
                     return 4;
                   } else {
                     return 0;
@@ -334,13 +335,13 @@
             
         }
 
-        showCurrentDatapoint(self.currentPos, firstTime=true);
-        showCurrentData(self.currentTooltip, self.currentValue);
+        showCurrentDatapoint(self.currentPos.label, firstTime=true);
+        showCurrentData(self.currentPos.tooltip, self.currentPos.value);
 
         // Slider
-        var currentPosX = x(self.currentPos);  
+        self.currentPos.x = x(self.currentPos.label);  
         var slider = svg.selectAll('g.slider')
-            .data([{x: currentPosX}]) //??
+            .data([{x: self.currentPos.x}]) //??
             .enter()
                 .append('g')
                 .attr("class", "slider")
@@ -355,7 +356,7 @@
         slider.append("circle")
             .attr("class", "target")
             .attr("r", 8)
-            .attr("cx", currentPosX)
+            .attr("cx", self.currentPos.x)
             .attr("cy", 12)
             .attr("class", "pulse fill-background stroke-foreground")
             // .attr("fill", self.colors.background)
@@ -365,7 +366,7 @@
 
         slider.append('rect')
             .attr('y', 22)
-            .attr('x', currentPosX-1.5)
+            .attr('x', self.currentPos.x-1.5)
             .attr("height", h-36)
             .attr("width", 3)
             .attr("class", "fill-foreground")
@@ -386,30 +387,30 @@
               .attr("cx", d.x = Math.max(0, Math.min(w, d3.event.x))); 
        
             // define current position
-            currentPosX = d3.select(this).attr("cx");
+            self.currentPos.x = d3.select(this).attr("cx");
 
             // move the line
             slider.select('rect')
-              .attr('x', currentPosX-1)
+              .attr('x', self.currentPos.x-1)
               .attr('opacity', 1);
 
             // determine direction of slide movement
-            if (currentPosX < lastPosX){
+            if (self.currentPos.x < lastPosX){
               direction = "left";
-              lastPosX = currentPosX;
+              lastPosX = self.currentPos.x;
             } else {
               direction ="right";
-              lastPosX = currentPosX;
+              lastPosX = self.currentPos.x;
             }
             
 
             // determine which circles/tooltips are to be displayed
             g.selectAll(".circle")
               .attr("r", function(d){
-                if ( Math.abs(x(d.label) - parseInt(currentPosX)) < 10) {
-                // (x(d.label)<(parseInt(currentPosX)+5)) && (x(d.label)>(parseInt(currentPosX)-5))){ 
-                  self.currentTooltip = d.tooltip;
-                  self.currentValue = d.display_value ? d.display_value : d.value;
+                if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
+                // (x(d.label)<(parseInt(self.currentPos.x)+5)) && (x(d.label)>(parseInt(self.currentPos.x)-5))){ 
+                  self.currentPos.tooltip = d.tooltip;
+                  self.currentPos.value = d.display_value ? d.display_value : d.value;
                   return 4;
                 } else {
                   return 0;
@@ -421,13 +422,13 @@
             if (direction == "right"){
               closestPoint = d3.min(points[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx")); 
-                return (cx - currentPosX >= 0) ? cx : Number.MAX_VALUE  ;
+                return (cx - self.currentPos.x >= 0) ? cx : Number.MAX_VALUE  ;
               });
           
             } else {
               closestPoint = d3.max(points[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx")); 
-                return (cx - currentPosX < 0) ? cx : Number.MIN_VALUE  ;
+                return (cx - self.currentPos.x < 0) ? cx : Number.MIN_VALUE  ;
               });
             }
 
@@ -449,7 +450,7 @@
 
              // Update the info below chart
             showCurrentDatapoint(x.invert(closestPoint));
-            showCurrentData(self.currentTooltip, self.currentValue);
+            showCurrentData(self.currentPos.tooltip, self.currentPos.value);
 
         }
 
@@ -610,14 +611,14 @@
         // FIND THE FIRST TOOLTIP AND SET AS CURRENT POSITION
         for (var i=0; i<data.length; i++){
           if (data[i].tooltip){
-            self.currentPos = data[i].label;
-            self.currentTooltip = data[i].tooltip;
-            self.currentValue = data[i].display_value ? data[i].display_value : data[i].value;
+            self.currentPos.label = data[i].label;
+            self.currentPos.tooltip = data[i].tooltip;
+            self.currentPos.value = data[i].display_value ? data[i].display_value : data[i].value;
             break;
           } else {
-            self.currentPos = data[0].label;
-            self.currentTooltip = data[0].tooltip;
-            self.currentValue = data[0].display_value ? data[0].display_value : data[0].value;
+            self.currentPos.label = data[0].label;
+            self.currentPos.tooltip = data[0].tooltip;
+            self.currentPos.value = data[0].display_value ? data[0].display_value : data[0].value;
           }
         }
       },
