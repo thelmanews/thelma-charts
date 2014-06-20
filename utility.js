@@ -11,15 +11,12 @@ Thelma.chartValidation = {
 	validateChartData: function(polymerObj) {
 		// polymerObj is passed to the function to make chartValidation not dependant on polymer
 		
-		console.log(' ---- chart validation ---- ')
-
 		var errors = polymerObj.errors;
 		var i = 0;
 		if(!polymerObj.chartData) {
 			errors.push('no chart data');
 		}
 		errors = errors.concat(polymerObj.chartSpecificDataValidate());
-		console.log(errors);
 
 		if(errors.length>0) {
 			polymerObj.$.chart.style.opacity = 0.5; // this is for testing
@@ -167,8 +164,7 @@ Thelma.chartUtils = {
       
       dims.labels = {};
       dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
-      dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
-
+      dims.labels.width = dims.labels.maxLength * 8.5; // This calc usually works?
       dims.values = {};
       dims.values.maxLength = d3.max(chartData, function(d){ 
         if (d.range){
@@ -184,17 +180,20 @@ Thelma.chartUtils = {
       }); // 3 is for the characters separating min and max " - "
       
 
-      dims.values.width = dims.values.maxLength * 5.25; // This calc works with the font-size 13px
-
+      dims.values.width = dims.values.maxLength * 8.5; // This calc usually works?
       dims.bar = {};
       dims.bar.minWidth = 15;
       dims.bar.maxWidth = 100;
-      dims.bar.width = Math.min(dims.bar.maxWidth, ( (dims.width/2 - (Math.max(dims.values.width,dims.labels.width) - dims.margin.label)) *2)); 
+      dims.bar.width = Math.min(dims.bar.maxWidth, ( (dims.width/2 - (Math.max(dims.values.width,dims.labels.width))) *2)); 
       dims.bar.width = dims.bar.width < dims.bar.minWidth ? dims.bar.minWidth : dims.bar.width; 
       
       dims.minWidth = dims.bar.minWidth + dims.values.width + dims.labels.width; // cannot resize to smaller than this;
       // dims.minHeight - need to set this also
-
+      console.log("^^^^^^^^^^^^^^^");
+      console.log(dims.bar.width);
+      console.log(dims.values.width);
+      console.log(dims.labels.width);
+      console.log(dims.width/2 - dims.bar.width/2 - Math.max(dims.values.width, dims.labels.width));
       return dims;
 
     }
