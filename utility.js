@@ -182,18 +182,16 @@ Thelma.chartUtils = {
 
       dims.values.width = dims.values.maxLength * 8.5; // This calc usually works?
       dims.bar = {};
-      dims.bar.minWidth = 15;
+      dims.bar.minWidth = 10;
       dims.bar.maxWidth = 100;
       dims.bar.width = Math.min(dims.bar.maxWidth, ( (dims.width/2 - (Math.max(dims.values.width,dims.labels.width))) *2)); 
       dims.bar.width = dims.bar.width < dims.bar.minWidth ? dims.bar.minWidth : dims.bar.width; 
       
-      dims.minWidth = dims.bar.minWidth + dims.values.width + dims.labels.width; // cannot resize to smaller than this;
+      dims.minWidth = dims.bar.minWidth + dims.values.width + dims.labels.width;
+      dims.width = dims.width < dims.minWidth ? dims.minWidth : dims.width;  // cannot resize to smaller than this;
+      // dims.labels.charLimit - calculate the character limit for labels, given the min width of the bar and the width of the component
       // dims.minHeight - need to set this also
-      console.log("^^^^^^^^^^^^^^^");
-      console.log(dims.bar.width);
-      console.log(dims.values.width);
-      console.log(dims.labels.width);
-      console.log(dims.width/2 - dims.bar.width/2 - Math.max(dims.values.width, dims.labels.width));
+     
       return dims;
 
     }
