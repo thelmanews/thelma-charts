@@ -39,11 +39,67 @@ Thelma.chartValidation = {
 
 }
 
-Thelma.sharedPrivateMethods = {
+Thelma.BarFamilyPrivateStaticMethods = function() {
 
-	privateMethod: function() {
-		alert('abc');
+	  this.setupBarLabelDims = function(dims, chartData, overlap, gap) {
+
+        console.log(dims);
+        
+        // bars margin and dims
+
+        dims.bars = {};
+        dims.bars.count = chartData.length;
+        dims.bars.overlap = overlap || 1; // the higher the number, the more overlap
+        dims.bars.gap = gap || 1;
+
+
+        dims.bars.width = (dims.width / dims.bars.count)* dims.bars.overlap / dims.bars.gap;
+        dims.bars.widthOverlap = dims.bars.width*dims.bars.overlap;
+
+
+
+        // value margin and dims (depending on bars.width)
+        
+        dims.values = {};
+        dims.values.maxLength = d3.max(chartData, function(d){  
+          return  d.display_value ? d.display_value.length : d.value.toString().length;
+         });
+        dims.values.size = Math.min(30,((dims.bars.width/dims.bars.overlap) / dims.values.maxLength / 0.6) );
+        dims.values.margin = dims.values.size * 0.25;
+
+        // Adjust top margin as necessary
+        if ((dims.values.size+dims.values.margin) > dims.margin.top) { 
+          dims.margin.top = dims.values.size+dims.values.margin;
+        }
+
+
+
+        // label margins and dims
+
+        dims.labels = {};
+        dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
+	    dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
+
+	      // If labels are long, angle them and adjust margin 
+	      // 1.1 worked with well with different labels but it might be a little bit too aggressive. (larger->more conservative)
+	    if (dims.labels.width > dims.bars.width/dims.bars.overlap/1.3) { 
+	        dims.labels.angle = 25;
+	        dims.margin.bottom = dims.labels.width + dims.margin.label;
+	        dims.margin.right = dims.labels.width;
+	        
+	        // need to adjust margin right when last label is long, so it does not cut off
+	    } else {
+	        dims.labels.angle = 0;
+	    }
+
+        return dims;
+
+        
+        
+
 	}
+
+	
 }
 
 Thelma.chartUtils = {
