@@ -11,15 +11,12 @@ Thelma.chartValidation = {
 	validateChartData: function(polymerObj) {
 		// polymerObj is passed to the function to make chartValidation not dependant on polymer
 		
-		console.log(' ---- chart validation ---- ')
-
 		var errors = polymerObj.errors;
 		var i = 0;
 		if(!polymerObj.chartData) {
 			errors.push('no chart data');
 		}
 		errors = errors.concat(polymerObj.chartSpecificDataValidate());
-		console.log(errors);
 
 		if(errors.length>0) {
 			polymerObj.$.chart.style.opacity = 0.5; // this is for testing
@@ -151,5 +148,51 @@ Thelma.chartUtils = {
 
           return dims.labels;
       },
+    setupStackedDims: function(polymerObj){
+      var dims = {},
+          chartData = polymerObj.chartData;
+      dims.margin = {
+              top : 0,
+              right : 0,
+              bottom : 0,
+              left : 0,
+              label: 10,
+          }, 
+
+      dims.width = Math.max(100,(polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right)), 
+      dims.height = Math.max(150,(polymerObj.chartHeight*0.95 - dims.margin.top - dims.margin.bottom)),
+      
+      dims.labels = {};
+      dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
+      dims.labels.width = dims.labels.maxLength * 8; // This calc usually works?  Might need more sophistication
+      
+      dims.values = {};
+      dims.values.maxLength = d3.max(chartData, function(d){ 
+        if (d.range){
+          if (d.range.min.display_value){
+            return  d.range.min.display_value.length + d.range.max.display_value.length + 3;
+          } else {
+            return  d.range.min.value.length + d.range.max.value.length + 3; // 3 is for the characters separating min and max " - "
+          }
+        } else {
+          return d.display_value ? d.display_value.length : d.value.toString().length;
+        }
+      }); 
+      dims.values.width = dims.values.maxLength * 8; // This calc usually works? Might need more sophistication
+      
+      dims.bar = {};
+      dims.bar.minWidth = 10;
+      dims.bar.maxWidth = 100;
+      dims.bar.width = Math.min(dims.bar.maxWidth, ( (dims.width/2 - (Math.max(dims.values.width,dims.labels.width))-dims.margin.label) *2)); 
+      dims.bar.width = dims.bar.width < dims.bar.minWidth ? dims.bar.minWidth : dims.bar.width; 
+      
+      dims.minWidth = dims.bar.minWidth + (Math.max(dims.values.width,dims.labels.width)*2);
+      dims.width = dims.width < dims.minWidth ? dims.minWidth : dims.width;  // cannot resize to smaller than this;
+      // dims.labels.charLimit - calculate the character limit for labels, given the min width of the bar and the width of the component
+      // dims.minHeight - need to set this also
+
+      return dims;
+
+    }
 
 }

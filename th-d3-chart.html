@@ -50,15 +50,27 @@
          },
          chartDataChanged: function() {
             this.validateChartData(this);
+
+            // dont call updateData before init()
+            if(!this.initialized) {
+              //TODO better way of handling this is calling updateData when polymer-ready is fired. good for now!
+              return;
+            }
             
             if(this.errors.length==0) {
               this.updateData();
             }
          },
          chartWidthChanged: function() {
+            if(!this.initialized) {
+              return;
+            }
             this.resize();
          },
          chartHeightChanged: function() {
+            if(!this.initialized) {
+              return;
+            }
             this.resize();
          },
          resize: function() {
