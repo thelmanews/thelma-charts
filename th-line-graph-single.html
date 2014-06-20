@@ -46,7 +46,6 @@
         animation-timing-function: linear;
       }
     </style>
-    <content></content>
     <svg id="chart"></svg> 
     <div id="info"></div> 
   </template> 
@@ -112,6 +111,11 @@
         
         var g = self.svg.append("g");
         self.g = g;
+
+                
+        self.tooltip = d3.select(self.$.info)
+          .append("div")   
+          .attr("class", "tooltip");
 
         // line data
         self.startingLine = d3.svg.line()
@@ -185,6 +189,18 @@
         //   // .attr("stroke", self.colors.foreground)
         //   .attr("opacity", function(d) { return self.chartOptions.animateAxis ? 0 : 0.3; });
         
+        self.displayValue = g.append('g').append('text')
+          .attr("font-size", height/3)
+          .attr("x", function(){
+            return self.chartOptions.dataPosition === "left" ? self.dims.margin.left : (width-self.dims.margin.left);
+           })
+          .attr("text-anchor", function(){
+            return self.chartOptions.dataPosition === "left" ? "start" : "end";
+           })
+          .attr("y", -(height/2))
+          .attr("class", "fill-foreground")
+          .attr("opacity", 0.7) // this can start as 0 and fade in after datapoint and slider appear
+          .text(self.currentValue);
 
 
       },
@@ -199,6 +215,8 @@
 
         self.g
           .attr("transform", "translate(0,"+ (height-self.dims.margin.top/2) +")");
+
+
       
       },
       _setupElementSizes: function(){
@@ -242,6 +260,7 @@
       },
       updateData: function(){
 
+       
       },
       reset: function() {
         var self = this,
@@ -272,184 +291,30 @@
             yLabels = self.yLabels,
             yTicks = self.yTicks,
             h = self.height,
-            w = self.width;
-
-        var info_area = self.$.info;
-        var tooltip = d3.select(info_area)
-          .append("div")   
-          .attr("class", "tooltip");
+            w = self.width,
+            tooltip = self.tooltip,
+            data = self.chartData,
+            animationStyle = self.chartOptions.animateStyle;
 
         var path;
-        var currentPos;
-        var currentTooltip;
-        var currentValue;
 
 
-        function drawLine(){
-          var data = self.chartData,
-              animationStyle = self.chartOptions.animateStyle;
 
-          if (animationStyle === "draw"){
-  
-            if (self.chartOptions.fillArea){
-              // area to fill under line
-              var area = d3.svg.area()
-                .x(function(d) { return x(d.label); })
-                .y1(function(d) { return -y(d.value); }).interpolate(self.chartOptions.lineStyle);
-
-              g.append("path")
-                .datum(data)
-                .attr("class", "data0")
-                .attr("opacity", 0)
-                .transition()
-                  .duration(1000) // TODO: make variable?
-                  //.delay(1000) 
-                  .ease("linear")
-                  .attr("stroke-dashoffset", 0)
-                .attr("d", area)
-                // .attr("fill", color)
-                .attr("opacity", 0.7);
-            }
-
-            path = g.selectAll('.dummy').data(data)
-              .enter().append("path")
-              .attr("d", line(data)) 
-              .attr("class", "data0 no-fill")
-              // .attr("stroke", color)
-              .attr("stroke-width", "3")
-              .attr("fill", "none");
-
-            var totalLength = path.node().getTotalLength();
-           
-            path
-              .attr("stroke-dasharray", totalLength + " " + totalLength)
-              .attr("stroke-dashoffset", totalLength)
-              .transition()
-                .duration(1000) // TODO: make variable?
-                //.delay(1000) 
-                .ease("linear")
-                .attr("stroke-dashoffset", 0);
-          } else { // raise style 
-            
-            if (self.chartOptions.fillArea){ 
-              var areaStart = d3.svg.area()
-                .x(function(d) { return x(d.label); })
-                .y1(0).interpolate(self.chartOptions.lineStyle);
-                    
-              var area = d3.svg.area()
-                .x(function(d) { return x(d.label); })
-                .y1(function(d) { return -y(d.value); })
-                .interpolate(self.chartOptions.lineStyle);
-
-              g.append("path")
-                .datum(data)
-                .attr("class", "area data0")
-                .attr("opacity", 0)
-                // .attr("fill", color)
-                .attr("d", areaStart)
-                .transition()
-                  .duration(1000)
-                  .ease("linear")
-                  .attr("stroke-dashoffset", 0)
-                .attr("d", area)
-                // .attr("fill", color)
-                .attr("opacity", 0.7);
-            }
-
-             var path = g.selectAll('.dummy').data(data).enter().append("path")
-              .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
-              // .attr("stroke", color)
-              .attr("class", "data0")
-              .attr("stroke-width", "2.5")
-              .attr("fill", "none")
-              .attr("opacity", function(){ return self.chartOptions.fillArea ? 0 : 1;});
-
-            path.transition()
-              .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
-              .attr("d", line(data))
-              .attr("opacity", 1);
-          }
-
-          g.selectAll(".circle")
-          .data(data)
-          .enter().append("circle")
-          .attr("class", "circle data0 stroke-foreground")
-          .attr("r", 0)
-          // .attr("fill", color) 
-          // .attr("stroke", self.colors.foreground)
-          .attr("stroke-width", 3)
-          .attr("cx", function(d) { return  x(d.label); })
-          .attr("cy", function(d) { return -1 * y(d.value); })
         
-        }
-
-        function animateAxis(){
-          yAxis.transition()
-            .duration(1000)
-            .attr("y1", -1 * 0)
-            .attr("y2", -1 * y(maxValue))
-            .attr("opacity", 1);
-
-          yLabels.transition()
-            .duration(1000)
-            .attr("y", function(d) { return -1 * y(d) })
-            .attr("opacity", 1);
-
-          yTicks.transition()
-            .duration(1000)
-            .attr("y1", function(d) { return -1 * y(d) })
-            .attr("y2", function(d) { return -1 * y(d) })
-            .attr("opacity", 1);
-        }
-
-
-        if(self.chartOptions.animateAxis) {
-          animateAxis();
-        }
-
-        // CALL THE DRAWLINES FUNCTION AND PASS IN THE DATA
-        drawLine();
-
-
-        // FIND THE FIRST TOOLTIP AND SET self AS CURRENT POSITION
-        for (var i=0; i<data.length; i++){
-          if (data[i].tooltip){
-            currentPos = data[i].label;
-            currentTooltip = data[i].tooltip;
-            currentValue = data[i].display_value ? data[i].display_value : data[i].value;
-            break;
-          } else {
-            currentPos = data[0].label;
-            currentTooltip = data[0].tooltip;
-            currentValue = data[0].display_value ? data[0].display_value : data[0].value;
-          }
-        }
-
-        var data_area = g.append('g').append('text')
-          .attr("font-size", h/3)
-          .attr("x", function(){
-            return self.chartOptions.dataPosition === "left" ? self.dims.margin.left : (w-self.dims.margin.left);
-           })
-          .attr("text-anchor", function(){
-            return self.chartOptions.dataPosition === "left" ? "start" : "end";
-           })
-          .attr("y", -(h/2))
-          .attr("class", "fill-foreground")
-          // .attr("fill", self.colors.foreground)
-          .attr("opacity", 0.7)
-          .text(currentValue);
-
-
-        function getCurrentValues(position, firstTime){
-          currentValue;
+        self.animateLines();
+        self.animateAxis();
+        self.setStartingPosition(self.chartData);
+   
+        function showCurrentDatapoint(position, firstTime){
+          // currentValue;
           g.selectAll(".circle")
                 .transition()
                 .delay(function(){ return firstTime ? 1000 : 0})
                 .duration(300)
                 .attr("r", function(d){
                   if (parseInt(d.label)==parseInt(position)){ 
-                    currentTooltip = d.tooltip;
-                    currentValue = d.display_value ? d.display_value : d.value;
+                    self.currentTooltip = d.tooltip;
+                    self.currentValue = d.display_value ? d.display_value : d.value;
                     return 4;
                   } else {
                     return 0;
@@ -457,7 +322,7 @@
                 });
         }
 
-        function showCurrentValues(tooltipInfo, value){
+        function showCurrentData(tooltipInfo, value){
             // show tooltip 
             tooltip.transition() 
                 .duration(100)      
@@ -465,15 +330,15 @@
             tooltip.html(tooltipInfo);  
             
             // show value
-            data_area.text(value);
+            self.displayValue.text(value);
             
         }
 
-        getCurrentValues(currentPos, firstTime=true);
-        showCurrentValues(currentTooltip, currentValue);
+        showCurrentDatapoint(self.currentPos, firstTime=true);
+        showCurrentData(self.currentTooltip, self.currentValue);
 
         // Slider
-        var currentPosX = x(currentPos);  
+        var currentPosX = x(self.currentPos);  
         var slider = svg.selectAll('g.slider')
             .data([{x: currentPosX}]) //??
             .enter()
@@ -543,8 +408,8 @@
               .attr("r", function(d){
                 if ( Math.abs(x(d.label) - parseInt(currentPosX)) < 10) {
                 // (x(d.label)<(parseInt(currentPosX)+5)) && (x(d.label)>(parseInt(currentPosX)-5))){ 
-                  currentTooltip = d.tooltip;
-                  currentValue = d.display_value ? d.display_value : d.value;
+                  self.currentTooltip = d.tooltip;
+                  self.currentValue = d.display_value ? d.display_value : d.value;
                   return 4;
                 } else {
                   return 0;
@@ -583,8 +448,8 @@
                 .attr('opacity', 0.4);
 
              // Update the info below chart
-            getCurrentValues(x.invert(closestPoint));
-            showCurrentValues(currentTooltip, currentValue);
+            showCurrentDatapoint(x.invert(closestPoint));
+            showCurrentData(self.currentTooltip, self.currentValue);
 
         }
 
@@ -594,6 +459,167 @@
       
 
 
+      },
+      animateLines: function(){
+        var self = this;
+        var g = self.g,
+            svg = self.svg,
+            data = self.chartData,
+            line = self.line,
+            x = self.x,
+            y = self.y,
+            minLabel = self.minLabel,
+            maxLabel = self.maxLabel,
+            minValue = self.minValue,
+            maxValue = self.maxValue,
+            startingLine = self.startingLine,
+            yAxis = self.yAxis,
+            yLabels = self.yLabels,
+            yTicks = self.yTicks,
+            h = self.height,
+            w = self.width,
+            tooltip = self.tooltip,
+            data = self.chartData,
+            animationStyle = self.chartOptions.animateStyle;
+
+        if (animationStyle === "draw"){
+            if (self.chartOptions.fillArea){
+              
+              // data for fill area
+              var area = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(function(d) { return -y(d.value); }).interpolate(self.chartOptions.lineStyle);
+
+              // path for fill area
+              g.append("path")
+                .datum(data)
+                .attr("class", "data0")
+                .attr("opacity", 0)
+                .transition()
+                  .duration(1000) 
+                  .ease("linear")
+                  .attr("stroke-dashoffset", 0)
+                .attr("d", area)
+                .attr("opacity", 0.7);
+            }
+
+            // path for line
+            path = g.selectAll('.dummy').data(data)
+              .enter().append("path")
+              .attr("d", line(data)) 
+              .attr("class", "data0 no-fill")
+              .attr("stroke-width", "3")
+              .attr("fill", "none");
+
+            // draw effect animation
+            var totalLength = path.node().getTotalLength();
+            path
+              .attr("stroke-dasharray", totalLength + " " + totalLength)
+              .attr("stroke-dashoffset", totalLength)
+              .transition()
+                .duration(1000) 
+                .ease("linear")
+                .attr("stroke-dashoffset", 0);
+
+          } else { // raise style 
+            
+            if (self.chartOptions.fillArea){ 
+              
+              // data for fill area, starting state
+              var areaStart = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(0).interpolate(self.chartOptions.lineStyle);
+              
+              // data for fill area, ending state
+              var area = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(function(d) { return -y(d.value); })
+                .interpolate(self.chartOptions.lineStyle);
+
+              // path for fill area
+              g.append("path")
+                .datum(data)
+                .attr("class", "area data0")
+                .attr("opacity", 0)
+                .attr("d", areaStart)
+                .transition()
+                  .duration(1000)
+                  .ease("linear")
+                  .attr("stroke-dashoffset", 0)
+                .attr("d", area)
+                .attr("opacity", 0.7);
+            }
+
+            // path for starting state of line
+             var path = g.selectAll('.dummy').data(data).enter().append("path")
+              .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
+              // .attr("stroke", color)
+              .attr("class", "data0")
+              .attr("stroke-width", "2.5")
+              .attr("fill", "none")
+              .attr("opacity", function(){ return self.chartOptions.fillArea ? 0 : 1;});
+
+            // transition for ending state of line
+            path.transition()
+              .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
+              .attr("d", line(data))
+              .attr("opacity", 1);
+          }
+
+          // append circles to datapoints
+          g.selectAll(".circle")
+          .data(data)
+          .enter().append("circle")
+          .attr("class", "circle data0 stroke-foreground")
+          .attr("r", 0)
+          .attr("stroke-width", 3)
+          .attr("cx", function(d) { return  x(d.label); })
+          .attr("cy", function(d) { return -1 * y(d.value); })
+      },
+      animateAxis: function(){
+        var self = this;
+        if (self.chartOptions.animateAxis) {
+          var yAxis = self.yAxis,
+              y = self.y,
+              maxValue = self.maxValue,
+              // yTicks = self.yTicks,
+              yLabels = self.yLabels;
+
+          yAxis.transition()
+            .duration(1000)
+            .attr("y1", -1 * 0)
+            .attr("y2", -1 * y(maxValue))
+            .attr("opacity", 1);
+
+          yLabels.transition()
+            .duration(1000)
+            .attr("y", function(d) { return -1 * y(d) })
+            .attr("opacity", 1);
+
+          // yTicks.transition()
+          //   .duration(1000)
+          //   .attr("y1", function(d) { return -1 * y(d) })
+          //   .attr("y2", function(d) { return -1 * y(d) })
+          //   .attr("opacity", 1);
+        }
+      },
+      setStartingPosition: function(data){
+        var self = this;
+        
+
+        // FIND THE FIRST TOOLTIP AND SET AS CURRENT POSITION
+        for (var i=0; i<data.length; i++){
+          if (data[i].tooltip){
+            self.currentPos = data[i].label;
+            self.currentTooltip = data[i].tooltip;
+            self.currentValue = data[i].display_value ? data[i].display_value : data[i].value;
+            break;
+          } else {
+            self.currentPos = data[0].label;
+            self.currentTooltip = data[0].tooltip;
+            self.currentValue = data[0].display_value ? data[0].display_value : data[0].value;
+          }
+        }
       },
       chartSpecificDataValidate: function() {
 
