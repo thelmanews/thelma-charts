@@ -299,44 +299,11 @@
 
         var path;
 
-
-
-        
         self.animateLines();
         self.animateAxis();
-        self.setStartingPosition(self.chartData);
-   
-        function showCurrentDatapoint(position, firstTime){
-          // currentPos.value;
-          g.selectAll(".circle")
-                .transition()
-                .delay(function(){ return firstTime ? 1000 : 0})
-                .duration(300)
-                .attr("r", function(d){
-                  if (parseInt(d.label)==parseInt(position)){ 
-                    self.currentPos.tooltip = d.tooltip;
-                    self.currentPos.value = d.display_value ? d.display_value : d.value;
-                    return 4;
-                  } else {
-                    return 0;
-                  }
-                });
-        }
+        self.setStartingPosition(self.chartData);   
+        self.showCurrentData(self.currentPos, firstTime=true);
 
-        function showCurrentData(tooltipInfo, value){
-            // show tooltip 
-            tooltip.transition() 
-                .duration(100)      
-                .style("opacity", 1);      
-            tooltip.html(tooltipInfo);  
-            
-            // show value
-            self.displayValue.text(value);
-            
-        }
-
-        showCurrentDatapoint(self.currentPos.label, firstTime=true);
-        showCurrentData(self.currentPos.tooltip, self.currentPos.value);
 
         // Slider
         self.currentPos.x = x(self.currentPos.label);  
@@ -373,7 +340,7 @@
         var lastPosX = slider.select("circle").attr("cx");
         var direction;
         var points = g.selectAll('.circle');
-        var closestPoint;  
+        
 
         function dragMove(d) {
 
@@ -416,13 +383,13 @@
 
             // Find the closest point to the slider
             if (direction == "right"){
-              closestPoint = d3.min(points[0], function(d){
+              self.currentPos.closestX = d3.min(points[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx")); 
                 return (cx - self.currentPos.x >= 0) ? cx : Number.MAX_VALUE  ;
               });
           
             } else {
-              closestPoint = d3.max(points[0], function(d){
+              self.currentPos.closestX = d3.max(points[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx")); 
                 return (cx - self.currentPos.x < 0) ? cx : Number.MIN_VALUE  ;
               });
@@ -437,16 +404,18 @@
               .attr('class','pulse')
               .transition()
                 .duration(50)
-                .attr('cx', closestPoint);
+                .attr('cx', self.currentPos.closestX);
             slider.select('rect')
               .transition()
                 .duration(50)
-                .attr('x', closestPoint-1) // adjusted bc of thickness of line
+                .attr('x', self.currentPos.closestX-1) // adjusted bc of thickness of line
                 .attr('opacity', 0.4);
 
+            self.currentPos.closestLabel = x.invert(self.currentPos.closestX);
+
              // Update the info below chart
-            showCurrentDatapoint(x.invert(closestPoint));
-            showCurrentData(self.currentPos.tooltip, self.currentPos.value);
+            // showCurrentDatapoint(x.invert(closestX));
+            self.showCurrentData(self.currentPos);
 
         }
 
@@ -620,7 +589,37 @@
       drawJoystick: function(){},
       dragMove: function(d){},
       dragEnd: function(){},
-      showCurrentData: function(){},
+      showCurrentData: function(currentPos, firstTime){
+        var self = this,
+            g = self.g,
+            label = currentPos.closestLabel || currentPos.label,
+            value = currentPos.val,
+            tooltip = currentPos.tooltip;
+
+          g.selectAll(".circle")
+                .transition()
+                .delay(function(){ return firstTime ? 1000 : 0})
+                .duration(300)
+                .attr("r", function(d){
+                  if ((parseInt(d.label)==parseInt(label))){ 
+                    tooltip = d.tooltip;
+                    value = d.display_value ? d.display_value : d.value;
+                    return 4;
+                  } else {
+                    return 0;
+                  }
+                });
+
+           // show tooltip 
+            self.tooltip.transition() 
+                .duration(100)      
+                .style("opacity", 1);      
+            self.tooltip.html(tooltip);  
+            
+            // show value
+            self.displayValue.text(currentPos.value);
+
+      },
       chartSpecificDataValidate: function() {
 
         }
