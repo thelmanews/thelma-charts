@@ -96,7 +96,7 @@
         self.minValue = self.getBoundaryValue(self, "value", d3.min);
         
         self.y = d3.scale.linear().domain([self.minValue, self.maxValue]).range([self.dims.margin.top, 
-                (self.height-(self.dims.margin.top + self.dims.margin.bottom)) ]), //30 to make room for the slider
+                (self.height-(self.dims.margin.top + self.dims.margin.bottom)) ]), //30 to make room for the joystick
         self.x = d3.scale.linear().domain([self.minLabel, self.maxLabel]).range([0, self.width ]); 
 
       },
@@ -200,7 +200,7 @@
            })
           .attr("y", -(height/2))
           .attr("class", "fill-foreground")
-          .attr("opacity", 0.7) // this can start as 0 and fade in after datapoint and slider appear
+          .attr("opacity", 0.7) // this can start as 0 and fade in after datapoint and joystick appear
           .text(self.currentPos.value);
 
 
@@ -216,9 +216,7 @@
 
         self.g
           .attr("transform", "translate(0,"+ (height-self.dims.margin.top/2) +")");
-
-
-      
+   
       },
       _setupElementSizes: function(){
         var self = this,  
@@ -233,9 +231,6 @@
           .x(function(d) { return x(d.label); })
           .y(function(d) { return -y(d.value); })
           .interpolate(self.chartOptions.lineStyle);
-
-          
-
       },
       resize: function(){
         var self = this;
@@ -268,163 +263,19 @@
             g = self.g,
             svg = self.svg;
         
-        // removes the lines, slider and data/tooltips
+        // removes the lines, joystick and data/tooltips
         g.selectAll("path, circle, text").remove();     
         d3.select(self.$.info).selectAll("div, li").remove();  
-        svg.selectAll(".slider").remove();   
-
+        svg.selectAll(".joystick").remove();   
       },
 
       animate: function() {
         var self = this;
-        var g = self.g,
-            svg = self.svg,
-            data = self.chartData,
-            line = self.line,
-            x = self.x,
-            y = self.y,
-            minLabel = self.minLabel,
-            maxLabel = self.maxLabel,
-            minValue = self.minValue,
-            maxValue = self.maxValue,
-            startingLine = self.startingLine,
-            yAxis = self.yAxis,
-            yLabels = self.yLabels,
-            yTicks = self.yTicks,
-            h = self.height,
-            w = self.width,
-            tooltip = self.tooltip,
-            data = self.chartData,
-            animationStyle = self.chartOptions.animateStyle;
-
-        var path;
-
         self.animateLines();
         self.animateAxis();
         self.setStartingPosition(self.chartData);   
+        self.moveJoystick();
         self.showCurrentData(self.currentPos, firstTime=true);
-
-
-        // Slider
-        self.currentPos.x = x(self.currentPos.label);  
-        var slider = svg.selectAll('g.slider')
-            .data([{x: self.currentPos.x}]) //??
-            .enter()
-                .append('g')
-                .attr("class", "slider")
-                .attr("height", 200)
-                .attr("width", w);
-
-        var drag = d3.behavior.drag()
-            .origin(Object)
-            .on("drag", dragMove)
-            .on('dragend', dragEnd);
-
-        slider.append("circle")
-            .attr("class", "target")
-            .attr("r", 8)
-            .attr("cx", self.currentPos.x)
-            .attr("cy", 12)
-            .attr("class", "pulse fill-background stroke-foreground")
-            .attr("stroke-width", 4.5)
-            .call(drag);
-
-        slider.append('rect')
-            .attr('y', 22)
-            .attr('x', self.currentPos.x-1.5)
-            .attr("height", h-36)
-            .attr("width", 3)
-            .attr("class", "fill-foreground")
-            .attr('opacity', 0.4);
-
-        var lastPosX = slider.select("circle").attr("cx");
-        var direction;
-        var points = g.selectAll('.circle');
-        
-
-        function dragMove(d) {
-
-            // move the circle
-            d3.select(this)
-
-              .attr("class", "fill-background stroke-foreground")
-              .attr("cx", d.x = Math.max(0, Math.min(w, d3.event.x))); 
-       
-            // define current position
-            self.currentPos.x = d3.select(this).attr("cx");
-
-            // move the line
-            slider.select('rect')
-              .attr('x', self.currentPos.x-1)
-              .attr('opacity', 1);
-
-            // determine direction of slide movement
-            if (self.currentPos.x < lastPosX){
-              direction = "left";
-              lastPosX = self.currentPos.x;
-            } else {
-              direction ="right";
-              lastPosX = self.currentPos.x;
-            }
-            
-
-            // determine which circles/tooltips are to be displayed
-            g.selectAll(".circle")
-              .attr("r", function(d){
-                if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
-                  self.currentPos.tooltip = d.tooltip;
-                  self.currentPos.value = d.display_value ? d.display_value : d.value;
-                  return 4;
-                } else {
-                  return 0;
-                }
-              });
-           
-
-            // Find the closest point to the slider
-            if (direction == "right"){
-              self.currentPos.closestX = d3.min(points[0], function(d){
-                var cx = parseInt(d3.select(d).attr("cx")); 
-                return (cx - self.currentPos.x >= 0) ? cx : Number.MAX_VALUE  ;
-              });
-          
-            } else {
-              self.currentPos.closestX = d3.max(points[0], function(d){
-                var cx = parseInt(d3.select(d).attr("cx")); 
-                return (cx - self.currentPos.x < 0) ? cx : Number.MIN_VALUE  ;
-              });
-            }
-
-        }
-
-        function dragEnd() {
-      
-            // Lock the slider in place
-            d3.select(this)
-              .attr('class','pulse')
-              .transition()
-                .duration(50)
-                .attr('cx', self.currentPos.closestX);
-            slider.select('rect')
-              .transition()
-                .duration(50)
-                .attr('x', self.currentPos.closestX-1) // adjusted bc of thickness of line
-                .attr('opacity', 0.4);
-
-            self.currentPos.closestLabel = x.invert(self.currentPos.closestX);
-
-             // Update the info below chart
-            // showCurrentDatapoint(x.invert(closestX));
-            self.showCurrentData(self.currentPos);
-
-        }
-
-        // BUGS
-        // When u click the joystick, it jumps to the last position you let go at
-        // the axis/ margin is funky. do we want to show lines? y labels?
-      
-
-
       },
       animateLines: function(){
         var self = this;
@@ -571,7 +422,6 @@
       setStartingPosition: function(data){
         var self = this;
         
-
         // FIND THE FIRST TOOLTIP AND SET AS CURRENT POSITION
         for (var i=0; i<data.length; i++){
           if (data[i].tooltip){
@@ -586,9 +436,6 @@
           }
         }
       },
-      drawJoystick: function(){},
-      dragMove: function(d){},
-      dragEnd: function(){},
       showCurrentData: function(currentPos, firstTime){
         var self = this,
             g = self.g,
@@ -596,6 +443,7 @@
             value = currentPos.val,
             tooltip = currentPos.tooltip;
 
+          // show circles
           g.selectAll(".circle")
                 .transition()
                 .delay(function(){ return firstTime ? 1000 : 0})
@@ -617,8 +465,133 @@
             self.tooltip.html(tooltip);  
             
             // show value
-            self.displayValue.text(currentPos.value);
+            self.displayValue.text(value);
 
+      },
+      moveJoystick: function(){
+        var self = this, 
+            svg = self.svg,
+            x = self.x,
+            w = self.width,
+            h = self.height,
+            g = self.g;
+
+        self.points = g.selectAll('.circle');
+        self.currentPos.x = x(self.currentPos.label);  
+
+        if (!joystick){
+          var joystick = svg.selectAll('g.joystick')
+              .data([{x: self.currentPos.x}]) //??
+              .enter()
+                  .append('g')
+                  .attr("class", "joystick")
+                  .attr("height", 200)
+                  .attr("width", w);
+
+          var drag = d3.behavior.drag()
+              .origin(Object)
+              .on("drag", dragMove)
+              .on('dragend', dragEnd);
+
+          joystick.append("circle")
+              .attr("class", "target")
+              .attr("r", 8)
+              .attr("cx", self.currentPos.x)
+              .attr("cy", 12)
+              .attr("class", "pulse fill-background stroke-foreground")
+              .attr("stroke-width", 4.5)
+              .call(drag);
+
+          joystick.append('rect')
+              .attr('y', 22)
+              .attr('x', self.currentPos.x-1.5)
+              .attr("height", h-36)
+              .attr("width", 3)
+              .attr("class", "fill-foreground")
+              .attr('opacity', 0.4);
+
+          self.lastPosX = joystick.select("circle").attr("cx");
+        }
+
+        function dragMove(d){
+
+            // move the circle
+            d3.select(this)
+
+              .attr("class", "fill-background stroke-foreground")
+              .attr("cx", d.x = Math.max(0, Math.min(w, d3.event.x))); 
+       
+            // define current position
+            self.currentPos.x = d3.select(this).attr("cx");
+
+            // move the line
+            joystick.select('rect')
+              .attr('x', self.currentPos.x-1)
+              .attr('opacity', 1);
+
+            // determine direction of slide movement
+            if (self.currentPos.x < self.lastPosX){
+              self.direction = "left";
+              self.lastPosX = self.currentPos.x;
+            } else {
+              self.direction ="right";
+              self.lastPosX = self.currentPos.x;
+            }
+
+
+            // determine which circles/tooltips are to be displayed
+            g.selectAll(".circle")
+              .attr("r", function(d){
+                if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
+                  self.currentPos.tooltip = d.tooltip;
+                  self.currentPos.value = d.display_value ? d.display_value : d.value;
+                  return 4;
+                } else {
+                  return 0;
+                }
+              });
+           
+
+            // Find the closest point to the joystick
+            if (self.direction == "right"){
+                          console.log("%%%%%%");
+            console.log(self.points[0]);
+              self.currentPos.closestX = d3.min(self.points[0], function(d){
+                var cx = parseInt(d3.select(d).attr("cx"));                 
+                return (cx - self.currentPos.x >= 0) ? cx : Number.MAX_VALUE  ;
+              });
+          
+            } else {
+              self.currentPos.closestX = d3.max(self.points[0], function(d){
+                var cx = parseInt(d3.select(d).attr("cx")); 
+                return (cx - self.currentPos.x < 0) ? cx : Number.MIN_VALUE  ;
+              });
+            }
+        }
+
+        function dragEnd(){
+          console.log("#");
+          console.log(self.currentPos);
+         // Lock the joystick in place
+            d3.select(this)
+              .attr('class','pulse')
+              .transition()
+                .duration(50)
+                .attr('cx', self.currentPos.closestX);
+            joystick.select('rect')
+              .transition()
+                .duration(50)
+                .attr('x', self.currentPos.closestX-1) // adjusted bc of thickness of line
+                .attr('opacity', 0.4);
+
+            self.currentPos.closestLabel = x.invert(self.currentPos.closestX);
+
+             // Update the info below chart
+            // showCurrentDatapoint(x.invert(closestX));
+            self.showCurrentData(self.currentPos);
+
+        
+        }
       },
       chartSpecificDataValidate: function() {
 
