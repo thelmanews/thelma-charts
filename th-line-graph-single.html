@@ -106,6 +106,15 @@
             height = self.height,
             y = self.y,
             x = self.x;
+            g = self.g, 
+            svg = self.svg,
+            data = self.chartData,
+            line = self.line,
+            startingLine = self.startingLine,
+            animationStyle = self.chartOptions.animateStyle; 
+
+
+
         self.currentPos = {};
 
         self.svg = d3.select(self.$.chart);
@@ -113,7 +122,6 @@
         var g = self.svg.append("g");
         self.g = g;
 
-                
         self.tooltip = d3.select(self.$.info)
           .append("div")   
           .attr("class", "tooltip");
@@ -123,6 +131,10 @@
           .x(function(d) { return x(d.label); })
           .y(0).interpolate(self.chartOptions.lineStyle);
 
+        self.line = d3.svg.line()
+          .x(function(d) { return x(d.label); })
+          .y(function(d) { return -y(d.value); })
+          .interpolate(self.chartOptions.lineStyle);
         // x-axis
         self.xAxis = g.append("line")
           .attr("class", "axis")
@@ -203,6 +215,98 @@
           .attr("opacity", 0.7) // this can start as 0 and fade in after datapoint and joystick appear
           .text(self.currentPos.value);
 
+        if (animationStyle === "draw"){
+            if (self.chartOptions.fillArea){
+              
+              //SETUP
+              // data for fill area
+              self.areaData = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(function(d) { return -y(d.value); }).interpolate(self.chartOptions.lineStyle);
+
+              // path for fill area
+              self.areaPath = g.selectAll('.area')
+                .datum(data)
+                
+                .append("path")
+                .attr("class", "data0 area")
+                .attr("opacity", 0)
+                .attr("d", self.areaData)
+                // animate
+                .transition()
+                  .duration(1000) 
+                  .ease("linear")
+                  .attr("stroke-dashoffset", 0)
+                .attr("opacity", 0.7);
+            }
+
+            // path for line
+            self.linePath = g.selectAll('.data0').data(data)
+              .enter().append("path")
+              .attr("d", self.line(data)) 
+              .attr("class", "data0 no-fill")
+              .attr("stroke-width", "3")
+              .attr("fill", "none");
+
+              console.log("**#*#**#*#*#*#");
+              console.log(self.linePath.node());
+
+
+          } else { // raise style 
+            
+            // if (self.chartOptions.fillArea){ 
+              
+            //   // data for fill area, starting state
+            //   var areaStart = d3.svg.area()
+            //     .x(function(d) { return x(d.label); })
+            //     .y1(0).interpolate(self.chartOptions.lineStyle);
+              
+            //   // data for fill area, ending state
+            //   var area = d3.svg.area()
+            //     .x(function(d) { return x(d.label); })
+            //     .y1(function(d) { return -y(d.value); })
+            //     .interpolate(self.chartOptions.lineStyle);
+
+            //   // path for fill area
+            //   g.append("path")
+            //     .datum(data)
+            //     .attr("class", "area data0")
+            //     .attr("opacity", 0)
+            //     .attr("d", areaStart)
+            //     .transition()
+            //       .duration(1000)
+            //       .ease("linear")
+            //       .attr("stroke-dashoffset", 0)
+            //     .attr("d", area)
+            //     .attr("opacity", 0.7);
+            // }
+
+            // // path for starting state of line
+            //  var path = g.selectAll('.data0').data(data).enter().append("path")
+            //   .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
+            //   .attr("class", "data0 no-fill")
+            //   .attr("stroke-width", "2.5")
+            //   .attr("fill", "none")
+            //   .attr("opacity", function(){ return self.chartOptions.fillArea ? 0 : 1;});
+
+            // // transition for ending state of line
+            // path.transition()
+            //   .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
+            //   .attr("d", line(data))
+            //   .attr("opacity", 1);
+          }
+
+          // append circles to datapoints
+          g.selectAll(".circle")
+          .data(data)
+          .enter().append("circle")
+          .attr("class", "circle data0 stroke-foreground")
+          .attr("r", 0)
+          .attr("stroke-width", 3)
+          .attr("cx", function(d) { return  x(d.label); })
+          .attr("cy", function(d) { return -1 * y(d.value); })
+
+
 
       },
       _setupContainerSize: function(){
@@ -227,10 +331,12 @@
 
         self._setupContainerSize();
         
-        self.line = d3.svg.line()
-          .x(function(d) { return x(d.label); })
-          .y(function(d) { return -y(d.value); })
-          .interpolate(self.chartOptions.lineStyle);
+        // self.line = d3.svg.line()
+        //   .x(function(d) { return x(d.label); })
+        //   .y(function(d) { return -y(d.value); })
+        //   .interpolate(self.chartOptions.lineStyle);
+
+        self.setStartingPosition();   
       },
       resize: function(){
         var self = this;
@@ -250,7 +356,6 @@
         // self._setupElements();
         self._setupElementSizes();
         self.dataLength = self.chartData.length;
-
         self.animate();
         
       },
@@ -271,66 +376,39 @@
 
       animate: function() {
         var self = this;
-        self.animateLines();
         self.animateAxis();
-        self.setStartingPosition(self.chartData);   
+        self.animateLines();
         self.moveJoystick();
         self.showCurrentData(self.currentPos, firstTime=true);
       },
       animateLines: function(){
         var self = this;
-        var g = self.g,
+        var g = self.g, 
             svg = self.svg,
             data = self.chartData,
-            line = self.line,
-            x = self.x,
+            x = self.x, 
             y = self.y,
-            minLabel = self.minLabel,
-            maxLabel = self.maxLabel,
-            minValue = self.minValue,
-            maxValue = self.maxValue,
+            line = self.line,
             startingLine = self.startingLine,
-            yAxis = self.yAxis,
-            yLabels = self.yLabels,
-            yTicks = self.yTicks,
-            h = self.height,
-            w = self.width,
-            tooltip = self.tooltip,
-            data = self.chartData,
-            animationStyle = self.chartOptions.animateStyle;
+            animationStyle = self.chartOptions.animateStyle; 
+            
 
         if (animationStyle === "draw"){
             if (self.chartOptions.fillArea){
               
-              // data for fill area
-              var area = d3.svg.area()
-                .x(function(d) { return x(d.label); })
-                .y1(function(d) { return -y(d.value); }).interpolate(self.chartOptions.lineStyle);
-
               // path for fill area
-              g.append("path")
-                .datum(data)
-                .attr("class", "data0")
-                .attr("opacity", 0)
+              self.areaPath
                 .transition()
                   .duration(1000) 
                   .ease("linear")
-                  .attr("stroke-dashoffset", 0)
-                .attr("d", area)
+                  .attr("stroke-dasharrayshoffset", 0)
                 .attr("opacity", 0.7);
             }
 
-            // path for line
-            path = g.selectAll('.dummy').data(data)
-              .enter().append("path")
-              .attr("d", line(data)) 
-              .attr("class", "data0 no-fill")
-              .attr("stroke-width", "3")
-              .attr("fill", "none");
-
             // draw effect animation
-            var totalLength = path.node().getTotalLength();
-            path
+            self.totalLength = self.linePath.node().getTotalLength();
+            
+            self.linePath
               .attr("stroke-dasharray", totalLength + " " + totalLength)
               .attr("stroke-dashoffset", totalLength)
               .transition()
@@ -368,9 +446,9 @@
             }
 
             // path for starting state of line
-             var path = g.selectAll('.dummy').data(data).enter().append("path")
+             var path = g.selectAll('.data0').data(data).enter().append("path")
               .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
-              .attr("class", "data0")
+              .attr("class", "data0 no-fill")
               .attr("stroke-width", "2.5")
               .attr("fill", "none")
               .attr("opacity", function(){ return self.chartOptions.fillArea ? 0 : 1;});
@@ -419,8 +497,9 @@
           //   .attr("opacity", 1);
         }
       },
-      setStartingPosition: function(data){
-        var self = this;
+      setStartingPosition: function(){
+        var self = this,
+            data = self.chartData;
         
         // FIND THE FIRST TOOLTIP AND SET AS CURRENT POSITION
         for (var i=0; i<data.length; i++){
@@ -554,8 +633,6 @@
 
             // Find the closest point to the joystick
             if (self.direction == "right"){
-                          console.log("%%%%%%");
-            console.log(self.points[0]);
               self.currentPos.closestX = d3.min(self.points[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx"));                 
                 return (cx - self.currentPos.x >= 0) ? cx : Number.MAX_VALUE  ;
@@ -570,8 +647,6 @@
         }
 
         function dragEnd(){
-          console.log("#");
-          console.log(self.currentPos);
          // Lock the joystick in place
             d3.select(this)
               .attr('class','pulse')
@@ -585,9 +660,6 @@
                 .attr('opacity', 0.4);
 
             self.currentPos.closestLabel = x.invert(self.currentPos.closestX);
-
-             // Update the info below chart
-            // showCurrentDatapoint(x.invert(closestX));
             self.showCurrentData(self.currentPos);
 
         
