@@ -118,8 +118,7 @@
 	        .attr('x', width/2 + barWidth/2 + margin.label)
 	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
 	        .text(function(d) {
-            
-            return d.range_max_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value + " - " + d.range_max_value) ;
+            return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
           });
 
 		  },
