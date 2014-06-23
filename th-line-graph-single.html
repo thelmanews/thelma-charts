@@ -54,7 +54,7 @@
     Polymer('th-line-graph-single', {
       chartOptions: {
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
-        animateStyle: "draw", // options: raise, draw
+        animateStyle: "raise", // options: raise, draw
         animateAxis: false, // need to restyle the axis
         fillArea: true, 
         dataPosition: "left" // options: left, right
@@ -219,12 +219,11 @@
           .text(self.currentPos.value);
 
 
-        if (self.chartOptions.fillArea){
-              
-              self.areaDataStart = d3.svg.area()
-                .x(function(d) { return x(d.label); })
-                .y1(0).interpolate(self.chartOptions.lineStyle);
 
+
+        if (animationStyle === "draw"){
+            if (self.chartOptions.fillArea){
+              
               // data for fill area
               self.areaData = d3.svg.area()
                 .x(function(d) { return x(d.label); })
@@ -237,24 +236,7 @@
                 .attr("class", "data0 area")
                 .attr("opacity", 0)
                 .attr("d", self.areaData);
-        }
-
-        if (animationStyle === "draw"){
-            // if (self.chartOptions.fillArea){
-              
-            //   // data for fill area
-            //   self.areaData = d3.svg.area()
-            //     .x(function(d) { return x(d.label); })
-            //     .y1(function(d) { return -y(d.value); })
-            //     .interpolate(self.chartOptions.lineStyle);
-
-            //   // path for fill area
-            //   self.areaPath = g.append("path")
-            //     .datum(data)
-            //     .attr("class", "data0 area")
-            //     .attr("opacity", 0)
-            //     .attr("d", self.areaData);
-            // }
+            }
 
           self.linePath = g.selectAll('.data0').data(data)
               .enter().append("path")
@@ -267,43 +249,37 @@
             if (self.chartOptions.fillArea){ 
               
               // data for fill area, starting state
-              var areaStart = d3.svg.area()
+              self.areaDataStart = d3.svg.area()
                 .x(function(d) { return x(d.label); })
                 .y1(0).interpolate(self.chartOptions.lineStyle);
               
               // data for fill area, ending state
-              var area = d3.svg.area()
+              self.areaData = d3.svg.area()
                 .x(function(d) { return x(d.label); })
                 .y1(function(d) { return -y(d.value); })
                 .interpolate(self.chartOptions.lineStyle);
 
               // path for fill area
-              g.append("path")
+              self.areaPath = g.append("path")
                 .datum(data)
                 .attr("class", "area data0")
                 .attr("opacity", 0)
-                .attr("d", areaStart)
-                .transition()
-                  .duration(1000)
-                  .ease("linear")
-                  .attr("stroke-dashoffset", 0)
-                .attr("d", area)
-                .attr("opacity", 0.7);
+                .attr("d", self.areaDataStart)
+
+              // self.areaPath
+            
+                
             }
 
             // path for starting state of line
-             var path = g.selectAll('.data0').data(data).enter().append("path")
-              .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
+             self.linePath = g.selectAll('.data0').data(data).enter().append("path")
+              .attr("d", function(){ return self.chartOptions.fillArea ? self.line(data) : self.startingLine(data);})
               .attr("class", "data0 no-fill")
               .attr("stroke-width", "2.5")
               .attr("fill", "none")
               .attr("opacity", function(){ return self.chartOptions.fillArea ? 0 : 1;});
 
-            // transition for ending state of line
-            path.transition()
-              .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
-              .attr("d", line(data))
-              .attr("opacity", 1);
+            
           }
 
           // append circles to datapoints
@@ -337,7 +313,8 @@
             width = self.width,
             height = self.height,
             y = self.y,
-            x = self.x;
+            x = self.x,
+            data = self.chartData;
 
         self._setupContainerSize();
         
@@ -346,8 +323,8 @@
         //   .y(function(d) { return -y(d.value); })
         //   .interpolate(self.chartOptions.lineStyle);
 
-        self.areaPath
-          .datum(data);
+        // self.areaPath
+        //   .datum(data);
           
         self.linePath
           .attr("d", self.line(data)); 
@@ -408,10 +385,8 @@
             startingLine = self.startingLine,
             animationStyle = self.chartOptions.animateStyle; 
             
-
         if (animationStyle === "draw"){
             if (self.chartOptions.fillArea){
-              
               // path for fill area
               self.areaPath
                 .transition()
@@ -433,47 +408,24 @@
                 .attr("stroke-dashoffset", 0);
 
           } else { // raise style 
-            
             if (self.chartOptions.fillArea){ 
-              
-              // data for fill area, starting state
-              var areaStart = d3.svg.area()
-                .x(function(d) { return x(d.label); })
-                .y1(0).interpolate(self.chartOptions.lineStyle);
-              
-              // data for fill area, ending state
-              var area = d3.svg.area()
-                .x(function(d) { return x(d.label); })
-                .y1(function(d) { return -y(d.value); })
-                .interpolate(self.chartOptions.lineStyle);
-
-              // path for fill area
-              g.append("path")
+              self.areaPath  
                 .datum(data)
-                .attr("class", "area data0")
-                .attr("opacity", 0)
-                .attr("d", areaStart)
-                .transition()
+                  .transition()
                   .duration(1000)
                   .ease("linear")
                   .attr("stroke-dashoffset", 0)
-                .attr("d", area)
+                .attr("d", self.areaData)
                 .attr("opacity", 0.7);
             }
 
-            // path for starting state of line
-             var path = g.selectAll('.data0').data(data).enter().append("path")
-              .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
-              .attr("class", "data0 no-fill")
-              .attr("stroke-width", "2.5")
-              .attr("fill", "none")
-              .attr("opacity", function(){ return self.chartOptions.fillArea ? 0 : 1;});
-
             // transition for ending state of line
-            path.transition()
-              .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
-              .attr("d", line(data))
-              .attr("opacity", 1);
+            self.linePath
+              .transition()
+                .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
+                .attr("d", self.line(data))
+                .attr("opacity", 1);
+
           }
 
           // append circles to datapoints
