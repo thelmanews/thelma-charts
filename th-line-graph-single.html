@@ -101,6 +101,7 @@
 
       },
       _setupElements: function(){
+
         var self = this,
             width = self.width,
             height = self.height,
@@ -131,10 +132,12 @@
           .x(function(d) { return x(d.label); })
           .y(0).interpolate(self.chartOptions.lineStyle);
 
-        self.line = d3.svg.line()
+                self.line = d3.svg.line()
           .x(function(d) { return x(d.label); })
           .y(function(d) { return -y(d.value); })
           .interpolate(self.chartOptions.lineStyle);
+
+     
         // x-axis
         self.xAxis = g.append("line")
           .attr("class", "axis")
@@ -218,82 +221,67 @@
         if (animationStyle === "draw"){
             if (self.chartOptions.fillArea){
               
-              //SETUP
               // data for fill area
               self.areaData = d3.svg.area()
                 .x(function(d) { return x(d.label); })
                 .y1(function(d) { return -y(d.value); }).interpolate(self.chartOptions.lineStyle);
 
               // path for fill area
-              self.areaPath = g.selectAll('.area')
+              self.areaPath = g.append("path")
                 .datum(data)
-                
-                .append("path")
                 .attr("class", "data0 area")
                 .attr("opacity", 0)
-                .attr("d", self.areaData)
-                // animate
-                .transition()
-                  .duration(1000) 
-                  .ease("linear")
-                  .attr("stroke-dashoffset", 0)
-                .attr("opacity", 0.7);
+                .attr("d", self.areaData);
             }
 
-            // path for line
-            self.linePath = g.selectAll('.data0').data(data)
+          self.linePath = g.selectAll('.data0').data(data)
               .enter().append("path")
-              .attr("d", self.line(data)) 
               .attr("class", "data0 no-fill")
               .attr("stroke-width", "3")
               .attr("fill", "none");
 
-              console.log("**#*#**#*#*#*#");
-              console.log(self.linePath.node());
-
-
           } else { // raise style 
             
-            // if (self.chartOptions.fillArea){ 
+            if (self.chartOptions.fillArea){ 
               
-            //   // data for fill area, starting state
-            //   var areaStart = d3.svg.area()
-            //     .x(function(d) { return x(d.label); })
-            //     .y1(0).interpolate(self.chartOptions.lineStyle);
+              // data for fill area, starting state
+              var areaStart = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(0).interpolate(self.chartOptions.lineStyle);
               
-            //   // data for fill area, ending state
-            //   var area = d3.svg.area()
-            //     .x(function(d) { return x(d.label); })
-            //     .y1(function(d) { return -y(d.value); })
-            //     .interpolate(self.chartOptions.lineStyle);
+              // data for fill area, ending state
+              var area = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(function(d) { return -y(d.value); })
+                .interpolate(self.chartOptions.lineStyle);
 
-            //   // path for fill area
-            //   g.append("path")
-            //     .datum(data)
-            //     .attr("class", "area data0")
-            //     .attr("opacity", 0)
-            //     .attr("d", areaStart)
-            //     .transition()
-            //       .duration(1000)
-            //       .ease("linear")
-            //       .attr("stroke-dashoffset", 0)
-            //     .attr("d", area)
-            //     .attr("opacity", 0.7);
-            // }
+              // path for fill area
+              g.append("path")
+                .datum(data)
+                .attr("class", "area data0")
+                .attr("opacity", 0)
+                .attr("d", areaStart)
+                .transition()
+                  .duration(1000)
+                  .ease("linear")
+                  .attr("stroke-dashoffset", 0)
+                .attr("d", area)
+                .attr("opacity", 0.7);
+            }
 
-            // // path for starting state of line
-            //  var path = g.selectAll('.data0').data(data).enter().append("path")
-            //   .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
-            //   .attr("class", "data0 no-fill")
-            //   .attr("stroke-width", "2.5")
-            //   .attr("fill", "none")
-            //   .attr("opacity", function(){ return self.chartOptions.fillArea ? 0 : 1;});
+            // path for starting state of line
+             var path = g.selectAll('.data0').data(data).enter().append("path")
+              .attr("d", function(){ return self.chartOptions.fillArea ? line(data) : startingLine(data);})
+              .attr("class", "data0 no-fill")
+              .attr("stroke-width", "2.5")
+              .attr("fill", "none")
+              .attr("opacity", function(){ return self.chartOptions.fillArea ? 0 : 1;});
 
-            // // transition for ending state of line
-            // path.transition()
-            //   .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
-            //   .attr("d", line(data))
-            //   .attr("opacity", 1);
+            // transition for ending state of line
+            path.transition()
+              .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
+              .attr("d", line(data))
+              .attr("opacity", 1);
           }
 
           // append circles to datapoints
@@ -335,6 +323,12 @@
         //   .x(function(d) { return x(d.label); })
         //   .y(function(d) { return -y(d.value); })
         //   .interpolate(self.chartOptions.lineStyle);
+
+        self.areaPath
+          .datum(data);
+          
+        self.linePath
+          .attr("d", self.line(data)); 
 
         self.setStartingPosition();   
       },
@@ -406,7 +400,7 @@
             }
 
             // draw effect animation
-            self.totalLength = self.linePath.node().getTotalLength();
+            var totalLength = self.linePath.node().getTotalLength();
             
             self.linePath
               .attr("stroke-dasharray", totalLength + " " + totalLength)
