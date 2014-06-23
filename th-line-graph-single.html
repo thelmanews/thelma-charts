@@ -333,7 +333,6 @@
       },
       resize: function(){
         var self = this;
-        alert();
         self.dims = self.setupDimensions(self);
         self.width = self.dims.width;
         self.height = self.dims.height;
@@ -348,11 +347,24 @@
         self._scaleBuilder();
         // self._setupElements();
         self._setupElementSizes();
+        self.moveJoystick;
         self.dataLength = self.chartData.length;
+
         self.animate();
         
       },
       updateData: function(){
+        var self = this;
+
+        // select all the chart elements and set them in variables
+        
+        // redraw the axes
+        // resize the container
+        // resize the joystick
+        // resize the 
+        // redefine the linedata and areapaths
+        // transition the paths to the new data
+        // 
 
        
       },
