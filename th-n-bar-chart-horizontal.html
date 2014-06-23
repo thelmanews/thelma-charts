@@ -119,6 +119,11 @@
 		      // setting up the size. needed for resizing
 		      self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
+		      console.log('self.dims.bars.width');
+		      console.log(self.dims);
+		      console.log(self.dims.bars);
+		      console.log(self.dims.bars.width);
+
 		      this.bars
 		        .attr("class", function(d,i){return "bar data"+i;})
 		        .attr('x', x(0)) //function(d) { return x(d.label); })  rev
@@ -132,8 +137,8 @@
 		        .attr("class", function(d,i){return "label data"+i;})
 		        //.style('opacity', 0)
 		        .style('text-anchor','left')
-		        .attr('y', function(d) { return y(d.label) + self.dims.bars.width + self.dims.labels.height* 0.6; })
-		        .attr('x', 0);
+		        .attr('x', 0)
+		        .attr('y', function(d) { return y(d.label) + self.dims.bars.width + self.dims.labels.height* 0.6; });
 
 		      //console.log(this.bars);
 		      this.values
@@ -174,10 +179,22 @@
 		  },
 
 		  resize: function() {
-		  	  
+		  	  /*
 		  	  var self = this;
 		  	  
 		  	  self.dims = self.setupDimensions(self);
+		  	  self.setupBarDims(self, 1, 1.6);
+
+		  	  var maxValueLength = d3.max(self.chartData, function(d) {
+		      	return d.display_value ? d.display_value.length : d.value.length;
+		      });
+
+
+		  	  self.dims.labels =  {};
+		      self.dims.values = {};
+		      self.dims.labels.height = 25;
+		      self.dims.values.height = self.dims.bars.width;
+		      self.dims.values.containerWidth = maxValueLength * self.dims.values.height * 0.75;  // characters x font size x 0.6 (average 
 
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
@@ -198,11 +215,13 @@
 
 		     // self.reset();
 		      self.animate();
-
+			*/
 
 		  },
 
 		  updateData: function() {
+
+		  	/*
 
 		  	console.log('UPDATE DATA');
 
@@ -240,7 +259,12 @@
 			      self.labels.enter().append('text').attr('class','label');
 			       
 
-			       self.values.enter().append('text').attr('class','value')
+			       self.values.enter().append('text').attr('class','value');
+
+			       self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).attr('x', width).style('opacity', 0).remove();
+			       self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+			       self.values.exit().transition().duration(1000).style('opacity', 0).remove();
+
 			        
 
 			    }
@@ -248,15 +272,15 @@
 			      self.bars
 			        .attr("class", function(d,i){return "data"+i;})
 			        .attr('x', function(d) { return x(d.label); })
-			        .attr('width',self.dims.barWidth);
+			        .attr('width', self.dims.barWidth);
 
 
 			      
 			      self.labels
 			        .attr("class", function(d,i){return "data"+i;})
 			        .style('text-anchor','left')
-			        .attr('x', function(d) { return x(d.label); })
-			        .attr('y', height + 12); //12: font size
+			        .attr('x', function(d) { return 0; })
+		        	.attr('y', function(d) { return y(d.label) + self.dims.bars.width + self.dims.labels.height* 0.6; });
 			      
 			      self.values
 			        .attr("class", function(d,i){return "data"+i;})
@@ -277,7 +301,7 @@
 		      //setTimeout( function() {self.animate();},500);
 
 		      self.animate();
-		      
+		      */
 
 		  },
 

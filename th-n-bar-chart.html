@@ -184,7 +184,7 @@
 		        var height= self.dims.height;
 		        self.bars.transition().duration(this.animationDelay)
 		        .attr('x', function(d) { return self.x(d.label); })
-		        .attr('y', function(d) { console.log(d.value); console.log(height); console.log(y(d.value)); return height-y(d.value);})
+		        .attr('y', function(d) { return height-y(d.value);})
 		        .attr('width', self.dims.bars.width)
 		        .attr('height', function(d) {return y(d.value)})
 		        .style('opacity', 1);
