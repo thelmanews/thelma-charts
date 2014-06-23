@@ -8,25 +8,24 @@
 
 		Polymer('th-compare-grid-chart', {
 		  chartData: [
-		    {label: 'Non-Smoker', value: 33, image: 'images/kid.png'},
+		    {label: 'Non-Smoker', value: 71, image: 'images/kid.png'},
 		    {label: 'Smoker', value: 1, image: 'images/kid-smoker.png'}
 		  ],
 		  init: function() {
 		    var margin = {
-		          top : 5,
-		          right : 15,
-		          bottom : 5,
-		          left : 10,
+		          top : 0,
+		          right : 0,
+		          bottom : 0,
+		          left : 0,
 		          label: 3
-		      }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*1.0 - margin.top - margin.bottom
-		         , barWidth = width* 0.12 , textLabelMargin = height*0.05;
+		      };
+
+		      var width = this.chartWidth-margin.left - margin.right, 
+		      		height = this.chartHeight - margin.top - margin.bottom;
+		         
 
 		      this.height = height;
-
-		      this.extractElementDataPoints();
-
-		      
-
+		   
 
 		      var chart_svg = this.$.chart;
 
@@ -36,17 +35,21 @@
 
 		      var _data = {};
 
-		      _data.elementsPerRow = Math.min(9, totalCount);
-		      var rowNum = Math.floor(totalCount / _data.elementsPerRow);
+		      var ratio = 1;
+
+		      if (totalCount < 20){
+		      	_data.elementsPerRow = Math.min(5, totalCount);
+		    	} else {
+		    		_data.elementsPerRow = Math.min(8, totalCount);
+		    	} 
+		      var rowNum = Math.ceil(totalCount / _data.elementsPerRow);
 		      
 		      _data.count = d3.range(0, totalCount);
-		      console.log(height);
 		      _data.dim = {
 		          width : Math.floor(width / _data.elementsPerRow),
 		          height : Math.floor(height / rowNum)
 		      };
 
-		      console.log(_data.dim);
 		      _data.set1_count = this.chartData[0].value;
 		      _data.set1_image = 'images/kid.png';
 
@@ -59,13 +62,12 @@
 
 		      var svg, scale_bar, lefts, right, barg, left_holder, right_holder, right_labels;
 
-		      var bar_width = 15, holder_height = 100, holder_width = width * 0.5;
-
+		      // var bar_width = 15, holder_height = 100, holder_width = width * 0.5;
+		      
 
 		      this.container = d3.select(chart_svg).attr('width', width + margin.left + margin.right)
-		          .attr('height', height + margin.top + margin.bottom)
-		          .append('g')
-		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+		          .attr('height', height+ margin.top + margin.bottom)
+		          .append('g');
 
 
 		       this.icons = this.container.selectAll('.icon').data(_data.count).enter().append('image')
@@ -92,10 +94,10 @@
 		  reset: function() {
 		      
 		        this.icons.attr('x', function(d, i) {
-		             return (Math.random() < 0.5 ? -1 : 1) * (250 + Math.random()*100) ;
+		             return (Math.random() < 0.5 ? -1 : 1) * (this.chartWidth + Math.random()*100) ;
 		        })
 		       .attr('y', function(d, i) {
-		             return (Math.random() < 0.5 ? -1 : 1) * (250 + Math.random()*100) ;
+		             return (Math.random() < 0.5 ? -1 : 1) * (this.chartHeight + Math.random()*100) ;
 		        });    
 		  },
 		  
@@ -111,10 +113,10 @@
 		            return i * delay;
 		        })
 		        .attr('x', function(d, i) {
-		             return  (i % _data.elementsPerRow) * (_data.dim.width + 2);
+		             return  (i % _data.elementsPerRow) * (_data.dim.width);
 		        })
 		       .attr('y', function(d, i) {
-		            return (Math.floor(i / _data.elementsPerRow)) * (_data.dim.height) + 5;
+		            return (Math.floor(i / _data.elementsPerRow)) * (_data.dim.height);
 		        })
 
 		},
