@@ -168,11 +168,11 @@ Thelma.chartUtils = {
       
       dims.values = {};
       dims.values.maxLength = d3.max(chartData, function(d){ 
-        if (d.range){
-          if (d.range.min.display_value){
-            return  d.range.min.display_value.length + d.range.max.display_value.length + 3;
+        if (d.range_min_value){
+          if (d.range_min_display_value){
+            return  d.range_min_display_value.length + d.range_max_display_value.length + 3;
           } else {
-            return  d.range.min.value.length + d.range.max.value.length + 3; // 3 is for the characters separating min and max " - "
+            return  d.range_min_display_value.length + d.range_max_display_value.length + 3; // 3 is for the characters separating min and max " - "
           }
         } else {
           return d.display_value ? d.display_value.length : d.value.toString().length;

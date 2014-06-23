@@ -5,9 +5,10 @@
 
 	<script>
 		Polymer('th-spectrum-chart', {
-		  chartData: [{label: 'Medicaid', range: { min: { value: 10, display_value: '$10'}, max: { value: 50, display_value: '$50'}}},
-		              {label: 'Federal', color: '#888', pattern: 'stripe',  range: { min: { value: 40, display_value: '$40'}, max: { value: 60, display_value: '$60'}}},
-		              {label: 'Medicare', range: { min: { value: 70, display_value: '$70'}, max: { value: 100, display_value: '$100'}}}],
+		  chartData: [
+		  		{label: 'Medicaid', range_min_value: 10, range_min_display_value: '$10', range_max_value: 50, range_max_display_value: '$50'},
+		        {label: 'Federal', color: '#888', pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60'},
+		        {label: 'Medicare', range_min_value: 70, range_min_display_value: '$70', range_max_value: 100, range_max_display_value: '$100'}],
 		  orientation: 'vertical',
 		  init: function() {
 		    var self = this;
@@ -66,9 +67,9 @@
 	      
 	      var dataMargin = 0.1;  // 10% extra space     
 
-	      var minmin = d3.min(self.chartData, function(d) { return d.range.min.value;});
+	      var minmin = d3.min(self.chartData, function(d) { return d.range_min_value;});
 
-	      var maxmax = d3.max(self.chartData, function(d) { return d.range.max.value;});
+	      var maxmax = d3.max(self.chartData, function(d) { return d.range_max_value;});
 
 	      var marginValue = (maxmax-minmin)* dataMargin;
 	      var wholeRange = {min : minmin-marginValue, max:  maxmax+marginValue};
@@ -91,7 +92,7 @@
 	        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
 	        .attr('x', width/2 - barWidth/2)
 	        //.attr('y', 0)
-	        .attr('y', function(d) {return height - y(d.range.max.value)})
+	        .attr('y', function(d) {return height - y(d.range_max_value)})
 	        .attr('width',barWidth)
 	        .attr('height', 0);
 
@@ -103,7 +104,7 @@
 	        .style('opacity', 0)
 	        .style('text-anchor','end')
 	        .attr('x', width/2 - barWidth/2 - margin.label)
-	        .attr('y', function(d) {return height - y(d.range.max.value - ((d.range.max.value - d.range.min.value)/2));}) 
+	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
 	        .text(function(d) {return d.label;});
 	      
 	      self.values = this.container.selectAll('.value').data(this.chartData).enter()
@@ -115,10 +116,10 @@
 	      self.values
 	        .style('opacity', 0)
 	        .attr('x', width/2 + barWidth/2 + margin.label)
-	        .attr('y', function(d) {return height - y(d.range.max.value - ((d.range.max.value - d.range.min.value)/2));}) 
+	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
 	        .text(function(d) {
             
-            return d.range.max.display_value ? (d.range.min.display_value + " - " + d.range.max.display_value) : (d.range.min.value + " - " + d.range.max.value) ;
+            return d.range_max_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value + " - " + d.range_max_value) ;
           });
 
 		  },
@@ -137,7 +138,7 @@
         var labels = self.labels;
         var delay = self.animationDelay;
         self.bars.transition().duration(delay).delay(function(d,i) { return i*delay;})
-        .attr('height', function(d) {return y(d.range.max.value - d.range.min.value)});
+        .attr('height', function(d) {return y(d.range_max_value - d.range_min_value)});
 
         self.labels.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
         .style('opacity', 1);
@@ -157,7 +158,7 @@
           } else {
           	for (var i=0; i < numOfSets; i++){
           		// Each range should have a min and max value.
-          		if (!this.chartData[i].range.min.value || !this.chartData[i].range.max.value){ 
+          		if (!this.chartData[i].range_min_value || !this.chartData[i].range_max_value){ 
             		errors.push({ input: this.chartData, msg: 'You must include a min and max value for each datapoint.'});
           		}
           		// Each range should have a label.
@@ -165,7 +166,7 @@
           			errors.push({ input: this.chartData, msg: 'You must include a label for each range.'});	
           		}
           		// The max value should always be larger than the min.
-          		if (this.chartData[i].range.min.value > this.chartData[i].range.max.value) {
+          		if (this.chartData[i].range_min_value > this.chartData[i].range_max_value) {
           			errors.push({ input: this.chartData, msg: 'Max value must be greater than min value.'});	
           		}
           	}
