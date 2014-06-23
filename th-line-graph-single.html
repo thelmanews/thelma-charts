@@ -61,11 +61,11 @@
       
       },
       chartData: [
-        {'label': 2010, 'value': 104,'display_value': '$104' },
-        {'label': 2011, 'value': 108,'display_value': '$108' },
-        {'label': 2012, 'value': 107,'display_value': '$107', 'tooltip': 'Enter a tooltip'},
-        {'label': 2013, 'value': 110,'display_value': '$110', 'tooltip': 'Enter a tooltip',},
-        {'label': 2014, 'value': 112,'display_value': '$112', 'tooltip': 'Enter a tooltip'}
+        {'label': 2010, 'value': 104,'display_value': '$104', 'tooltip': ''},
+        {'label': 2011, 'value': 108,'display_value': '$108', 'tooltip': ''},
+        {'label': 2012, 'value': 107,'display_value': '$107', 'tooltip': ''},
+        {'label': 2013, 'value': 110,'display_value': '$110', 'tooltip': ''},
+        {'label': 2014, 'value': 112,'display_value': '$112', 'tooltip': ''}
       ],
       init: function() {
         var self = this;
@@ -218,13 +218,18 @@
           .attr("opacity", 0.7) // this can start as 0 and fade in after datapoint and joystick appear
           .text(self.currentPos.value);
 
-        if (animationStyle === "draw"){
-            if (self.chartOptions.fillArea){
+
+        if (self.chartOptions.fillArea){
               
+              self.areaDataStart = d3.svg.area()
+                .x(function(d) { return x(d.label); })
+                .y1(0).interpolate(self.chartOptions.lineStyle);
+
               // data for fill area
               self.areaData = d3.svg.area()
                 .x(function(d) { return x(d.label); })
-                .y1(function(d) { return -y(d.value); }).interpolate(self.chartOptions.lineStyle);
+                .y1(function(d) { return -y(d.value); })
+                .interpolate(self.chartOptions.lineStyle);
 
               // path for fill area
               self.areaPath = g.append("path")
@@ -232,7 +237,24 @@
                 .attr("class", "data0 area")
                 .attr("opacity", 0)
                 .attr("d", self.areaData);
-            }
+        }
+
+        if (animationStyle === "draw"){
+            // if (self.chartOptions.fillArea){
+              
+            //   // data for fill area
+            //   self.areaData = d3.svg.area()
+            //     .x(function(d) { return x(d.label); })
+            //     .y1(function(d) { return -y(d.value); })
+            //     .interpolate(self.chartOptions.lineStyle);
+
+            //   // path for fill area
+            //   self.areaPath = g.append("path")
+            //     .datum(data)
+            //     .attr("class", "data0 area")
+            //     .attr("opacity", 0)
+            //     .attr("d", self.areaData);
+            // }
 
           self.linePath = g.selectAll('.data0').data(data)
               .enter().append("path")
@@ -334,7 +356,7 @@
       },
       resize: function(){
         var self = this;
-
+        alert();
         self.dims = self.setupDimensions(self);
         self.width = self.dims.width;
         self.height = self.dims.height;
