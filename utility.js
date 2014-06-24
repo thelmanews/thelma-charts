@@ -19,11 +19,11 @@ Thelma.chartValidation = {
 		errors = errors.concat(polymerObj.chartSpecificDataValidate());
 
 		if(errors.length>0) {
-			polymerObj.$.chart.style.opacity = 0.5; // this is for testing
-			polymerObj.$.data_errors.style.display = 'block'; // this is for testing
+			// polymerObj.$.chart.style.opacity = 0.5; // this is for testing
+			// polymerObj.$.data_errors.style.display = 'block'; // this is for testing
 			
 			for (i; i < errors.length; i++){	
-				polymerObj.$.data_errors.appendChild(document.createElement('li')).innerHTML = errors[i].msg; // this is for testing
+				// polymerObj.$.data_errors.appendChild(document.createElement('li')).innerHTML = errors[i].msg; // this is for testing
 				polymerObj.asyncFire('error', errors[i]); // where error is an object containing details
 			}
 		}

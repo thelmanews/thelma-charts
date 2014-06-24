@@ -54,11 +54,12 @@
     Polymer('th-line-graph-single', {
       chartOptions: {
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
-        animateStyle: "raise", // options: raise, draw
+        animateStyle: "draw", // options: raise, draw
         animateAxis: false, // need to restyle the axis
         fillArea: false, 
-        dataPosition: "left" // options: left, right
-      
+        dataPosition: "left",  // options: left, right
+        joyStick: true, 
+        showYaxis: true
       },
       chartData: [
         {'label': 2010, 'value': 104,'display_value': '$104', 'tooltip': ''},
@@ -87,8 +88,11 @@
         self._setupElementSizes();
         self.dataLength = self.chartData.length;
       },
-      _scaleBuilder: function(){
+      _scaleBuilder: function(data){
         var self = this;
+        
+        console.log(self.chartData);
+
 
         self.maxLabel = self.getBoundaryValue(self, "label", d3.max);
         self.minLabel = self.getBoundaryValue(self, "label", d3.min);
@@ -304,8 +308,6 @@
               }
           }
           
-        
-
         self.circles
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); });
@@ -314,7 +316,6 @@
           self.joystick.select('rect')
             .attr("height", height-36)
         }
-
 
         self.setStartingPosition();   
       },
@@ -334,22 +335,68 @@
         self._scaleBuilder();
         self._setupElementSizes();
         self.moveJoystick;
-        self.dataLength = self.chartData.length;
-
         self.animate();
         
       },
       updateData: function(){
-        var self = this;
+        var self = this,
+            data = self.chartData,
+            x = self.x,
+            y = self.y;
+
+        self._scaleBuilder();
+        
+        // select elements
+        self.yLabels = self.g.selectAll('.yLabel').data(y.ticks(4));
+        self.xLabels = self.g.selectAll('.xLabel').data(x.ticks(5));
+        self.linePath = self.g.selectAll('path.data0').data(data);
+        self.circles = self.g.selectAll('.circle').data(data);
+        self.xAxis = self.g.selectAll('path.axis').data(data);
+
+          
+        // add new data points
+        self.xLabels
+          .enter().append("text")
+          .attr("class", "xLabel axis")
+          .text(String)
+          .attr("text-anchor", "middle");
+         
+        self.yLabels  // these new ones are not being positioned correctly..
+          .enter().append("text")
+          .attr("class", "yLabel axis")
+          .text(String)
+          .attr("dy", 4)
+          .attr("opacity", function(d) { return self.chartOptions.animateAxis ? 0 : 1; })
+          .style("text-anchor", "start");
+
+        self.xAxis
+          .attr("x1", x(self.minLabel))
+          .attr("y1", 0)
+          .attr("x2", x(self.maxLabel)) 
+          .attr("y2", 0);
+
+        self.circles
+          .enter().append("circle")
+          .attr("class", "circle data0 stroke-foreground")
+          .attr("r", 0)
+          .attr("stroke-width", 3);
+
+         // remove extra datapoints
+        self.linePath.exit().remove();
+        self.xLabels.exit().remove();
+        self.yLabels.exit().remove();
+        self.circles.exit().remove();
+
+
+        self._setupElementSizes();
+        self.moveJoystick;
+        self.animate();
 
         // select all the chart elements and set them in variables
         
         // redraw the axes
-        // resize the joystick
-        // resize the 
         // redefine the linedata and areapaths
         // transition the paths to the new data
-        // 
 
        
       },
@@ -395,6 +442,8 @@
 
             // draw effect animation
             var totalLength = self.linePath.node().getTotalLength();
+            console.log("***!&!&*!**!");
+            console.log(totalLength);
             
             self.linePath
               .attr("stroke-dasharray", totalLength + " " + totalLength)
@@ -455,11 +504,6 @@
             .attr("y", function(d) { return -1 * y(d) })
             .attr("opacity", 1);
 
-          // yTicks.transition()
-          //   .duration(1000)
-          //   .attr("y1", function(d) { return -1 * y(d) })
-          //   .attr("y2", function(d) { return -1 * y(d) })
-          //   .attr("opacity", 1);
         }
       },
       setStartingPosition: function(){
