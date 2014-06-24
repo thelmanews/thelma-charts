@@ -93,11 +93,12 @@
 		  },
 		  reset: function() {
 		      
-		        this.icons.attr('x', function(d, i) {
-		             return (Math.random() < 0.5 ? -1 : 1) * (this.chartWidth + Math.random()*100) ;
+		        var self = this;
+		        self.icons.attr('x', function(d, i) {
+		             return (Math.random() < 0.5 ? -1 : 1) * (self.chartWidth + Math.random()*100) ;
 		        })
 		       .attr('y', function(d, i) {
-		             return (Math.random() < 0.5 ? -1 : 1) * (this.chartHeight + Math.random()*100) ;
+		             return (Math.random() < 0.5 ? -1 : 1) * (self.chartHeight + Math.random()*100) ;
 		        });    
 		  },
 		  
