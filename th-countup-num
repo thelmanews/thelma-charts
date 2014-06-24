@@ -1,6 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="thelma_core.html">
-
+<link rel="import" href="th-text.html">
 
 <polymer-element name="th-countup-num" extends="th-animated" attributes="startFrom startFromSameNumberOfDigit duration numberSize type" >
   <template>
@@ -16,12 +16,14 @@
           margin: 0;
         }
 
-        #num, #before_unit, #after_unit {
+        #num, #unit_before, #unit_after {
           font-size: {{numberSize}};
         }
       </style>
       <div id="container">
-        <span id="before_num"></span><span id="before_unit"></span><span id="num"></span><span id="after_unit"></span><span id="after_num"></span>
+        <th-text markdown="false" type="{{type}}">  
+          <span id="before_num"></span><span id="unit_before"></span><span id="num"></span><span id="unit_after"></span><span id="after_num"></span>
+        </th-text>
       </div>
   </template>
   <script src="../bower_components/countUp.js/countUp.js"></script> 
@@ -49,16 +51,16 @@
           var beforeEl = this.$.before_num;
           var numEl = this.$.num;
           var afterEl = this.$.after_num;
-          var beforeUnit = this.$.before_unit;
-          var afterUnit = this.$.after_unit;
+          var unitBefore = this.$.unit_before;
+          var unitAfter = this.$.unit_after;
 
-          container.className = this.type;
+          // container.className = this.type; // don't need this with text component included
 
           if(beforeAfter && beforeAfter.length>0) {
             var splitUnitsBefore = beforeAfter[0].match(/(.*)(#|%|\$)$/); // matches 1) everything else 2) symbol at the end of the line 
             if (splitUnitsBefore) {
               beforeEl.innerText = splitUnitsBefore[1];
-              beforeUnit.innerText = splitUnitsBefore[2];
+              unitBefore.innerText = splitUnitsBefore[2];
             } else {
               beforeEl.innerText = beforeAfter[0];
             }
@@ -68,7 +70,7 @@
             var splitUnitsAfter = beforeAfter[1].match(/^(#|%|\$)(.*)/); // matches 1) symbol at beginning of line 2) everything else
             if (splitUnitsAfter) {
               afterEl.innerText = splitUnitsAfter[2];
-              afterUnit.innerText = splitUnitsAfter[1];
+              unitAfter.innerText = splitUnitsAfter[1];
             } else {
               afterEl.innerText = beforeAfter[1];
             }
