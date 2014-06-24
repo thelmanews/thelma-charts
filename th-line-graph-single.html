@@ -56,7 +56,7 @@
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
         animateStyle: "draw", // options: raise, draw
         animateAxis: false, // need to restyle the axis
-        fillArea: false, 
+        fillArea: true, 
         dataPosition: "left",  // options: left, right
         joyStick: true, 
         showYaxis: true
@@ -90,7 +90,7 @@
       },
       _scaleBuilder: function(data){
         var self = this;
-        
+        console.log("$$$$$$$");
         console.log(self.chartData);
 
 
@@ -159,9 +159,12 @@
           .data(x.ticks(5))// TODO: Replace with formula (number of labels)
           .enter().append("text")
           .attr("class", "xLabel axis")
-          .text(String)
+          .text(function(d){
+            console.log("###############");
+            console.log(d);
+            return d;})
           .attr("text-anchor", "middle");
-          // .attr("fill", self.colors.foreground);
+          
         
         // y labels
         self.yLabels = g.selectAll(".yLabel")
@@ -170,7 +173,6 @@
           .attr("class", "yLabel axis")
           .text(String)
           .attr("dy", 4)
-          // .attr("fill", self.colors.foreground)
           .attr("opacity", function(d) { return self.chartOptions.animateAxis ? 0 : 1; })
           .style("text-anchor", "start");
         
@@ -236,6 +238,13 @@
           // .attr("opacity", function(d) { return self.chartOptions.animateAxis ? 0 : 1; });
 
         self.xLabels
+           .data(x.ticks(5))// TODO: Replace with formula (number of labels)
+        
+          .text(function(d){
+            console.log("###############");
+            console.log(d);
+            return d;})
+        
           .attr("x", function(d) { return x(d) })
           .attr("y", self.dims.margin.top/2);
 
@@ -287,7 +296,7 @@
               self.areaPath
                 .datum(data)
                   .attr("class", "data0 area")
-                  .attr("opacity", 0)
+                  .style("opacity", 0)
                   .attr("d", self.areaData);
             }
           } else {
@@ -303,7 +312,7 @@
               self.areaPath 
                 .datum(data)
                 .attr("class", "area data0")
-                .attr("opacity", 0)
+                .style("opacity", 0)
                 .attr("d", self.areaDataStart)     
               }
           }
@@ -340,11 +349,13 @@
       },
       updateData: function(){
         var self = this,
-            data = self.chartData,
-            x = self.x,
-            y = self.y;
+            data = self.chartData;
+           
 
         self._scaleBuilder();
+  
+        var x = self.x,
+            y = self.y;
         
         // select elements
         self.yLabels = self.g.selectAll('.yLabel').data(y.ticks(4));
@@ -383,18 +394,15 @@
 
          // remove extra datapoints
         self.linePath.exit().remove();
-        self.xLabels.exit().remove();
-        self.yLabels.exit().remove();
-        self.circles.exit().remove();
 
+        self.circles.exit().remove();
 
         self._setupElementSizes();
         self.moveJoystick;
         self.animate();
 
         // select all the chart elements and set them in variables
-        
-        // redraw the axes
+
         // redefine the linedata and areapaths
         // transition the paths to the new data
 
@@ -425,26 +433,26 @@
             data = self.chartData,
             x = self.x, 
             y = self.y,
-            line = self.line,
+            
             startingLine = self.startingLine,
             animationStyle = self.chartOptions.animateStyle; 
             
         if (animationStyle === "draw"){
             if (self.chartOptions.fillArea){
               // path for fill area
+
               self.areaPath
-                .transition()
-                  .duration(1000) 
-                  .ease("linear")
-                  .attr("stroke-dasharrayshoffset", 0)
-                .attr("opacity", 0.7);
+                // .transition()
+                //   .duration(1000) 
+                //   .ease("linear")
+                //   .attr("stroke-dashoffset", 0)
+                .style("opacity", 0.7); 
+                  
             }
 
             // draw effect animation
             var totalLength = self.linePath.node().getTotalLength();
-            console.log("***!&!&*!**!");
-            console.log(totalLength);
-            
+
             self.linePath
               .attr("stroke-dasharray", totalLength + " " + totalLength)
               .attr("stroke-dashoffset", totalLength)
@@ -456,7 +464,7 @@
           } else { // raise style 
             if (self.chartOptions.fillArea){ 
               self.areaPath  
-                .datum(data)
+                // .datum(data)
                   .transition()
                   .duration(1000)
                   .ease("linear")
@@ -474,15 +482,15 @@
 
           }
 
-          // append circles to datapoints
-          g.selectAll(".circle")
-          .data(data)
-          .enter().append("circle")
-          .attr("class", "circle data0 stroke-foreground")
-          .attr("r", 0)
-          .attr("stroke-width", 3)
-          .attr("cx", function(d) { return  x(d.label); })
-          .attr("cy", function(d) { return -1 * y(d.value); })
+            // // append circles to datapoints
+            // g.selectAll(".circle")
+            // .data(data)
+            // .enter().append("circle")
+            // .attr("class", "circle data0 stroke-foreground")
+            // .attr("r", 0)
+            // .attr("stroke-width", 3)
+            // .attr("cx", function(d) { return  x(d.label); })
+            // .attr("cy", function(d) { return -1 * y(d.value); })
       },
       animateAxis: function(){
         var self = this;
