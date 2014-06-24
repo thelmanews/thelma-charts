@@ -268,9 +268,9 @@
               .attr('class', function(d,i){return "value data"+i;})
               .attr('y', height);
 
-            privateObj.peaks.exit().remove();
-            privateObj.labels.exit().remove();
-            privateObj.values.exit().remove();
+            privateObj.peaks.exit().transition().duration(1000).style('opacity', 0).remove();
+            privateObj.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+            privateObj.values.exit().transition().duration(1000).style('opacity', 0).remove();
             self.resize();
           }
             // this is independent of size but dependent on data
