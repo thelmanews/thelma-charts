@@ -147,7 +147,7 @@
           privateObj.width = privateObj.dims.width;   //TODO needed?
           privateObj.height = privateObj.dims.height;
 
-          privateObj.dims = privateObj.setupBarLabelDims(privateObj.dims, self.chartData);
+          privateObj.dims = privateObj.setupBarLabelDims(privateObj.dims, self.chartData, 1.25);
 
       
           // format chart elements based on chartData
@@ -177,8 +177,8 @@
 
           }
           else {    
-            privateObj.peaks.transition().duration(privateObj.animationDelay).attr('d', privateObj.peakLineStart).attr('opacity', 0);
-            privateObj.values.transition().duration(privateObj.animationDelay).attr('y', height ).style('opacity', 0);
+            privateObj.peaks.transition().duration(self.animationDelay).attr('d', privateObj.peakLineStart).attr('opacity', 0);
+            privateObj.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
           }
         },
         
@@ -226,7 +226,7 @@
           // privateObj.labelDims = privateObj.setupLabelDims(self);
           // privateObj.valueDims = privateObj.setupValueDims(self);
 
-          privateObj.dims = privateObj.setupBarLabelDims(privateObj.dims, self.chartData);
+          privateObj.dims = privateObj.setupBarLabelDims(privateObj.dims, self.chartData, 1.25);
 
           // create scales
           privateObj.scales = self.simpleScaleBuilder(privateObj.width, privateObj.height, self.chartData);
