@@ -56,7 +56,7 @@
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
         animateStyle: "raise", // options: raise, draw
         animateAxis: false, // need to restyle the axis
-        fillArea: true, 
+        fillArea: false, 
         dataPosition: "left" // options: left, right
       
       },
@@ -310,6 +310,12 @@
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); });
 
+        if (self.joystick){
+          self.joystick.select('rect')
+            .attr("height", height-36)
+        }
+
+
         self.setStartingPosition();   
       },
       resize: function(){
@@ -326,7 +332,6 @@
         self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
       
         self._scaleBuilder();
-        // self._setupElements();
         self._setupElementSizes();
         self.moveJoystick;
         self.dataLength = self.chartData.length;
@@ -518,8 +523,8 @@
         self.points = g.selectAll('.circle');
         self.currentPos.x = x(self.currentPos.label);  
 
-        if (!joystick){
-          var joystick = svg.selectAll('g.joystick')
+        if (!self.joystick){
+          self.joystick = svg.selectAll('g.joystick')
               .data([{x: self.currentPos.x}]) //??
               .enter()
                   .append('g')
@@ -532,7 +537,7 @@
               .on("drag", dragMove)
               .on('dragend', dragEnd);
 
-          joystick.append("circle")
+          self.joystick.append("circle")
               .attr("class", "target")
               .attr("r", 8)
               .attr("cx", self.currentPos.x)
@@ -541,7 +546,7 @@
               .attr("stroke-width", 4.5)
               .call(drag);
 
-          joystick.append('rect')
+          self.joystick.append('rect')
               .attr('y', 22)
               .attr('x', self.currentPos.x-1.5)
               .attr("height", h-36)
@@ -549,7 +554,7 @@
               .attr("class", "fill-foreground")
               .attr('opacity', 0.4);
 
-          self.lastPosX = joystick.select("circle").attr("cx");
+          self.lastPosX = self.joystick.select("circle").attr("cx");
         }
 
         function dragMove(d){
@@ -564,7 +569,7 @@
             self.currentPos.x = d3.select(this).attr("cx");
 
             // move the line
-            joystick.select('rect')
+            self.joystick.select('rect')
               .attr('x', self.currentPos.x-1)
               .attr('opacity', 1);
 
@@ -613,7 +618,7 @@
               .transition()
                 .duration(50)
                 .attr('cx', self.currentPos.closestX);
-            joystick.select('rect')
+            self.joystick.select('rect')
               .transition()
                 .duration(50)
                 .attr('x', self.currentPos.closestX-1) // adjusted bc of thickness of line
