@@ -56,7 +56,7 @@
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
         animateStyle: "draw", // options: raise, draw
         animateAxis: false, // need to restyle the axis
-        fillArea: true, 
+        fillArea: false, 
         dataPosition: "left",  // options: left, right
         joyStick: true, 
         showYaxis: true
@@ -78,7 +78,7 @@
 
         // adjust the margins because labels and joystick need more space
         self.dims.margin.right = 10;
-        self.dims.margin.left = 10;
+        self.dims.margin.left = 15;
         self.dims.margin.top = 30;
         self.dims.margin.bottom = 30;
         self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
@@ -175,7 +175,9 @@
         // large display value
         self.displayValue = g.append('g').append('text')
           .attr("class", "fill-foreground")
-          .attr("opacity", 0.7); // this can start as 0 and fade in after datapoint and joystick appear
+          .attr("opacity", function(){
+            return self.chartOptions.joyStick ? 0.7 : 0;
+          }); // this can start as 0 and fade in after datapoint and joystick appear
 
         // fill area path
         self.areaPath = g.append("path");
@@ -341,7 +343,9 @@
         console.log(self.x(self.maxLabel));
         console.log(self.x(self.minLabel));
         self._setupElementSizes();
-        self.moveJoystick;
+        if (self.chartOptions.joyStick) {
+          self.moveJoystick();
+        }
         self.animate();
         
       },
@@ -390,7 +394,9 @@
         self.circles
           .enter().append("circle")
           .attr("class", "circle data0 stroke-foreground")
-          .attr("r", 0)
+          .attr("r", function(){
+            return self.chartOptions.joyStick ? 0 : 4;
+          })
           .attr("stroke-width", 3);
 
          // remove extra datapoints
@@ -401,7 +407,9 @@
         self.yLabels.exit().remove();
         self.xAxis.exit().remove();
         self._setupElementSizes();
-        self.moveJoystick;
+        if (self.chartOptions.joyStick) {
+          self.moveJoystick();
+        }
         self.animate();
 
         // select all the chart elements and set them in variables
@@ -426,8 +434,12 @@
         var self = this;
         self.animateAxis();
         self.animateLines();
-        self.moveJoystick();
-        self.showCurrentData(self.currentPos, firstTime=true);
+        
+        if (self.chartOptions.joyStick) {
+          self.moveJoystick();
+          self.showCurrentData(self.currentPos, firstTime=true);
+        }
+        
       },
       animateLines: function(){
         var self = this;
@@ -483,6 +495,16 @@
                 .attr("d", self.line(data))
                 .attr("opacity", 1);
 
+          }
+
+          // If no joystick, format circles as same color as line, no stroke)
+          if (!self.chartOptions.joyStick){
+            self.circles
+              .transition()
+              .delay(1000)
+              .duration(500)
+              .attr('class', 'data0 circle')
+              .attr('r', 4);
           }
 
             // // append circles to datapoints
@@ -583,8 +605,9 @@
 
         // self.points = g.selectAll('.circle');
         self.currentPos.x = x(self.currentPos.label);  
-
+        alert();
         if (!self.joystick){
+          alert();
           self.joystick = svg.selectAll('g.joystick')
               .data([{x: self.currentPos.x}]) //??
               .enter()
