@@ -101,7 +101,7 @@
         
         self.y = d3.scale.linear().domain([self.minValue, self.maxValue]).range([self.dims.margin.top, 
                 (self.height-(self.dims.margin.top + self.dims.margin.bottom)) ]), //30 to make room for the joystick
-        self.x = d3.scale.linear().domain([self.minLabel, self.maxLabel]).range([0, self.width ]); 
+        self.x = d3.scale.linear().domain([self.minLabel, self.maxLabel]).range([self.dims.margin.left, self.width ]); 
 
       },
       _setupElements: function(){
@@ -148,7 +148,6 @@
           .attr("class", "axis")
           .attr("stroke-width", 2);
          
-        
         // y-axis
         self.yAxis = g.append("line")
           .attr("x1", 0)
@@ -228,6 +227,9 @@
           .attr("x2", x(self.maxLabel)) 
           .attr("y2", 0);
 
+        console.log("&%&%&%&%&%");
+        console.log(x(self.minLabel));
+        console.log(x(self.maxLabel));
         self.yAxis
           .attr("y1", function(d) { return self.chartOptions.animateAxis ? y(0) : -1 * y(self.minValue); }) 
           .attr("y2", function(d) { return self.chartOptions.animateAxis ? y(0) : -1 * y(self.maxValue); });
@@ -335,6 +337,9 @@
         self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
       
         self._scaleBuilder();
+        console.log("$$$$$$$$$$$$$$$$$");
+        console.log(self.x(self.maxLabel));
+        console.log(self.x(self.minLabel));
         self._setupElementSizes();
         self.moveJoystick;
         self.animate();
@@ -345,7 +350,7 @@
             data = self.chartData;
            
         self._scaleBuilder();
-  
+
         var x = self.x,
             y = self.y;
         
@@ -380,6 +385,8 @@
           .attr("x2", x(self.maxLabel)) 
           .attr("y2", 0);
 
+        console.log("**!*!*!*!*!");
+        console.log(x(self.maxLabel));
         self.circles
           .enter().append("circle")
           .attr("class", "circle data0 stroke-foreground")
@@ -392,6 +399,7 @@
         self.circles.exit().remove();
         self.xLabels.exit().remove();
         self.yLabels.exit().remove();
+        self.xAxis.exit().remove();
         self._setupElementSizes();
         self.moveJoystick;
         self.animate();
@@ -493,7 +501,6 @@
           var yAxis = self.yAxis,
               y = self.y,
               maxValue = self.maxValue,
-              // yTicks = self.yTicks,
               yLabels = self.yLabels;
 
           yAxis.transition()
@@ -574,7 +581,7 @@
             h = self.height,
             g = self.g;
 
-        self.points = g.selectAll('.circle');
+        // self.points = g.selectAll('.circle');
         self.currentPos.x = x(self.currentPos.label);  
 
         if (!self.joystick){
@@ -617,11 +624,11 @@
             d3.select(this)
 
               .attr("class", "fill-background stroke-foreground")
-              .attr("cx", d.x = Math.max(0, Math.min(w, d3.event.x))); 
+              .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(w, d3.event.x))); 
        
             // define current position
             self.currentPos.x = d3.select(this).attr("cx");
-
+            console.log(self.currentPos.x);
             // move the line
             self.joystick.select('rect')
               .attr('x', self.currentPos.x-1)
@@ -652,22 +659,25 @@
 
             // Find the closest point to the joystick
             if (self.direction == "right"){
-              self.currentPos.closestX = d3.min(self.points[0], function(d){
+              self.currentPos.closestX = d3.min(self.circles[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx"));                 
                 return (cx - self.currentPos.x >= 0) ? cx : Number.MAX_VALUE  ;
               });
           
             } else {
-              self.currentPos.closestX = d3.max(self.points[0], function(d){
+              self.currentPos.closestX = d3.max(self.circles[0], function(d){
                 var cx = parseInt(d3.select(d).attr("cx")); 
                 return (cx - self.currentPos.x < 0) ? cx : Number.MIN_VALUE  ;
               });
             }
+            
         }
 
         function dragEnd(){
          var x = self.x;
          // Lock the joystick in place
+         console.log("#####");
+         console.log(self.currentPos);
             d3.select(this)
               .attr('class','pulse')
               .transition()
