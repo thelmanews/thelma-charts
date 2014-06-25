@@ -534,12 +534,19 @@
             value = currentPos.val,
             tooltip = currentPos.tooltip;
 
+            console.log("~~~~~~~~~~~~~~");
+            console.log(label);
+            console.log(currentPos);
+
+
+
           // show circles
           g.selectAll(".circle")
                 .transition()
                 .delay(function(){ return firstTime ? 1000 : 0})
                 .duration(300)
                 .attr("r", function(d){
+                  console.log(d.label);
                   if ((parseInt(d.label)==parseInt(label))){ 
                     tooltip = d.tooltip;
                     value = d.display_value ? d.display_value : d.value;
@@ -605,7 +612,7 @@
         }
 
         function dragMove(d){
-
+          var x = self.x;
             // move the circle
             d3.select(this)
 
@@ -659,6 +666,7 @@
         }
 
         function dragEnd(){
+         var x = self.x;
          // Lock the joystick in place
             d3.select(this)
               .attr('class','pulse')
