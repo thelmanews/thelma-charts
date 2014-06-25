@@ -55,15 +55,13 @@
       chartOptions: {
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
         animateStyle: "draw", // options: raise, draw
-        yAxisLine: true,
-        xAxisLine: true,
-        yAxisLabels: true,
+        fillArea: false, 
+        yAxisLabels: false,
         xAxisLabels: true,
         animateAxis: false, // need to restyle the axis
-        fillArea: false, 
         dataPosition: "left",  // options: left, right
-        joyStick: false, 
-        showYaxis: true
+        joyStick: false
+        
       },
       chartData: [
         {'label': 2010, 'value': 104,'display_value': '$104', 'tooltip': ''},
@@ -94,9 +92,6 @@
       },
       _scaleBuilder: function(data){
         var self = this;
-        console.log("$$$$$$$");
-        console.log(self.chartData);
-
 
         self.maxLabel = self.getBoundaryValue(self, "label", d3.max);
         self.minLabel = self.getBoundaryValue(self, "label", d3.min);
@@ -163,6 +158,7 @@
           .enter().append("text")
           .attr("class", "xLabel axis")
           .text(function(d){ return d;})
+          .attr("opacity", function(d) { return self.chartOptions.yAxisLabels ? 1 : 0; })
           .attr("text-anchor", "middle");
           
         
@@ -173,7 +169,7 @@
           .attr("class", "yLabel axis")
           .text(function(d){ return d;})
           .attr("dy", 4)
-          .attr("opacity", function(d) { return self.chartOptions.animateAxis ? 0 : 1; })
+          .attr("opacity", function(d) { return self.chartOptions.animateAxis || !self.chartOptions.yAxisLabels ? 0 : 1; })
           .style("text-anchor", "start");
         
         // large display value
