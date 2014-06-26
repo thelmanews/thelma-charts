@@ -260,9 +260,6 @@
           .attr("x2", x(self.maxLabel)) 
           .attr("y2", 0);
 
-        console.log("&%&%&%&%&%");
-        console.log(x(self.minLabel));
-        console.log(x(self.maxLabel));
         self.yAxis
           .attr("y1", function(d) { return self.chartOptions.animateAxis ? y(0) : -1 * y(self.minValue); }) 
           .attr("y2", function(d) { return self.chartOptions.animateAxis ? y(0) : -1 * y(self.maxValue); });
@@ -370,13 +367,14 @@
         self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
       
         self._scaleBuilder();
-      
         self._setupElementSizes();
+
         if (self.chartOptions.joyStick) {
           self.moveJoystick();
         } else {
           self.showTooltips();
         }
+
         self.animate();
         
       },
@@ -395,7 +393,7 @@
         self.linePath = self.g.selectAll('path.data0').data(data);
         self.circles = self.g.selectAll('.circle').data(data);
         self.xAxis = self.g.selectAll('path.axis').data(data);
-        self.tips = g.selectAll('.tip').data(data);
+        self.tips = self.g.selectAll('.tip').data(data);
           
           
         // add new data points
