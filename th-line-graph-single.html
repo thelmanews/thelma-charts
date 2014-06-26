@@ -362,6 +362,7 @@
         self.circles = self.g.selectAll('.circle').data(data);
         self.xAxis = self.g.selectAll('path.axis').data(data);
         self.tips = self.g.selectAll('.tip').data(data);
+        // self.areaPath = self.g.selectAll('.area').datum(data);
           
           
         // add new data points
@@ -400,13 +401,13 @@
           .attr('class', 'tip label fill-foreground')
           .attr('text-anchor', 'middle');
 
-
          // remove extra datapoints
         self.linePath.exit().remove();
         self.circles.exit().remove();
         self.xLabels.exit().remove();
         self.yLabels.exit().remove();
         self.xAxis.exit().remove();
+        self.areaPath.exit().remove();
         self.tips.exit().remove();
         self._setupElementSizes();
         
