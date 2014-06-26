@@ -33,31 +33,35 @@
   </template>
   <script>
 
+      (function() {
 
+        var privateObj = {};
 
         Polymer('th-donut-chart', {
           chartData: {value: 65},
           init: function() {
+
+            var self = this;
             var margin = {
                   top : 8,
                   right : 0,
                   bottom : 10,
                   left : 0,
                   label: 3
-              }, width = this.chartWidth*0.95 - margin.left - margin.right, height = this.chartHeight*0.95 - margin.top - margin.bottom,
+              }, width = self.chartWidth*0.95 - margin.left - margin.right, height = self.chartHeight*0.95 - margin.top - margin.bottom,
               twoPi = 2 * Math.PI,
               progress = 0,
               total = 100,
               formatPercent = d3.format(".0%"),
               outerRadius = height*0.39,
               innerRadius = height*0.25;
-              this._prevProgress = 0;
+              privateObj._prevProgress = 0;
 
-              this.height = height;
+              privateObj.height = height;
 
               var foreground, text, arc;
 
-              this.inTransition = false;
+              privateObj.inTransition = false;
 
 
               arc = d3.svg.arc()
@@ -66,7 +70,7 @@
                 .outerRadius(outerRadius);
 
 
-              var chart_svg = this.$.chart;
+              var chart_svg = self.$.chart;
 
               var svg = d3.select(chart_svg);
 
@@ -122,45 +126,47 @@
                   .attr("text-anchor", "middle")
                   .attr("dy", ".35em");
 
-              this.foreground = foreground;
-              this.formatPercent = formatPercent;
-              this.arc = arc;
-              this.twoPi = twoPi;
-              this.text = text;
+              privateObj.foreground = foreground;
+              privateObj.formatPercent = formatPercent;
+              privateObj.arc = arc;
+              privateObj.twoPi = twoPi;
+              privateObj.text = text;
 
 
           },
           reset: function() {
-              
+             var self = this;
+
               
           },
           
           animate: function() {
 
                 var self = this;
-                var progress = this.chartData.value;
+                var progress = self.chartData.value;
                 var total = 100;
-                var that = this;
-                var i = d3.interpolate(that._prevProgress/total, progress/total);//d3.event.loaded / total);
+                var i = d3.interpolate(privateObj._prevProgress/total, progress/total);//d3.event.loaded / total);
                 d3.transition().duration(1000).tween("progress", function() {
                   return function(t) {
                     progress = i(t);
-                    that.foreground.attr("d", that.arc.endAngle(that.twoPi * progress));
-                    that.text.text(that.formatPercent(progress));
+                    privateObj.foreground.attr("d", privateObj.arc.endAngle(privateObj.twoPi * progress));
+                    privateObj.text.text(privateObj.formatPercent(progress));
                   };
                 }).each("end",function() {
                   self.fire('th-animationend',{ element: self});  // is self too much to expose?
 
                 })
 
-                this._prevProgress = progress; 
+                privateObj._prevProgress = progress; 
           },
           chartSpecificDataValidate: function() {
             // There should be a value specified.
             // The value should be between 1 and 100.
 
+            var self = this;
+
             var errors = [],
-                currentVal = this.chartData.value;
+                currentVal = self.chartData.value;
 
             if(currentVal === undefined) {
               errors.push({input: currentVal, msg: 'Please provide a value for the chart.'});
@@ -173,12 +179,14 @@
             return errors;
           },
           updateData: function() {
-              this.animate();
+              var self = this;
+              self.animate();
           }
 
           
         });
 
+    })();
 
 
   </script>
