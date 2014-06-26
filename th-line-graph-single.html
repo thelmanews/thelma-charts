@@ -45,17 +45,56 @@
         -webkit-animation-iteration-count: infinite;
         animation-timing-function: linear;
       }
+
+      .tip {
+        fill: white;
+        background-color: white;
+        padding: 10px;
+      }
+      .d3-tip {
+        line-height: 1;
+        font-weight: bold;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        border-radius: 2px;
+      }
+       
+      /* Creates a small triangle extender for the tooltip */
+      .d3-tip:after {
+        box-sizing: border-box;
+        display: inline;
+        font-size: 10px;
+        width: 100%;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.8);
+        content: "\25BC";
+        position: absolute;
+        text-align: center;
+      }
+       
+      /* Style northward tooltips differently */
+      .d3-tip.n:after {
+        margin: -1px 0 0 0;
+        top: 100%;
+        left: 0;
+      }
     </style>
     <svg id="chart"></svg> 
     <div id="info"></div> 
   </template> 
   
+  <!-- this is for d3.tip, if used --> 
+  <!-- <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script> -->
+
   <script>
     Polymer('th-line-graph-single', {
       chartOptions: {
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
         animateStyle: "draw", // options: raise, draw
         fillArea: false, 
+        xAxisLine: true,
+        yAxisLine: true,
         yAxisLabels: false,
         xAxisLabels: true,
         animateAxis: false, // need to restyle the axis
@@ -104,7 +143,6 @@
 
       },
       _setupElements: function(){
-
         var self = this,
             width = self.width,
             height = self.height,
@@ -184,7 +222,12 @@
         .enter().append("circle")
         .attr("class", "circle data0 stroke-foreground")
         .attr("r", 0)
-        .attr("stroke-width", 3);
+        
+        self.tips = g.selectAll('.tip')
+          .data(data)
+          .enter().append('text')
+          .attr('class', 'tip label fill-foreground')
+          .attr('text-anchor', 'middle');
 
       },
       _setupContainerSize: function(){
@@ -327,12 +370,12 @@
         self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
       
         self._scaleBuilder();
-        console.log("$$$$$$$$$$$$$$$$$");
-        console.log(self.x(self.maxLabel));
-        console.log(self.x(self.minLabel));
+      
         self._setupElementSizes();
         if (self.chartOptions.joyStick) {
           self.moveJoystick();
+        } else {
+          self.showTooltips();
         }
         self.animate();
         
@@ -352,7 +395,8 @@
         self.linePath = self.g.selectAll('path.data0').data(data);
         self.circles = self.g.selectAll('.circle').data(data);
         self.xAxis = self.g.selectAll('path.axis').data(data);
-
+        self.tips = g.selectAll('.tip').data(data);
+          
           
         // add new data points
         self.xLabels
@@ -377,8 +421,6 @@
           .attr("x2", x(self.maxLabel)) 
           .attr("y2", 0);
 
-        console.log("**!*!*!*!*!");
-        console.log(x(self.maxLabel));
         self.circles
           .enter().append("circle")
           .attr("class", "circle data0 stroke-foreground")
@@ -387,16 +429,25 @@
           })
           .attr("stroke-width", 3);
 
+        self.tips
+          .enter().append('text')
+          .attr('class', 'tip label fill-foreground')
+          .attr('text-anchor', 'middle');
+
+
          // remove extra datapoints
         self.linePath.exit().remove();
-
         self.circles.exit().remove();
         self.xLabels.exit().remove();
         self.yLabels.exit().remove();
         self.xAxis.exit().remove();
+        self.tips.exit().remove();
         self._setupElementSizes();
+        
         if (self.chartOptions.joyStick) {
           self.moveJoystick();
+        } else {
+          self.showTooltips();
         }
         self.animate();
 
@@ -408,14 +459,14 @@
        
       },
       reset: function() {
-        var self = this,
-            g = self.g,
-            svg = self.svg;
+        // var self = this,
+        //     g = self.g,
+        //     svg = self.svg;
         
-        // removes the lines, joystick and data/notes
-        g.selectAll("path, circle, text").remove();     
-        d3.select(self.$.info).selectAll("div, li").remove();  
-        svg.selectAll(".joystick").remove();   
+        // // removes the lines, joystick and data/notes
+        // g.selectAll("path, circle, text").remove();     
+        // d3.select(self.$.info).selectAll("div, li").remove();  
+        // svg.selectAll(".joystick").remove();   
       },
 
       animate: function() {
@@ -426,6 +477,8 @@
         if (self.chartOptions.joyStick) {
           self.moveJoystick();
           self.showCurrentData(self.currentPos, firstTime=true);
+        } else {
+          self.showTooltips();
         }
         
       },
@@ -593,9 +646,9 @@
 
         // self.points = g.selectAll('.circle');
         self.currentPos.x = x(self.currentPos.label);  
-        alert();
+        
         if (!self.joystick){
-          alert();
+        
           self.joystick = svg.selectAll('g.joystick')
               .data([{x: self.currentPos.x}]) //??
               .enter()
@@ -635,7 +688,7 @@
             d3.select(this)
 
               .attr("class", "fill-background stroke-foreground")
-              .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(w, d3.event.x))); 
+              .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.width, d3.event.x))); 
        
             // define current position
             self.currentPos.x = d3.select(this).attr("cx");
@@ -705,6 +758,34 @@
 
         
         }
+      },
+      showTooltips: function(){
+        var self = this,
+            g = self.g,
+            data = self.chartData,
+            x = self.x,
+            y = self.y;
+
+        self.tips          
+          .text( function(d){return d.display_value; })
+          .attr("x", function(d) { return  x(d.label); })
+          .attr("y", function(d) { return -y(d.value) - 15; });
+
+        // USES D3.TIP LIBRARY - appends tips to body and loses styling
+        // self.tip = d3.tip()
+        //     .attr('class', 'd3-tip label fill-foreground')
+        //     .offset([-10, 0])
+        //     .html(function(d) {
+        //       return d.display_value;
+        //     });
+
+        // g.call(self.tip);
+          
+        // self.circles
+        // .on('mouseover', self.tip.show) // how to call tip.show w/out on mouse event?
+        // .on('mouseout', self.tip.hide);
+
+
       },
       chartSpecificDataValidate: function() {
 
