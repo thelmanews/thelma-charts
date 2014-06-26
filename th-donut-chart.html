@@ -170,9 +170,9 @@
 
             if(currentVal === undefined) {
               errors.push({input: currentVal, msg: 'Please provide a value for the chart.'});
-            } else if (currentVal > 100 || currentVal < 1){
+            } else if (currentVal > 100 || currentVal < 0){
               errors.push({ input: currentVal, 
-                            msg: currentVal + ' is invalid. You must enter a number between 1 and 100.', 
+                            msg: currentVal + ' is invalid. You must enter a number from 1 to 100.', 
                             corrected: (function(){ return currentVal > 100 ? 100 : 1; })()});
             }
             
