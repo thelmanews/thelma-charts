@@ -58,11 +58,11 @@
     Polymer('th-line-graph-single', {
       chartOptions: {
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
-        animateStyle: "draw", // options: raise, draw
+        animateStyle: "raise", // options: raise, draw
         fillArea: true, 
         xAxisLine: true,
         xAxisLabels: true,
-        yAxisLine: true, // doesnt do anything, there is never a line
+        yAxisLine: false, // doesnt do anything, there is never a line
         yAxisLabels: false,
         animateAxis: false, // need to restyle the axis
         dataPosition: "left",  // options: left, right
@@ -92,7 +92,7 @@
       
         self._scaleBuilder();
         self._setupElements();
-        self._setupElementSizes();
+        self._setupElementSizes(); 
         self.dataLength = self.chartData.length;
       },
       _scaleBuilder: function(data){
@@ -288,7 +288,7 @@
               self.areaPath
                 .datum(data)
                   .attr("class", "data0 area")
-                  .style("opacity", 0)
+                  .attr("opacity", 0)
                   .attr("d", self.areaData);
             }
           } else {
@@ -304,7 +304,7 @@
               self.areaPath 
                 .datum(data)
                 .attr("class", "area data0")
-                .style("opacity", 0)
+                .attr("opacity", 0)
                 .attr("d", self.areaDataStart)     
               }
           }
@@ -416,23 +416,20 @@
           self.showTooltips();
         }
         self.animate();
-
-        // select all the chart elements and set them in variables
-
-        // redefine the linedata and areapaths
-        // transition the paths to the new data
-
        
       },
       reset: function() {
-        // var self = this,
-        //     g = self.g,
-        //     svg = self.svg;
+        var self = this,
+            g = self.g,
+            svg = self.svg;
+  
+        // removes the lines, joystick and data/notes
+        g.selectAll("path, circle, text, rect, line").remove();     
+        d3.select(self.$.info).selectAll("div, li").remove();  
+        svg.selectAll('g.joyStick').remove();
+        self._setupElements();
+        self._setupElementSizes(); 
         
-        // // removes the lines, joystick and data/notes
-        // g.selectAll("path, circle, text").remove();     
-        // d3.select(self.$.info).selectAll("div, li").remove();  
-        // svg.selectAll(".joystick").remove();   
       },
 
       animate: function() {
@@ -670,7 +667,6 @@
             g.selectAll(".circle")
               .attr("r", function(d){
                 if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
-            
                   self.currentPos.note = d.note;
                   self.currentPos.value = d.display_value ? d.display_value : d.value;
                   return 4;
