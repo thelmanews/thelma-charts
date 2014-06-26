@@ -58,8 +58,8 @@
     Polymer('th-line-graph-single', {
       chartOptions: {
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
-        animateStyle: "raise", // options: raise, draw
-        fillArea: true, 
+        animateStyle: "draw", // options: raise, draw
+        fillArea: false, 
         xAxisLine: true,
         xAxisLabels: true,
         yAxisLine: false, // doesnt do anything, there is never a line
@@ -407,7 +407,6 @@
         self.xLabels.exit().remove();
         self.yLabels.exit().remove();
         self.xAxis.exit().remove();
-        self.areaPath.exit().remove();
         self.tips.exit().remove();
         self._setupElementSizes();
         
