@@ -46,39 +46,6 @@
         animation-timing-function: linear;
       }
 
-      .tip {
-        fill: white;
-        background-color: white;
-        padding: 10px;
-      }
-      .d3-tip {
-        line-height: 1;
-        font-weight: bold;
-        padding: 12px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        border-radius: 2px;
-      }
-       
-      /* Creates a small triangle extender for the tooltip */
-      .d3-tip:after {
-        box-sizing: border-box;
-        display: inline;
-        font-size: 10px;
-        width: 100%;
-        line-height: 1;
-        color: rgba(0, 0, 0, 0.8);
-        content: "\25BC";
-        position: absolute;
-        text-align: center;
-      }
-       
-      /* Style northward tooltips differently */
-      .d3-tip.n:after {
-        margin: -1px 0 0 0;
-        top: 100%;
-        left: 0;
-      }
     </style>
     <svg id="chart"></svg> 
     <div id="info"></div> 
@@ -92,15 +59,14 @@
       chartOptions: {
         lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
         animateStyle: "draw", // options: raise, draw
-        fillArea: false, 
+        fillArea: true, 
         xAxisLine: true,
-        yAxisLine: true,
-        yAxisLabels: false,
         xAxisLabels: true,
+        yAxisLine: true, // doesnt do anything, there is never a line
+        yAxisLabels: false,
         animateAxis: false, // need to restyle the axis
         dataPosition: "left",  // options: left, right
-        joyStick: false
-        
+        joyStick: true 
       },
       chartData: [
         {'label': 2010, 'value': 104,'display_value': '$104', 'note': ''},
@@ -153,7 +119,7 @@
             data = self.chartData,
             line = self.line,
             startingLine = self.startingLine,
-            animationStyle = self.chartOptions.animateStyle; 
+            animateStyle = self.chartOptions.animateStyle; 
 
         self.currentPos = {};
 
@@ -171,7 +137,8 @@
         // x-axis
         self.xAxis = g.append("line")
           .attr("class", "axis")
-          .attr("stroke-width", 2);
+          .attr("stroke-width", 2)
+          .attr("opacity", function(d) { return self.chartOptions.xAxisLine ? 1 : 0; });
          
         // y-axis
         self.yAxis = g.append("line")
@@ -186,7 +153,6 @@
           .text(function(d){ return d;})
           .attr("opacity", function(d) { return self.chartOptions.xAxisLabels ? 1 : 0; })
           .attr("text-anchor", "middle");
-          
         
         // y labels
         self.yLabels = g.selectAll(".yLabel")
@@ -221,8 +187,9 @@
         .data(data)
         .enter().append("circle")
         .attr("class", "circle data0 stroke-foreground")
-        .attr("r", 0)
+        .attr("r", 0);
         
+        // tooltips
         self.tips = g.selectAll('.tip')
           .data(data)
           .enter().append('text')
@@ -343,6 +310,7 @@
           }
           
         self.circles
+          .attr("stroke-width", 3)
           .attr("cx", function(d) { return  x(d.label); })
           .attr("cy", function(d) { return -1 * y(d.value); });
 
@@ -361,7 +329,7 @@
 
         // adjust the margins because labels and joystick need more space
         self.dims.margin.right = 10;
-        self.dims.margin.left = 10;
+        self.dims.margin.left = 15;
         self.dims.margin.top = 30;
         self.dims.margin.bottom = 30;
         self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
@@ -425,7 +393,7 @@
           .attr("r", function(){
             return self.chartOptions.joyStick ? 0 : 4;
           })
-          .attr("stroke-width", 3);
+          .attr("r", 0);
 
         self.tips
           .enter().append('text')
@@ -489,9 +457,9 @@
             y = self.y,
             
             startingLine = self.startingLine,
-            animationStyle = self.chartOptions.animateStyle; 
+            animateStyle = self.chartOptions.animateStyle; 
             
-        if (animationStyle === "draw"){
+        if (animateStyle === "draw"){
             if (self.chartOptions.fillArea){
               // path for fill area
 
@@ -602,19 +570,13 @@
             value = currentPos.val,
             note = currentPos.note;
 
-            console.log("~~~~~~~~~~~~~~");
-            console.log(label);
-            console.log(currentPos);
-
-
-
           // show circles
           g.selectAll(".circle")
                 .transition()
                 .delay(function(){ return firstTime ? 1000 : 0})
                 .duration(300)
                 .attr("r", function(d){
-                  console.log(d.label);
+                 
                   if ((parseInt(d.label)==parseInt(label))){ 
                     note = d.note;
                     value = d.display_value ? d.display_value : d.value;
@@ -642,7 +604,6 @@
             h = self.height,
             g = self.g;
 
-        // self.points = g.selectAll('.circle');
         self.currentPos.x = x(self.currentPos.label);  
         
         if (!self.joystick){
@@ -652,7 +613,7 @@
               .enter()
                   .append('g')
                   .attr("class", "joystick")
-                  .attr("height", 200)
+                  // .attr("height", 200)
                   .attr("width", w);
 
           var drag = d3.behavior.drag()
@@ -705,11 +666,11 @@
               self.lastPosX = self.currentPos.x;
             }
 
-
             // determine which circles/notes are to be displayed
             g.selectAll(".circle")
               .attr("r", function(d){
                 if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
+            
                   self.currentPos.note = d.note;
                   self.currentPos.value = d.display_value ? d.display_value : d.value;
                   return 4;
@@ -738,8 +699,7 @@
         function dragEnd(){
          var x = self.x;
          // Lock the joystick in place
-         console.log("#####");
-         console.log(self.currentPos);
+        
             d3.select(this)
               .attr('class','pulse')
               .transition()
@@ -751,7 +711,8 @@
                 .attr('x', self.currentPos.closestX-1) // adjusted bc of thickness of line
                 .attr('opacity', 0.4);
 
-            self.currentPos.closestLabel = x.invert(self.currentPos.closestX);
+            // Rounding the below number is a temp fix - because x.invert is resulting in a decimal number.
+            self.currentPos.closestLabel = Math.round(x.invert(self.currentPos.closestX));
             self.showCurrentData(self.currentPos);
 
         
@@ -767,7 +728,12 @@
         self.tips          
           .text( function(d){return d.display_value; })
           .attr("x", function(d) { return  x(d.label); })
-          .attr("y", function(d) { return -y(d.value) - 15; });
+          .attr("y", function(d) { return -y(d.value) - 15; })
+          .attr('opacity', 0)
+          .transition()
+          .delay(1000)
+          .duration(500)
+          .attr('opacity', 1);
 
         // USES D3.TIP LIBRARY - appends tips to body and loses styling
         // self.tip = d3.tip()
