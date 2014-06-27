@@ -19,11 +19,11 @@ Thelma.chartValidation = {
 		errors = errors.concat(polymerObj.chartSpecificDataValidate());
 
 		if(errors.length>0) {
-			polymerObj.$.chart.style.opacity = 0.5; // this is for testing
-			polymerObj.$.data_errors.style.display = 'block'; // this is for testing
+			// polymerObj.$.chart.style.opacity = 0.5; // this is for testing
+			// polymerObj.$.data_errors.style.display = 'block'; // this is for testing
 			
 			for (i; i < errors.length; i++){	
-				polymerObj.$.data_errors.appendChild(document.createElement('li')).innerHTML = errors[i].msg; // this is for testing
+				// polymerObj.$.data_errors.appendChild(document.createElement('li')).innerHTML = errors[i].msg; // this is for testing
 				polymerObj.asyncFire('error', errors[i]); // where error is an object containing details
 			}
 		}
@@ -135,7 +135,7 @@ Thelma.chartUtils = {
 
 		  var VERTICAL = 'vertical',
 		  	  HORIZONTAL = 'horizontal';
-
+          console.log("**********");
 		  var scales = {};
 		  labelAccessFun = labelAccessFun || function(d) {return d.label}; 
 		  valueAccessFun = valueAccessFun || function(d) {return d.value}; 
@@ -145,9 +145,9 @@ Thelma.chartUtils = {
 		  									: d3.scale.linear().range([0, width], .1);
 	      scales.y = orientation===VERTICAL ? d3.scale.linear().range([0, height])
 	      									: d3.scale.ordinal().rangeRoundBands([0, height]);
-
+      
 	      var max = d3.max(chartData, valueAccessFun);
-
+     
 	      scales.y.domain(orientation===VERTICAL ? [0, max] : chartData.map(labelAccessFun)); 
 	      scales.x.domain(orientation===VERTICAL ? chartData.map(labelAccessFun) : [0, max]);
 
@@ -208,9 +208,13 @@ Thelma.chartUtils = {
           } else {
             dims.labels.angle = 0;
           }
-
           return dims.labels;
       },
+    getBoundaryValue: function(polymerObj, property, d3boundary){
+        return d3boundary(polymerObj.chartData, function(d){
+          return d[property];
+        });
+    },
     setupStackedDims: function(polymerObj){
       var dims = {},
           chartData = polymerObj.chartData;
