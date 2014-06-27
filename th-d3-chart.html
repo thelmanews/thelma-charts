@@ -88,10 +88,8 @@
               [].forEach.call(barInfos, function(dataPointEl) {
                   var dataPoint = {};
                   [].forEach.call(dataPointEl.attributes, function(attr) {
-                    console.log(attr);
                     dataPoint[attr.name] = attr.value;
                   });
-                  console.log(dataPoint);
                   dataFromElements.push(dataPoint);
               });
 

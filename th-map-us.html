@@ -126,8 +126,6 @@
 	            
 	            self.path = d3.geo.path()
 	                .projection(projection);
-
-	            console.log(self.path)
             
 			    var chart_svg = self.$.chart;
 
@@ -144,7 +142,6 @@
 	                .attr('class','states_map');
 	            
 	            d3.json(self.dataUrls.us, function(error, us) {
-	            	console.log('json loaded');
 	                self.render(error,us);
 	            
 	            });    
@@ -164,7 +161,6 @@
                     .data(states.features)
                   .enter().append('path')
                     .attr('class', function(d) { 
-                        //console.log(this);
                         return 'state map-border '+d.properties.name.toLowerCase().replace(/\s/g, '-'); 
                     })
                     .attr('d', self.path)
@@ -212,7 +208,6 @@
 		        	var interval = (maxValue - minValue) / breaks;
 
 		        	var domain = d3.range(breaks).map(function(i) {
-		        		console.log(i);
 		        		return minValue + ((i) * interval);
 		        	});
 
@@ -225,8 +220,6 @@
 						self.dataMap.set(key, self.chartData.state_data.values[key]);
 					}
 
-				    //console.log(dataValues);
-				    console.log(self.dataMap);
 				      
 				    self.colors = d3.scale.threshold()
 				        .domain(domain)
@@ -245,8 +238,7 @@
              
              _clicked: function(d, self) {  //TODO make it realy private
              	  //var self = this;
-              	  console.log('clicked');
-              	  console.log(d);
+
                   var x, y, k,
                   	  width = self.dims.width,
                   	  height = self.dims.height;

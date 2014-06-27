@@ -119,20 +119,14 @@
 		      // setting up the size. needed for resizing
 		      self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-		      console.log('self.dims.bars.width');
-		      console.log(self.dims);
-		      console.log(self.dims.bars);
-		      console.log(self.dims.bars.width);
-
 		      this.bars
 		        .attr("class", function(d,i){return "bar data"+i;})
 		        .attr('x', x(0)) //function(d) { return x(d.label); })  rev
-		        .attr('y', function(d) { console.log(y(d.label)); return y(d.label); }) //function(d) { return height; })  rev
+		        .attr('y', function(d) { return y(d.label); }) //function(d) { return height; })  rev
 		        .attr('width', 0)
 		        .attr('height', self.dims.bars.width);
 
 		      
-		      //console.log(this.bars);
 		      this.labels
 		        .attr("class", function(d,i){return "label data"+i;})
 		        //.style('opacity', 0)
@@ -140,7 +134,6 @@
 		        .attr('x', 0)
 		        .attr('y', function(d) { return y(d.label) + self.dims.bars.width + self.dims.labels.height* 0.6; });
 
-		      //console.log(this.bars);
 		      this.values
 		        .attr("class", function(d,i){return "value data"+i;})
 		        .style('text-anchor','end')
@@ -172,7 +165,7 @@
 		       // .attr('x', function(d) {  return x(d.value);})
 		        .attr('width', function(d) {return x(d.value)});
 		        // rev
-		        //.attr('y', function(d) { console.log(d.value); console.log(height); console.log(y(d.value)); return height-y(d.value);})
+		        //.attr('y', function(d) { return height-y(d.value);})
 		        //.attr('height', function(d) {return y(d.value)});
 		        
 		        
@@ -223,12 +216,10 @@
 
 		  	/*
 
-		  	console.log('UPDATE DATA');
 
 		  	  var self = this;
 
 		  	  //TODO these don't do anything unless dimensions are set
-		      console.log(self.chartData);
 		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData, 'horizontal');
 
 
@@ -248,7 +239,6 @@
 
 		  	  if(self.dataLength!=self.chartData.length)
 		  	  {
-		  	  	  console.log('data length changed');
 
 		  	  	  self.dataLength = self.chartData.length;
 
