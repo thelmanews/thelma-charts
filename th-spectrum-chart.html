@@ -73,7 +73,6 @@
 
 	      var marginValue = (maxmax-minmin)* dataMargin;
 	      var wholeRange = {min : minmin-marginValue, max:  maxmax+marginValue};
-	      console.log(wholeRange);
 
 	      y.domain([wholeRange.min,wholeRange.max]); 
 
@@ -86,7 +85,6 @@
 	        .attr('height', function(d) {return y(wholeRange.max)});
 
 	      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
-	      //console.log(this.bars);
 	      self.bars
 	        .attr("class", function(d,i){ return "bar data"+i; })
 	        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
@@ -98,7 +96,6 @@
 
 
 	      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
-	      //console.log(this.bars);
 	      self.labels
 	        .attr("class", function(d,i){return "label data"+i;})
 	        .style('opacity', 0)
@@ -112,7 +109,6 @@
 	      	// .attr('font-size', '13px')
 	      	.attr('font-weight', 300)
 	      	.attr('class', function(d,i){return "defaultvalue value data"+i;});
-	      //console.log(this.bars);
 	      self.values
 	        .style('opacity', 0)
 	        .attr('x', width/2 + barWidth/2 + margin.label)

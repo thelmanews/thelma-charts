@@ -296,8 +296,7 @@
               .attr("fill", "none");
 
             var totalLength = path.node().getTotalLength();
-            console.log("==========");
-            console.log(totalLength);
+      
             path
               .attr("stroke-dasharray", totalLength + " " + totalLength)
               .attr("stroke-dashoffset", totalLength)
