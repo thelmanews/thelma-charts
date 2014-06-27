@@ -34,7 +34,7 @@
 		  ],
 		  init: function() {
 
-		    var that = this;
+		    var self = this;
 
 		    var margin = {
 		          top : 5,
@@ -42,113 +42,113 @@
 		          bottom : 20,
 		          left : 10,
 		          label: 3
-		      }, width = that.chartWidth*0.95 - margin.left - margin.right, height = that.chartHeight*1.0 - margin.top - margin.bottom
+		      }, width = self.chartWidth*0.95 - margin.left - margin.right, height = self.chartHeight*1.0 - margin.top - margin.bottom
 		         , barWidth = height* 0.02 , textLabelMargin = height*0.05;
 
-		      that.height = height;
-		      that.width = width;
+		      self.height = height;
+		      self.width = width;
 
-		      that.extractElementDataPoints();
+		      self.extractElementDataPoints();
 
 		      
 
 
-		      var chartEl = that.$.chart;
+		      var chartEl = self.$.chart;
 		      var container = d3.select(chartEl).attr('width', width + margin.left + margin.right)
 		          .attr('height', height + margin.top + margin.bottom)
 		          .append('g')
 		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-		      that.container = container;
+		      self.container = container;
 
-		      that.holderTranslate = 'translate(' + width / 2 + ',' + (height* 0.91) + ')';
+		      self.holderTranslate = 'translate(' + width / 2 + ',' + (height* 0.91) + ')';
 
 
-		      var totalCount = that.chartData.reduce(function(prev, cur) {
+		      var totalCount = self.chartData.reduce(function(prev, cur) {
 		          return prev+= parseInt(cur.value);
 		      }, 0);
 
 
-		      that.chartData[0].width = that.chartData[0].width || 25;
-		      that.chartData[0].height = that.chartData[0].height || 20;
+		      self.chartData[0].width = self.chartData[0].width || 25;
+		      self.chartData[0].height = self.chartData[0].height || 20;
 
-		      that.chartData[1].width = that.chartData[1].width || 20;
-		      that.chartData[1].height = that.chartData[1].height || 20;
+		      self.chartData[1].width = self.chartData[1].width || 20;
+		      self.chartData[1].height = self.chartData[1].height || 20;
 
 
-		      that.chartData[0].elementsPerRow =  Math.floor((width/2 - 10)/ that.chartData[0].width);
+		      self.chartData[0].elementsPerRow =  Math.floor((width/2 - 10)/ self.chartData[0].width);
 
-		      that.chartData[1].elementsPerRow =  Math.floor((width/2 - 10)/ that.chartData[1].width);
+		      self.chartData[1].elementsPerRow =  Math.floor((width/2 - 10)/ self.chartData[1].width);
 		      
 
 	        container.append('path')
 	            .attr('transform', 'translate(' + (width * 0.40) + ',' + (height *0.95) + ')')
 	            .attr('d', 'M 15 3 L 30 25 L 0 25 L 15 3').attr('class', 'triangle fill-foreground');
 
-	        that.barg = container.append('g')
+	        self.barg = container.append('g')
 	            .attr('transform', 'translate(' + width / 2 + ',' + height*0.95 + ')');
 
-	        var bar = that.barg.append('rect')
+	        var bar = self.barg.append('rect')
 	            .attr('x', -width / 2)
 	            .attr('y', 0)
 	            .attr('class', 'scale-bar fill-foreground')
 	            .attr('width', width)
 	            .attr('height', barWidth);
 
-	        that.left_holder = container.append('g')
+	        self.left_holder = container.append('g')
 	            .attr('class', 'left_holder')
-	            .attr('transform', that.holderTranslate);
+	            .attr('transform', self.holderTranslate);
 
-	        that.lefts = that.left_holder.selectAll('.lefts').data(d3.range(0,that.chartData[0].count)).enter().append('image')
-	            .attr('xlink:href', that.chartData[0].image)
+	        self.lefts = self.left_holder.selectAll('.lefts').data(d3.range(0,self.chartData[0].count)).enter().append('image')
+	            .attr('xlink:href', self.chartData[0].image)
 	            .attr('class', 'lefts')
 	            .attr('x', function(d, i) {
-	                 return -width / 2 + (i % that.chartData[0].elementsPerRow) * (that.chartData[0].width);
+	                 return -width / 2 + (i % self.chartData[0].elementsPerRow) * (self.chartData[0].width);
 	            })
 	            .attr('y', function(d, i) {
 	                 return -height* 1.2;
 	            })
-	            .attr('width', that.chartData[0].width)
-	            .attr('height', that.chartData[0].height);
+	            .attr('width', self.chartData[0].width)
+	            .attr('height', self.chartData[0].height);
 
-	        that.right_holder = container.append('g')
+	        self.right_holder = container.append('g')
 	            .attr('class', 'right_holder')
-	            .attr('transform', that.holderTranslate);
+	            .attr('transform', self.holderTranslate);
 
-	        that.rights = that.right_holder.selectAll('.rights').data(d3.range(0,that.chartData[1].count)).enter().append('image')
-	            .attr('xlink:href', that.chartData[1].image)
+	        self.rights = self.right_holder.selectAll('.rights').data(d3.range(0,self.chartData[1].count)).enter().append('image')
+	            .attr('xlink:href', self.chartData[1].image)
 	            .attr('class', 'rights')
 	            .attr('x', function(d, i) {
-	                return width/2 - margin.right - ((i % that.chartData[1].elementsPerRow) * (that.chartData[1].width)) - 3;
+	                return width/2 - margin.right - ((i % self.chartData[1].elementsPerRow) * (self.chartData[1].width)) - 3;
 	            })
 	            .attr('y', function(d, i) {
 	                return -height* 1.2;
 	            })
 	            .attr('rx', 3)
 	            .attr('ry', 3)
-	            .attr('width', that.chartData[1].width)
-	            .attr('height', that.chartData[1].height);
+	            .attr('width', self.chartData[1].width)
+	            .attr('height', self.chartData[1].height);
 
 
 		  },
 		  reset: function() {
 		      
-		        var that = this;
-		        that.lefts.transition().duration(10).attr('y', function(d, i) {
-	                 return -that.height* 1.2;
+		        var self = this;
+		        self.lefts.transition().duration(10).attr('y', function(d, i) {
+	                 return -self.height* 1.2;
 	            });   
-		        that.rights.transition().duration(10).attr('y', function(d, i) {
-	                 return -that.height* 1.2;
+		        self.rights.transition().duration(10).attr('y', function(d, i) {
+	                 return -self.height* 1.2;
 	            });   
 		  },
 		  
 		animate: function() {
 					      
-	        var that = this;
+	        var self = this;
 	        var totalSideTransition = 2000
 		        
- 			var delay = {left: totalSideTransition/that.chartData[0].count,
- 						right: totalSideTransition/that.chartData[1].count}
+ 			var delay = {left: totalSideTransition/self.chartData[0].count,
+ 						right: totalSideTransition/self.chartData[1].count}
  					, pauseBeforeRight = 1000;
 
 	        // for bar
@@ -158,27 +158,27 @@
 
 
 	        var prevAngle = 0;
-	        that.lefts.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
+	        self.lefts.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
 	            return i * delay.left;
 	        }).attr('y', function(d, i) {
-	            return -Math.floor(i / that.chartData[0].elementsPerRow) * (that.chartData[0].height) - 10;
+	            return -Math.floor(i / self.chartData[0].elementsPerRow) * (self.chartData[0].height) - 10;
 	        }).each('end', function(d, i) {
 	            
-	            var angle = ((i+1) / that.chartData[0].count) * maxAngle;
-	            that._animateBar(prevAngle, angle, Math.min(delay.left, dropSpeed*1.5));
+	            var angle = ((i+1) / self.chartData[0].count) * maxAngle;
+	            self._animateBar(prevAngle, angle, Math.min(delay.left, dropSpeed*1.5));
 	            prevAngle = angle;
-	            if(i+1 == that.chartData[0].count) {
+	            if(i+1 == self.chartData[0].count) {
 
 			        setTimeout(function() {
 		            	var prevAngle = maxAngle;
-			            that.rights.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
+			            self.rights.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
 			                return i * delay.right;
 			            }).attr('y', function(d, i) {
-			                return -Math.floor(i / that.chartData[1].elementsPerRow) * (that.chartData[1].height) - 10;
+			                return -Math.floor(i / self.chartData[1].elementsPerRow) * (self.chartData[1].height) - 10;
 			            }).each('end', function(d, i) {
 			            
-				            var angle = maxAngle - ((i+1) / that.chartData[1].count) * maxAngle;
-				            that._animateBar(prevAngle, angle, Math.min(delay.right, dropSpeed*1.5));
+				            var angle = maxAngle - ((i+1) / self.chartData[1].count) * maxAngle;
+				            self._animateBar(prevAngle, angle, Math.min(delay.right, dropSpeed*1.5));
 				            prevAngle = angle;
 				        });
 			        }, pauseBeforeRight);
@@ -190,25 +190,25 @@
 
 		_animateBar: function(fromAngle, toAngle, delay) {
 
-			var that = this;
+			var self = this;
 	        
-	        that.barg.transition().ease('linear').duration(delay).attrTween("transform", tween);
+	        self.barg.transition().ease('linear').duration(delay).attrTween("transform", tween);
 
-	        that.left_holder.transition().ease('linear').duration(delay).attrTween("transform", tween2);
+	        self.left_holder.transition().ease('linear').duration(delay).attrTween("transform", tween2);
 
-	        that.right_holder.transition().ease('linear').duration(delay).attrTween("transform", tween3);
+	        self.right_holder.transition().ease('linear').duration(delay).attrTween("transform", tween3);
 
 	        // for bar
 	        function tween(d, i, a) {
-	            return d3.interpolateString('translate(' + that.width / 2 + ',' + that.height*0.95 + ') rotate(' + fromAngle + ')', 'translate(' + that.width / 2 + ',' + that.height*0.95 + ') rotate(' + toAngle + ')');
+	            return d3.interpolateString('translate(' + self.width / 2 + ',' + self.height*0.95 + ') rotate(' + fromAngle + ')', 'translate(' + self.width / 2 + ',' + self.height*0.95 + ') rotate(' + toAngle + ')');
 	        }
 	        // for lefts
 	        function tween2(d, i, a) {
-	            return d3.interpolateString(that.holderTranslate + '  rotate(' + (fromAngle) + ')', that.holderTranslate + ' rotate(' + toAngle + ')');
+	            return d3.interpolateString(self.holderTranslate + '  rotate(' + (fromAngle) + ')', self.holderTranslate + ' rotate(' + toAngle + ')');
 	        }
 	        // for rights
 	        function tween3(d, i, a) {
-	            return d3.interpolateString(that.holderTranslate + ' rotate(' + fromAngle + ')', that.holderTranslate + '  rotate(' + toAngle + ')');
+	            return d3.interpolateString(self.holderTranslate + ' rotate(' + fromAngle + ')', self.holderTranslate + '  rotate(' + toAngle + ')');
 	        }
 
 	    },

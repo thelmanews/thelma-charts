@@ -8,7 +8,7 @@
       Polymer('th-split-donut-chart', {
         chartData: [{value: 26}, {value: 43}], // BUG: this only works when then smaller value comes first; otherwise the labels appear the same.
         init: function() {
-          var that = this,
+          var self = this,
               margin = {
                 top : 10,
                 right : 0,
@@ -16,7 +16,7 @@
                 left : 0,
                 label: 3
               }, 
-              width = that.chartWidth*0.95 - margin.left - margin.right, height = that.chartHeight*0.95 - margin.top - margin.bottom,
+              width = self.chartWidth*0.95 - margin.left - margin.right, height = self.chartHeight*0.95 - margin.top - margin.bottom,
               pi = Math.PI,
               progress = 0,
               total = 100,
@@ -26,9 +26,9 @@
               this._prevProgress = 0;
 
             
-            that.height = height;
+            self.height = height;
             
-            var data = [that.chartData[0].value, that.chartData[1].value];
+            var data = [self.chartData[0].value, self.chartData[1].value];
 
             var foreground, text, arc;
 
@@ -38,7 +38,7 @@
               .innerRadius(innerRadius)
               .outerRadius(outerRadius);
 
-            var chart_svg = that.$.chart;
+            var chart_svg = self.$.chart;
             var svg = d3.select(chart_svg);
 
             var container = svg.attr("width", width)
@@ -94,22 +94,22 @@
         
         animate: function() {
             var total = 100;
-            var that = this;
+            var self = this;
             var data = this.data;
             var meter = this.meter;
 
             meter.selectAll("path.foreground").transition().delay(1000).duration(1000)
               .attrTween('d', function(d){
-                var i = d3.interpolate(that._prevProgress/total, d/total);
+                var i = d3.interpolate(self._prevProgress/total, d/total);
                 
                 return function(t) {
                   var progress = i(t);
                   
                   meter.selectAll("text.label").text(function(d){
-                    return progress > d/total ? that.formatPercent(d/total) : that.formatPercent(progress);
+                    return progress > d/total ? self.formatPercent(d/total) : self.formatPercent(progress);
                   })
 
-                  return that.arc.endAngle(that.pi * progress)();
+                  return self.arc.endAngle(self.pi * progress)();
                   
                 };
                 this._prevProgress = progress; 

@@ -91,12 +91,12 @@
       },
       config: {animateAxis: false, interpolate: false},
       init: function() {
-        var that = this;
-        var data = that.chartData['0'], // this needs to encompass all data
+        var self = this;
+        var data = self.chartData['0'], // this needs to encompass all data
             xMargin = 20,// space btw labels and axis
             yMargin = 25,// space btw labels and axis
-            w = that.chartWidth - xMargin*2,
-            h = that.chartHeight;
+            w = self.chartWidth - xMargin*2,
+            h = self.chartHeight;
             
       
      
@@ -116,16 +116,16 @@
           })
         }
 
-        var maxValue = getMax(that.chartData, "value");
-        var minValue = getMin(that.chartData, "value");
-        var maxLabel = getMax(that.chartData, "label");
-        var minLabel = getMin(that.chartData, "label");
+        var maxValue = getMax(self.chartData, "value");
+        var minValue = getMin(self.chartData, "value");
+        var maxLabel = getMax(self.chartData, "label");
+        var minLabel = getMin(self.chartData, "label");
 
         var y = d3.scale.linear().domain([minValue, maxValue]).range([yMargin, (h-20) ]), //20 to make room for the slider
             x = d3.scale.linear().domain([minLabel, maxLabel]).range([xMargin, w ]); 
             
         // container
-        var chart_svg = that.$.chart;
+        var chart_svg = self.$.chart;
         var svg = d3.select(chart_svg)
           .attr("width", w)
           .attr("height", h);
@@ -139,8 +139,8 @@
           .x(function(d) { return x(d.label); })
           .y(function(d) { return -y(d.value); });
 
-        if(that.config.interpolate) {
-          line.interpolate(that.lineStyle);
+        if(self.config.interpolate) {
+          line.interpolate(self.lineStyle);
         }
 
         var startingLine = d3.svg.line()
@@ -161,11 +161,11 @@
         var yAxis = g.append("line")
           .attr("x1", x(0))
           .attr("x2", x(0))
-          .attr("y1", function(d) { return that.config.animateAxis ? y(0) : -1 * y(0); })
-          .attr("y2", function(d) { return that.config.animateAxis ? y(0) : -1 * y(maxValue); })
+          .attr("y1", function(d) { return self.config.animateAxis ? y(0) : -1 * y(0); })
+          .attr("y2", function(d) { return self.config.animateAxis ? y(0) : -1 * y(maxValue); })
           .attr('class', "no-fill stroke-foreground")
           .attr("stroke-width", 2)
-          .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
+          .attr("opacity", function(d) { return self.config.animateAxis ? 0 : 1; });
 
         // x labels
         g.selectAll(".xLabel")
@@ -186,11 +186,11 @@
           .text(String)
           .attr("text-anchor", "middle")
           .attr("transform", function(d){
-            var yPos = that.config.animateAxis ? 0 : -1 * y(d);
+            var yPos = self.config.animateAxis ? 0 : -1 * y(d);
             return "translate(0,"+ yPos +") rotate(-90)";
           } )
           .attr("dy", 4)
-          .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
+          .attr("opacity", function(d) { return self.config.animateAxis ? 0 : 1; });
 
           /*
 
@@ -231,32 +231,32 @@
           .data(y.ticks(4)) // TODO: Replace with formula (number of tickmarks)
           .enter().append("line")
           .attr("class", "yTicks stroke-foreground")
-          .attr("y1", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
+          .attr("y1", function(d) { return self.config.animateAxis ? 0 : -1 * y(d); })
           .attr("x1", x(-0.2))
-          .attr("y2", function(d) { return that.config.animateAxis ? 0 : -1 * y(d); })
+          .attr("y2", function(d) { return self.config.animateAxis ? 0 : -1 * y(d); })
           .attr("x2", x(0))          
-          .attr("opacity", function(d) { return that.config.animateAxis ? 0 : 1; });
+          .attr("opacity", function(d) { return self.config.animateAxis ? 0 : 1; });
         
        
         // make variables accessible in other methods
-        that.svg = svg;
-        that.data = data;
-        that.g = g;
-        that.line = line;
-        that.x = x;
-        that.y = y;
-        that.maxValue = maxValue;
-        that.yAxis = yAxis;
-        that.yTicks = yTicks;
-        that.yLabels = yLabels;
-        that.startingLine = startingLine;
-        that.w = w;
-        that.h = h;
+        self.svg = svg;
+        self.data = data;
+        self.g = g;
+        self.line = line;
+        self.x = x;
+        self.y = y;
+        self.maxValue = maxValue;
+        self.yAxis = yAxis;
+        self.yTicks = yTicks;
+        self.yLabels = yLabels;
+        self.startingLine = startingLine;
+        self.w = w;
+        self.h = h;
 
       },
       reset: function() {
-        // var that = this;
-        // that.path      
+        // var self = this;
+        // self.path      
         //   .transition()
         //   .duration(2000)
         //   .ease("linear")
@@ -264,22 +264,22 @@
       },
       
       animate: function() {
-        var that = this;
-        var g = that.g,
-            svg = that.svg,
-            data = that.data,
-            line = that.line,
-            x = that.x,
-            y = that.y,
-            maxValue = that.maxValue,
-            startingLine = that.startingLine,
-            yAxis = that.yAxis,
-            yLabels = that.yLabels,
-            yTicks = that.yTicks,
-            h = that.h,
-            w = that.w;
+        var self = this;
+        var g = self.g,
+            svg = self.svg,
+            data = self.data,
+            line = self.line,
+            x = self.x,
+            y = self.y,
+            maxValue = self.maxValue,
+            startingLine = self.startingLine,
+            yAxis = self.yAxis,
+            yLabels = self.yLabels,
+            yTicks = self.yTicks,
+            h = self.h,
+            w = self.w;
 
-        var tooltip_area = that.$.info;
+        var tooltip_area = self.$.info;
         var tooltip = d3.select(tooltip_area)
           .append("div")   
           .attr("class", "tooltip");
@@ -352,15 +352,15 @@
             .attr("opacity", 1);
         }
 
-        if(that.config.animateAxis) {
+        if(self.config.animateAxis) {
           animateAxis();
         }
 
         var firstTooltip = Number.MAX_VALUE;
-        for (var prop in that.chartData) {
-          drawLine(prop, that.chartData[prop],  that.animateStyle); // color will break if series name is changed
+        for (var prop in self.chartData) {
+          drawLine(prop, self.chartData[prop],  self.animateStyle); // color will break if series name is changed
 
-          var setFirstTooltip = d3.min(that.chartData[prop], function(d) {
+          var setFirstTooltip = d3.min(self.chartData[prop], function(d) {
               return d.tooltip ? d.label : Number.MAX_VALUE;
           });
 
