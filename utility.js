@@ -24,7 +24,7 @@ Thelma.chartValidation = {
 			
 			for (i; i < errors.length; i++){	
 				// polymerObj.$.data_errors.appendChild(document.createElement('li')).innerHTML = errors[i].msg; // this is for testing
-				polymerObj.asyncFire('error', errors[i]); // where error is an object containing details
+				polymerObj.asyncFire('th-error', errors[i]); // where th-error is an object containing details
 			}
 		}
 		
