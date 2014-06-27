@@ -34,7 +34,6 @@
 		        .attr("class", function(d,i){return "bar data"+i;});
 
 		      
-		      //console.log(this.bars);
 		      privateObj.labels
 		        .attr("class", function(d,i){return "label data"+i;});
 		        //.style('opacity', 0)
@@ -125,8 +124,6 @@
 
 		      privateObj.dims = privateObj.setupBarLabelDims(privateObj.dims, self.chartData, 1, 1.3);
 
-		      console.log(privateObj.dims);
-
 	    	  var margin = privateObj.dims.margin,
 	    	  	  width = privateObj.dims.width,
 	    	      height = privateObj.dims.height;
@@ -188,7 +185,7 @@
 		        var height= privateObj.dims.height;
 		        privateObj.bars.transition().duration(this.animationDelay)
 		        .attr('x', function(d) { return privateObj.x(d.label); })
-		        .attr('y', function(d) { console.log(d.value); console.log(height); console.log(y(d.value)); return height-y(d.value);})
+		        .attr('y', function(d) { return height-y(d.value);})
 		        .attr('width', privateObj.dims.bars.width)
 		        .attr('height', function(d) {return y(d.value)})
 		        .style('opacity', 1);
@@ -220,8 +217,6 @@
 		  },
 
 		  resize: function() {
-
-		  		console.log(' RESIZE RESIZE RESIZE');
 		  	  
 		  	  var self = this;
 		  	  
@@ -264,7 +259,6 @@
 
 		  updateData: function() {
 
-		  	console.log('UPDATE DATA');
 
 		  	  var self = this;
 
@@ -288,7 +282,6 @@
 
 		  	  if(privateObj.dataLength!=self.chartData.length)
 		  	  {
-		  	  	  console.log('data length changed');
 
 
 		  	  	  privateObj.dataLength = self.chartData.length;

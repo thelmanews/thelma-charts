@@ -24,7 +24,7 @@ Thelma.chartValidation = {
 			
 			for (i; i < errors.length; i++){	
 				// polymerObj.$.data_errors.appendChild(document.createElement('li')).innerHTML = errors[i].msg; // this is for testing
-				polymerObj.asyncFire('error', errors[i]); // where error is an object containing details
+				polymerObj.asyncFire('th-error', errors[i]); // where th-error is an object containing details
 			}
 		}
 		
@@ -42,8 +42,6 @@ Thelma.chartValidation = {
 Thelma.BarFamilyPrivateStaticMethods = function() {
 
 	  this.setupBarLabelDims = function(dims, chartData, overlap, gap) {
-
-        console.log(dims);
         
         // bars margin and dims
 
@@ -135,7 +133,6 @@ Thelma.chartUtils = {
 
 		  var VERTICAL = 'vertical',
 		  	  HORIZONTAL = 'horizontal';
-          console.log("**********");
 		  var scales = {};
 		  labelAccessFun = labelAccessFun || function(d) {return d.label}; 
 		  valueAccessFun = valueAccessFun || function(d) {return d.value}; 

@@ -67,8 +67,7 @@
             var sliderel = this.$.slider;
 
             var axis = d3.svg.axis().orient('bottom').ticks(10);
-            console.log('self.value');
-            console.log(self.value);
+
             slider = d3.slider().value(self.value).min(self.min).max(self.max).step(self.step); //.margin(100);
 
             if(self.labels) {
