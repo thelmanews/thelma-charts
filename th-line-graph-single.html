@@ -59,56 +59,59 @@
     (function() { 
 
         var privateObj = {
-          _scaleBuilder: function(polymerObj) {
+           _scaleBuilder: function(polymerObj) {
 
-              polymerObj.maxLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.max);
-              polymerObj.minLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.min);
-              polymerObj.maxValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
-              polymerObj.minValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
+              console.log(privateObj);
+
+              privateObj.maxLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.max);
+              privateObj.minLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.min);
+              privateObj.maxValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
+              privateObj.minValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
               
-              polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([polymerObj.dims.margin.top, 
-                      (polymerObj.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom)) ]), //30 to make room for the joystick
-              polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.width ]); 
+              privateObj.y = d3.scale.linear().domain([privateObj.minValue, privateObj.maxValue]).range([privateObj.dims.margin.top, 
+                      (privateObj.height-(privateObj.dims.margin.top + privateObj.dims.margin.bottom)) ]), //30 to make room for the joystick
+
+              privateObj.x = d3.scale.linear().domain([privateObj.minLabel, privateObj.maxLabel]).range([privateObj.dims.margin.left, privateObj.width ]); 
 
             },
             _setupElements: function(polymerObj){
-              var width = polymerObj.width,
-                  height = polymerObj.height,
-                  y = polymerObj.y,
-                  x = polymerObj.x;
-                  g = polymerObj.g, 
-                  svg = polymerObj.svg,
+              var width = privateObj.width,
+                  height = privateObj.height,
+                  y = privateObj.y,
+                  x = privateObj.x;
+                  g = privateObj.g, 
+                  svg = privateObj.svg,
                   data = polymerObj.chartData,
-                  line = polymerObj.line,
-                  startingLine = polymerObj.startingLine,
+                  line = privateObj.line,
+                  startingLine = privateObj.startingLine,
                   animateStyle = polymerObj.chartOptions.animateStyle; 
 
-              polymerObj.currentPos = {};
+              privateObj.currentPos = {};
 
-              polymerObj.svg = d3.select(polymerObj.$.chart);
+              privateObj.svg = d3.select(polymerObj.$.chart);
               
               // container
-              var g = polymerObj.svg.append("g");
-              polymerObj.g = g;
+              var g = privateObj.svg.append("g");
+              privateObj.g = g;
 
               // note area
-              polymerObj.note = d3.select(polymerObj.$.info)
+              privateObj.note = d3.select(polymerObj.$.info)
                 .append("div")   
                 .attr("class", "note");
            
               // x-axis
-              polymerObj.xAxis = g.append("line")
+              privateObj.xAxis = g.append("line")
                 .attr("class", "axis")
                 .attr("stroke-width", 2)
                 .attr("opacity", function(d) { return polymerObj.chartOptions.xAxisLine ? 1 : 0; });
                
               // y-axis
-              polymerObj.yAxis = g.append("line")
+              privateObj.yAxis = g.append("line")
                 .attr("x1", 0)
                 .attr("x2", 0);       
 
               // x labels
-              polymerObj.xLabels = g.selectAll(".xLabel")
+              privateObj.xLabels = g.selectAll(".xLabel")
                 .data(x.ticks(4))// TODO: Replace with formula (number of labels)
                 .enter().append("text")
                 .attr("class", "xLabel axis")
@@ -117,7 +120,7 @@
                 .attr("text-anchor", "middle");
               
               // y labels
-              polymerObj.yLabels = g.selectAll(".yLabel")
+              privateObj.yLabels = g.selectAll(".yLabel")
                 .data(y.ticks(4)) // TODO: Replace with formula (number of labels)
                 .enter().append("text")
                 .attr("class", "yLabel axis")
@@ -127,17 +130,17 @@
                 .style("text-anchor", "start");
               
               // large display value
-              polymerObj.displayValue = g.append('g').append('text')
+              privateObj.displayValue = g.append('g').append('text')
                 .attr("class", "fill-foreground")
                 .attr("opacity", function(){
                   return polymerObj.chartOptions.joyStick ? 0.7 : 0;
                 }); // this can start as 0 and fade in after datapoint and joystick appear
 
               // fill area path
-              polymerObj.areaPath = g.append("path");
+              privateObj.areaPath = g.append("path");
 
               // line path
-              polymerObj.linePath = g.selectAll('.data0')
+              privateObj.linePath = g.selectAll('.data0')
                   .data(data)
                   .enter().append("path")
                   .attr("class", "data0 no-fill")
@@ -145,14 +148,14 @@
                   .attr("fill", "none");
 
               // datapoints
-              polymerObj.circles = g.selectAll(".circle")
+              privateObj.circles = g.selectAll(".circle")
               .data(data)
               .enter().append("circle")
               .attr("class", "circle data0 stroke-foreground")
               .attr("r", 0);
               
               // tooltips
-              polymerObj.tips = g.selectAll('.tip')
+              privateObj.tips = g.selectAll('.tip')
                 .data(data)
                 .enter().append('text')
                 .attr('class', 'tip label fill-foreground')
@@ -160,46 +163,49 @@
 
             },
             _setupContainerSize: function(polymerObj){
-              width = polymerObj.width,
-                  height = polymerObj.height;
 
-              polymerObj.svg
-                .attr("width", width)
-                .attr("height", height); 
+              console.log(privateObj);
 
-              polymerObj.g
-                .attr("transform", "translate(0,"+ (height-polymerObj.dims.margin.top/2) +")");
+              privateObj.svg
+                .attr("width", privateObj.width)
+                .attr("height", privateObj.height); 
+
+              console.log((privateObj.height-privateObj.dims.margin.top/2));
+              privateObj.g
+                .attr("transform", "translate(0,"+ (privateObj.height-privateObj.dims.margin.top/2) +")");
+
+                console.log(privateObj.g.attr("transform"));
          
             },
             _setupElementSizes: function(polymerObj){
-              var width = polymerObj.width,
-                  height = polymerObj.height,
-                  y = polymerObj.y,
-                  x = polymerObj.x,
+              var width = privateObj.width,
+                  height = privateObj.height,
+                  y = privateObj.y,
+                  x = privateObj.x,
                   data = polymerObj.chartData,
                   valueSize = Math.min(width, height)/3; // this should adapt if width is narrow
 
               privateObj._setupContainerSize(polymerObj);
               
-              polymerObj.xAxis
-                .attr("x1", x(polymerObj.minLabel))
+              privateObj.xAxis
+                .attr("x1", x(privateObj.minLabel))
                 .attr("y1", 0)
-                .attr("x2", x(polymerObj.maxLabel)) 
+                .attr("x2", x(privateObj.maxLabel)) 
                 .attr("y2", 0);
 
-              polymerObj.yAxis
-                .attr("y1", function(d) { return polymerObj.chartOptions.animateAxis ? y(0) : -1 * y(polymerObj.minValue); }) 
-                .attr("y2", function(d) { return polymerObj.chartOptions.animateAxis ? y(0) : -1 * y(polymerObj.maxValue); });
+              privateObj.yAxis
+                .attr("y1", function(d) { return polymerObj.chartOptions.animateAxis ? y(0) : -1 * y(privateObj.minValue); }) 
+                .attr("y2", function(d) { return polymerObj.chartOptions.animateAxis ? y(0) : -1 * y(privateObj.maxValue); });
                 // .attr("stroke-width", 2)
                 // .attr("opacity", function(d) { return polymerObj.chartOptions.animateAxis ? 0 : 1; });
 
-              polymerObj.xLabels
+              privateObj.xLabels
                 // .data(x.ticks(5))// TODO: Replace with formula (number of labels)
                 .text(function(d){ return d;})
                 .attr("x", function(d) { return x(d) })
-                .attr("y", polymerObj.dims.margin.top/2);
+                .attr("y", privateObj.dims.margin.top/2);
 
-              polymerObj.yLabels
+              privateObj.yLabels
                 .text(function(d){ return d;})
                 .attr("transform", function(d){
                   var yPos = polymerObj.chartOptions.animateAxis ? 0 : -1 * y(d);
@@ -207,32 +213,32 @@
                 } );
 
 
-              polymerObj.displayValue
+              privateObj.displayValue
                 .attr("text-anchor", function(){ return polymerObj.chartOptions.dataPosition === "left" ? "start" : "end"; })
-                .attr("x", function(){ return polymerObj.chartOptions.dataPosition === "left" ? polymerObj.dims.margin.left : (width-polymerObj.dims.margin.left); })
-                .attr("y", -(height - valueSize - polymerObj.dims.margin.top)) 
+                .attr("x", function(){ return polymerObj.chartOptions.dataPosition === "left" ? privateObj.dims.margin.left : (width-privateObj.dims.margin.left); })
+                .attr("y", -(height - valueSize - privateObj.dims.margin.top)) 
                 .attr("font-size", valueSize) 
-                .text(polymerObj.currentPos.value);
+                .text(privateObj.currentPos.value);
 
               
               // line data, starting state (raise)
-              polymerObj.startingLine = d3.svg.line()
+              privateObj.startingLine = d3.svg.line()
                 .x(function(d) { return x(d.label); })
                 .y(0).interpolate(polymerObj.chartOptions.lineStyle);
 
               // line data, ending state
-              polymerObj.line = d3.svg.line()
+              privateObj.line = d3.svg.line()
                 .x(function(d) { return x(d.label); })
                 .y(function(d) { return -y(d.value); })
                 .interpolate(polymerObj.chartOptions.lineStyle);
 
               // data for fill area, starting state (raise)
-              polymerObj.areaDataStart = d3.svg.area()
+              privateObj.areaDataStart = d3.svg.area()
                 .x(function(d) { return x(d.label); })
                 .y1(0).interpolate(polymerObj.chartOptions.lineStyle);
 
               // data for fill area, ending state
-              polymerObj.areaData = d3.svg.area()
+              privateObj.areaData = d3.svg.area()
                 .x(function(d) { return x(d.label); })
                 .y1(function(d) { return -y(d.value); })
                 .interpolate(polymerObj.chartOptions.lineStyle);
@@ -240,42 +246,42 @@
               // update path for fill area and lines
                 if (polymerObj.chartOptions.animateStyle == "draw"){
 
-                  polymerObj.linePath 
+                  privateObj.linePath 
                     .data(data)
-                    .attr("d", polymerObj.line(data)); 
+                    .attr("d", privateObj.line(data)); 
 
                   if (polymerObj.chartOptions.fillArea){   
-                    polymerObj.areaPath
+                    privateObj.areaPath
                       .datum(data)
                         .attr("class", "data0 area")
                         .attr("opacity", 0)
-                        .attr("d", polymerObj.areaData);
+                        .attr("d", privateObj.areaData);
                   }
                 } else {
                 
-                  polymerObj.linePath
+                  privateObj.linePath
                     .data(data)
-                    .attr("d", function(){ return polymerObj.chartOptions.fillArea ? polymerObj.line(data) : polymerObj.startingLine(data);})
+                    .attr("d", function(){ return polymerObj.chartOptions.fillArea ? privateObj.line(data) : privateObj.startingLine(data);})
                     .attr("class", "data0 no-fill")
                     .attr("stroke-width", "2.5")
                     .attr("opacity", function(){ return polymerObj.chartOptions.fillArea ? 0 : 1;});
 
                   if (polymerObj.chartOptions.fillArea){   
-                    polymerObj.areaPath 
+                    privateObj.areaPath 
                       .datum(data)
                       .attr("class", "area data0")
                       .attr("opacity", 0)
-                      .attr("d", polymerObj.areaDataStart)     
+                      .attr("d", privateObj.areaDataStart)     
                     }
                 }
                 
-              polymerObj.circles
+              privateObj.circles
                 .attr("stroke-width", 3)
                 .attr("cx", function(d) { return  x(d.label); })
                 .attr("cy", function(d) { return -1 * y(d.value); });
 
-              if (polymerObj.joystick){
-                polymerObj.joystick.select('rect')
+              if (privateObj.joystick){
+                privateObj.joystick.select('rect')
                   .attr("height", height-36)
               }
 
@@ -309,35 +315,42 @@
             var self = this;
 
             // setup dimensions
-            self.dims = self.setupDimensions(self);
-            self.width = self.dims.width;
-            self.height = self.dims.height;
+            privateObj.dims = self.setupDimensions(self);
+            console.log(privateObj.dims);
+
+
+            privateObj.width = privateObj.dims.width;
+            privateObj.height = privateObj.dims.height;     //NEEDED?!?
+
+            console.log(privateObj);
 
             // adjust the margins because labels and joystick need more space
-            self.dims.margin.right = 10;
-            self.dims.margin.left = 15;
-            self.dims.margin.top = 30;
-            self.dims.margin.bottom = 30;
-            self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
+            privateObj.dims.margin.right = 10;
+            privateObj.dims.margin.left = 15;
+            privateObj.dims.margin.top = 30;
+            privateObj.dims.margin.bottom = 30;
+            privateObj.width = privateObj.dims.width = Math.max(100,(self.chartWidth*0.95 -privateObj.dims.margin.left - privateObj.dims.margin.right));
+
+            //NEEDED ?!?
           
             privateObj._scaleBuilder(self);
             privateObj._setupElements(self);
             privateObj._setupElementSizes(self); 
-            self.dataLength = self.chartData.length;
+            privateObj.dataLength = self.chartData.length;
           },
           
           resize: function(){
             var self = this;
-            self.dims = self.setupDimensions(self);
-            self.width = self.dims.width;
-            self.height = self.dims.height;
+            privateObj.dims = self.setupDimensions(self);
+            privateObj.width = privateObj.dims.width;
+            privateObj.height = privateObj.dims.height;
 
             // adjust the margins because labels and joystick need more space
-            self.dims.margin.right = 10;
-            self.dims.margin.left = 15;
-            self.dims.margin.top = 30;
-            self.dims.margin.bottom = 30;
-            self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
+            privateObj.dims.margin.right = 10;
+            privateObj.dims.margin.left = 15;
+            privateObj.dims.margin.top = 30;
+            privateObj.dims.margin.bottom = 30;
+            privateObj.width = privateObj.dims.width = Math.max(100,(self.chartWidth*0.95 -privateObj.dims.margin.left - privateObj.dims.margin.right));
           
             privateObj._scaleBuilder(self);
             privateObj._setupElementSizes(self);
@@ -357,29 +370,29 @@
                
             privateObj._scaleBuilder(self);
 
-            var x = self.x,
-                y = self.y;
+            var x = privateObj.x,
+                y = privateObj.y;
             
             // select elements
-            self.yLabels = self.g.selectAll('.yLabel').data(y.ticks(4));
-            self.xLabels = self.g.selectAll('.xLabel').data(x.ticks(4));
-            self.linePath = self.g.selectAll('path.data0').data(data);
-            self.circles = self.g.selectAll('.circle').data(data);
-            self.xAxis = self.g.selectAll('path.axis').data(data);
-            self.tips = self.g.selectAll('.tip').data(data);
+            privateObj.yLabels = privateObj.g.selectAll('.yLabel').data(y.ticks(4));
+            privateObj.xLabels = privateObj.g.selectAll('.xLabel').data(x.ticks(4));
+            privateObj.linePath = privateObj.g.selectAll('path.data0').data(data);
+            privateObj.circles = privateObj.g.selectAll('.circle').data(data);
+            privateObj.xAxis = privateObj.g.selectAll('path.axis').data(data);
+            privateObj.tips = privateObj.g.selectAll('.tip').data(data);
             // self.areaPath = self.g.selectAll('.area').datum(data);
               
               
             // add new data points
-            self.xLabels
+            privateObj.xLabels
               .enter().append("text")
               .attr("class", "xLabel axis")
               .text(function(d){ return d;})
               .attr("text-anchor", "middle")
               .attr("x", function(d) { return x(d) })
-              .attr("y", self.dims.margin.top/2);
+              .attr("y", privateObj.dims.margin.top/2);
              
-            self.yLabels  // these new ones are not being positioned correctly..
+            privateObj.yLabels  // these new ones are not being positioned correctly..
               .enter().append("text")
               .attr("class", "yLabel axis")
               .text(function(d){ return d;})
@@ -387,13 +400,13 @@
               .attr("opacity", function(d) { return self.chartOptions.animateAxis ? 0 : 1; })
               .style("text-anchor", "start");
 
-            self.xAxis
-              .attr("x1", x(self.minLabel))
+            privateObj.xAxis
+              .attr("x1", x(privateObj.minLabel))
               .attr("y1", 0)
-              .attr("x2", x(self.maxLabel)) 
+              .attr("x2", x(privateObj.maxLabel)) 
               .attr("y2", 0);
 
-            self.circles
+            privateObj.circles
               .enter().append("circle")
               .attr("class", "circle data0 stroke-foreground")
               .attr("r", function(){
@@ -401,18 +414,18 @@
               })
               .attr("r", 0);
 
-            self.tips
+            privateObj.tips
               .enter().append('text')
               .attr('class', 'tip label fill-foreground')
               .attr('text-anchor', 'middle');
 
              // remove extra datapoints
-            self.linePath.exit().remove();
-            self.circles.exit().remove();
-            self.xLabels.exit().remove();
-            self.yLabels.exit().remove();
-            self.xAxis.exit().remove();
-            self.tips.exit().remove();
+            privateObj.linePath.exit().remove();
+            privateObj.circles.exit().remove();
+            privateObj.xLabels.exit().remove();
+            privateObj.yLabels.exit().remove();
+            privateObj.xAxis.exit().remove();
+            privateObj.tips.exit().remove();
             privateObj._setupElementSizes(self);
             
             if (self.chartOptions.joyStick) {
@@ -425,8 +438,8 @@
           },
           reset: function() {
             var self = this,
-                g = self.g,
-                svg = self.svg;
+                g = privateObj.g,
+                svg = privateObj.svg;
       
             // removes the lines, joystick and data/notes
             g.selectAll("path, circle, text, rect, line").remove();     
@@ -444,7 +457,7 @@
             
             if (self.chartOptions.joyStick) {
               self.moveJoystick();
-              self.showCurrentData(self.currentPos, firstTime=true);
+              self.showCurrentData(privateObj.currentPos, firstTime=true);
             } else {
               self.showTooltips();
             }
@@ -452,20 +465,20 @@
           },
           animateLines: function(){
             var self = this;
-            var g = self.g, 
-                svg = self.svg,
+            var g = privateObj.g, 
+                svg = privateObj.svg,
                 data = self.chartData,
-                x = self.x, 
-                y = self.y,
+                x = privateObj.x, 
+                y = privateObj.y,
                 
-                startingLine = self.startingLine,
+                startingLine = privateObj.startingLine,
                 animateStyle = self.chartOptions.animateStyle; 
                 
             if (animateStyle === "draw"){
                 if (self.chartOptions.fillArea){
                   // path for fill area
 
-                  self.areaPath
+                  privateObj.areaPath
                     // .transition()
                     //   .duration(1000) 
                     //   .ease("linear")
@@ -475,9 +488,9 @@
                 }
 
                 // draw effect animation
-                var totalLength = self.linePath.node().getTotalLength();
+                var totalLength = privateObj.linePath.node().getTotalLength();
 
-                self.linePath
+                privateObj.linePath
                   .attr("stroke-dasharray", totalLength + " " + totalLength)
                   .attr("stroke-dashoffset", totalLength)
                   .transition()
@@ -487,28 +500,28 @@
 
               } else { // raise style 
                 if (self.chartOptions.fillArea){ 
-                  self.areaPath  
+                  privateObj.areaPath  
                     // .datum(data)
                       .transition()
                       .duration(1000)
                       .ease("linear")
                       .attr("stroke-dashoffset", 0)
-                    .attr("d", self.areaData)
+                    .attr("d", privateObj.areaData)
                     .attr("opacity", 0.7);
                 }
 
                 // transition for ending state of line
-                self.linePath
+                privateObj.linePath
                   .transition()
                     .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
-                    .attr("d", self.line(data))
+                    .attr("d", privateObj.line(data))
                     .attr("opacity", 1);
 
               }
 
               // If no joystick, format circles as same color as line, no stroke)
               if (!self.chartOptions.joyStick){
-                self.circles
+                privateObj.circles
                   .transition()
                   .delay(1000)
                   .duration(500)
@@ -529,10 +542,10 @@
           animateAxis: function(){
             var self = this;
             if (self.chartOptions.animateAxis) {
-              var yAxis = self.yAxis,
-                  y = self.y,
-                  maxValue = self.maxValue,
-                  yLabels = self.yLabels;
+              var yAxis = privateObj.yAxis,
+                  y = privateObj.y,
+                  maxValue = privateObj.maxValue,
+                  yLabels = privateObj.yLabels;
 
               yAxis.transition()
                 .duration(1000)
@@ -554,20 +567,20 @@
             // FIND THE FIRST TOOLTIP AND SET AS CURRENT POSITION
             for (var i=0; i<data.length; i++){
               if (data[i].note){
-                self.currentPos.label = data[i].label;
-                self.currentPos.note = data[i].note;
-                self.currentPos.value = data[i].display_value ? data[i].display_value : data[i].value;
+                privateObj.currentPos.label = data[i].label;
+                privateObj.currentPos.note = data[i].note;
+                privateObj.currentPos.value = data[i].display_value ? data[i].display_value : data[i].value;
                 break;
               } else {
-                self.currentPos.label = data[0].label;
-                self.currentPos.note = data[0].note;
-                self.currentPos.value = data[0].display_value ? data[0].display_value : data[0].value;
+                privateObj.currentPos.label = data[0].label;
+                privateObj.currentPos.note = data[0].note;
+                privateObj.currentPos.value = data[0].display_value ? data[0].display_value : data[0].value;
               }
             }
           },
           showCurrentData: function(currentPos, firstTime){
             var self = this,
-                g = self.g,
+                g = privateObj.g,
                 label = currentPos.closestLabel || currentPos.label,
                 value = currentPos.val,
                 note = currentPos.note;
@@ -589,29 +602,29 @@
                     });
 
                // show note 
-                self.note.transition() 
+                privateObj.note.transition() 
                     .duration(100)      
                     .style("opacity", 1);      
-                self.note.html(note);  
+                privateObj.note.html(note);  
                 
                 // show value
-                self.displayValue.text(value);
+                privateObj.displayValue.text(value);
 
           },
           moveJoystick: function(){
             var self = this, 
-                svg = self.svg,
-                x = self.x,
-                w = self.width,
-                h = self.height,
-                g = self.g;
+                svg = privateObj.svg,
+                x = privateObj.x,
+                w = privateObj.width,
+                h = privateObj.height,
+                g = privateObj.g;
 
-            self.currentPos.x = x(self.currentPos.label);  
+            privateObj.currentPos.x = x(privateObj.currentPos.label);  
             
-            if (!self.joystick){
+            if (!privateObj.joystick){
             
-              self.joystick = svg.selectAll('g.joystick')
-                  .data([{x: self.currentPos.x}]) //??
+              privateObj.joystick = svg.selectAll('g.joystick')
+                  .data([{x: privateObj.currentPos.x}]) //??
                   .enter()
                       .append('g')
                       .attr("class", "joystick")
@@ -623,57 +636,56 @@
                   .on("drag", dragMove)
                   .on('dragend', dragEnd);
 
-              self.joystick.append("circle")
+              privateObj.joystick.append("circle")
                   .attr("class", "target")
                   .attr("r", 8)
-                  .attr("cx", self.currentPos.x)
+                  .attr("cx", privateObj.currentPos.x)
                   .attr("cy", 12)
                   .attr("class", "pulse fill-background stroke-foreground")
                   .attr("stroke-width", 4.5)
                   .call(drag);
 
-              self.joystick.append('rect')
+              privateObj.joystick.append('rect')
                   .attr('y', 22)
-                  .attr('x', self.currentPos.x-1.5)
+                  .attr('x', privateObj.currentPos.x-1.5)
                   .attr("height", h-36)
                   .attr("width", 3)
                   .attr("class", "fill-foreground")
                   .attr('opacity', 0.4);
 
-              self.lastPosX = self.joystick.select("circle").attr("cx");
+              privateObj.lastPosX = privateObj.joystick.select("circle").attr("cx");
             }
 
             function dragMove(d){
-              var x = self.x;
+              var x = privateObj.x;
                 // move the circle
                 d3.select(this)
 
                   .attr("class", "fill-background stroke-foreground")
-                  .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.width, d3.event.x))); 
+                  .attr("cx", d.x = Math.max(privateObj.dims.margin.left, Math.min(privateObj.width, d3.event.x))); 
            
                 // define current position
-                self.currentPos.x = d3.select(this).attr("cx");
-                console.log(self.currentPos.x);
+                privateObj.currentPos.x = d3.select(this).attr("cx");
                 // move the line
-                self.joystick.select('rect')
-                  .attr('x', self.currentPos.x-1)
+                privateObj.joystick.select('rect')
+                  .attr('x', privateObj.currentPos.x-1)
                   .attr('opacity', 1);
 
                 // determine direction of slide movement
-                if (self.currentPos.x < self.lastPosX){
-                  self.direction = "left";
-                  self.lastPosX = self.currentPos.x;
+                if (privateObj.currentPos.x < privateObj.lastPosX){
+                  privateObj.direction = "left";
+                  privateObj.lastPosX = privateObj.currentPos.x;
                 } else {
-                  self.direction ="right";
-                  self.lastPosX = self.currentPos.x;
+                  privateObj.direction ="right";
+                  privateObj.lastPosX = privateObj.currentPos.x;
                 }
 
                 // determine which circles/notes are to be displayed
                 g.selectAll(".circle")
                   .attr("r", function(d){
-                    if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
-                      self.currentPos.note = d.note;
-                      self.currentPos.value = d.display_value ? d.display_value : d.value;
+                    if ( Math.abs(x(d.label) - parseInt(privateObj.currentPos.x)) < 10) {
+                      privateObj.currentPos.note = d.note;
+                      privateObj.currentPos.value = d.display_value ? d.display_value : d.value;
                       return 4;
                     } else {
                       return 0;
@@ -682,51 +694,51 @@
                
 
                 // Find the closest point to the joystick
-                if (self.direction == "right"){
-                  self.currentPos.closestX = d3.min(self.circles[0], function(d){
+                if (privateObj.direction == "right"){
+                  privateObj.currentPos.closestX = d3.min(privateObj.circles[0], function(d){
                     var cx = parseInt(d3.select(d).attr("cx"));                 
-                    return (cx - self.currentPos.x >= 0) ? cx : Number.MAX_VALUE  ;
+                    return (cx - privateObj.currentPos.x >= 0) ? cx : Number.MAX_VALUE  ;
                   });
               
                 } else {
-                  self.currentPos.closestX = d3.max(self.circles[0], function(d){
+                  privateObj.currentPos.closestX = d3.max(privateObj.circles[0], function(d){
                     var cx = parseInt(d3.select(d).attr("cx")); 
-                    return (cx - self.currentPos.x < 0) ? cx : Number.MIN_VALUE  ;
+                    return (cx - privateObj.currentPos.x < 0) ? cx : Number.MIN_VALUE  ;
                   });
                 }
                 
             }
 
             function dragEnd(){
-             var x = self.x;
+             var x = privateObj.x;
              // Lock the joystick in place
             
                 d3.select(this)
                   .attr('class','pulse')
                   .transition()
                     .duration(50)
-                    .attr('cx', self.currentPos.closestX);
-                self.joystick.select('rect')
+                    .attr('cx', privateObj.currentPos.closestX);
+                privateObj.joystick.select('rect')
                   .transition()
                     .duration(50)
-                    .attr('x', self.currentPos.closestX-1) // adjusted bc of thickness of line
+                    .attr('x', privateObj.currentPos.closestX-1) // adjusted bc of thickness of line
                     .attr('opacity', 0.4);
 
                 // Rounding the below number is a temp fix - because x.invert is resulting in a decimal number.
-                self.currentPos.closestLabel = Math.round(x.invert(self.currentPos.closestX));
-                self.showCurrentData(self.currentPos);
+                privateObj.currentPos.closestLabel = Math.round(x.invert(privateObj.currentPos.closestX));
+                self.showCurrentData(privateObj.currentPos);
 
             
             }
           },
           showTooltips: function(){
             var self = this,
-                g = self.g,
+                g = privateObj.g,
                 data = self.chartData,
-                x = self.x,
-                y = self.y;
+                x = privateObj.x,
+                y = privateObj.y;
 
-            self.tips          
+            privateObj.tips          
               .text( function(d){return d.display_value; })
               .attr("x", function(d) { return  x(d.label); })
               .attr("y", function(d) { return -y(d.value) - 15; })
@@ -737,17 +749,17 @@
               .attr('opacity', 1);
 
             // USES D3.TIP LIBRARY - appends tips to body and loses styling
-            // self.tip = d3.tip()
+            // privateObj.tip = d3.tip()
             //     .attr('class', 'd3-tip label fill-foreground')
             //     .offset([-10, 0])
             //     .html(function(d) {
             //       return d.display_value;
             //     });
 
-            // g.call(self.tip);
+            // g.call(privateObj.tip);
               
-            // self.circles
-            // .on('mouseover', self.tip.show) // how to call tip.show w/out on mouse event?
+            // privateObj.circles
+            // .on('mouseover', privateObj.tip.show) // how to call tip.show w/out on mouse event?
             // .on('mouseout', self.tip.hide);
 
 
