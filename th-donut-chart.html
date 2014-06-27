@@ -43,94 +43,94 @@
 
             var self = this;
             var margin = {
-                  top : 8,
                   right : 0,
-                  bottom : 10,
                   left : 0,
                   label: 3
-              }, width = self.chartWidth*0.95 - margin.left - margin.right, height = self.chartHeight*0.95 - margin.top - margin.bottom,
-              twoPi = 2 * Math.PI,
-              progress = 0,
-              total = 100,
-              formatPercent = d3.format(".0%"),
-              outerRadius = height*0.39,
-              innerRadius = height*0.25;
-              privateObj._prevProgress = 0;
+                }, 
+                width = self.chartWidth*0.95 - margin.left - margin.right, 
+                height = width,
+                twoPi = 2 * Math.PI,
+                progress = 0,
+                total = 100,
+                formatPercent = d3.format(".0%"),
+                outerRadius = height*0.39,
+                innerRadius = height*0.25;
+                privateObj._prevProgress = 0;
 
-              privateObj.height = height;
+                privateObj.height = height;
 
-              var foreground, text, arc;
+            var foreground, text, arc;
 
-              privateObj.inTransition = false;
-
-
-              arc = d3.svg.arc()
-                .startAngle(0)
-                .innerRadius(innerRadius)
-                .outerRadius(outerRadius);
+            privateObj.inTransition = false;
 
 
-              var chart_svg = self.$.chart;
-
-              var svg = d3.select(chart_svg);
-
-              //adding shadow 
-
-              var defs = svg.append("defs");
-
-              var filter = defs.append("filter")
-                  .attr("id", "dropshadow")
-
-              filter.append("feGaussianBlur")
-                  .attr("in", "SourceAlpha")
-                  .attr("stdDeviation", 2)
-                  .attr("result", "blur");
-              filter.append("feOffset")
-                  .attr("in", "blur")
-                  .attr("dx", 1)
-                  .attr("dy", 1)
-                  .attr("result", "offsetBlur");
-
-              var feMerge = filter.append("feMerge");
-
-              feMerge.append("feMergeNode")
-                  .attr("in", "offsetBlur")
-              feMerge.append("feMergeNode")
-                  .attr("in", "SourceGraphic");
+            arc = d3.svg.arc()
+              .startAngle(0)
+              .innerRadius(innerRadius)
+              .outerRadius(outerRadius);
 
 
+            var chart_svg = self.$.chart;
 
-              var container = svg.attr("width", width)
-                  .attr("height", height)
-                  .append("g")
-                  .attr("transform", "translate(" +(width / 2 ) + "," + (height * 0.4) + ")");
-              
-              var meter = container.append("g")
-                  .attr("class", "progress-meter");
-              
-              meter.append("circle")
-                  .attr("class", "fill-background")
-                  .attr("r", outerRadius);
+            var svg = d3.select(chart_svg);
 
-              
-              meter.append("path")
-                  .attr("class", "fill-foreground")
-                  .attr("d", arc.endAngle(twoPi));
-              
-              foreground = meter.append("path")
-                  .attr("class", "data0")
-                  .attr("filter", "url(#dropshadow)");
-              
-              text = meter.append("text")
-                  .attr('class','percent data0')
-                  .attr("text-anchor", "middle")
-                  .attr("dy", ".35em");
+            //adding shadow 
 
-              privateObj.foreground = foreground;
-              privateObj.formatPercent = formatPercent;
-              privateObj.arc = arc;
-              privateObj.twoPi = twoPi;
-              privateObj.text = text;
+            var defs = svg.append("defs");
+
+            var filter = defs.append("filter")
+                .attr("id", "dropshadow")
+
+            filter.append("feGaussianBlur")
+                .attr("in", "SourceAlpha")
+                .attr("stdDeviation", 2)
+                .attr("result", "blur");
+            filter.append("feOffset")
+                .attr("in", "blur")
+                .attr("dx", 1)
+                .attr("dy", 1)
+                .attr("result", "offsetBlur");
+
+            var feMerge = filter.append("feMerge");
+
+            feMerge.append("feMergeNode")
+                .attr("in", "offsetBlur")
+            feMerge.append("feMergeNode")
+                .attr("in", "SourceGraphic");
+
+
+
+            var container = svg.attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" +(width / 2 ) + "," + (height * 0.4) + ")");
+            
+            var meter = container.append("g")
+                .attr("class", "progress-meter");
+            
+            meter.append("circle")
+                .attr("class", "fill-background")
+                .attr("r", outerRadius);
+
+            
+            meter.append("path")
+                .attr("class", "fill-foreground")
+                .attr("d", arc.endAngle(twoPi));
+            
+            foreground = meter.append("path")
+                .attr("class", "data0")
+                .attr("filter", "url(#dropshadow)");
+            
+            text = meter.append("text")
+                .attr('class','percent data0')
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em");
+
+            privateObj.foreground = foreground;
+            privateObj.formatPercent = formatPercent;
+            privateObj.arc = arc;
+            privateObj.twoPi = twoPi;
+            privateObj.text = text;
 
 
           },
