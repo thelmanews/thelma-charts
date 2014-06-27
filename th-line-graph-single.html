@@ -61,8 +61,6 @@
         var privateObj = {
            _scaleBuilder: function(polymerObj) {
 
-              console.log(privateObj);
-
               privateObj.maxLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.max);
               privateObj.minLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.min);
               privateObj.maxValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
@@ -164,17 +162,13 @@
             },
             _setupContainerSize: function(polymerObj){
 
-              console.log(privateObj);
-
               privateObj.svg
                 .attr("width", privateObj.width)
                 .attr("height", privateObj.height); 
 
-              console.log((privateObj.height-privateObj.dims.margin.top/2));
               privateObj.g
                 .attr("transform", "translate(0,"+ (privateObj.height-privateObj.dims.margin.top/2) +")");
 
-                console.log(privateObj.g.attr("transform"));
          
             },
             _setupElementSizes: function(polymerObj){
@@ -316,13 +310,11 @@
 
             // setup dimensions
             privateObj.dims = self.setupDimensions(self);
-            console.log(privateObj.dims);
 
 
             privateObj.width = privateObj.dims.width;
             privateObj.height = privateObj.dims.height;     //NEEDED?!?
 
-            console.log(privateObj);
 
             // adjust the margins because labels and joystick need more space
             privateObj.dims.margin.right = 10;
