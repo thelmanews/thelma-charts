@@ -18,14 +18,14 @@
       
       // Adding private static methods.
 
-      staticObj._setupData = function(self){
+      staticObj._setupData = function(polymerObj){
           
-          var barDims = self.dims.bars,
-              height = self.dims.height,
-              y = self.scales.y,
+          var barDims = polymerObj.dims.bars,
+              height = polymerObj.dims.height,
+              y = polymerObj.scales.y,
               lastEdge = 0;
 
-          var peakData = self.chartData.map(function(i){
+          var peakData = polymerObj.chartData.map(function(i){
             var coordinates = [{ x: lastEdge, y: -height},
                              {x: lastEdge + barDims.width, y: -height},
                              { x: lastEdge + barDims.width/2, y: -height+y(i.value)}];
@@ -36,94 +36,94 @@
         
         },
 
-        staticObj._setupElements = function(self){
-          var peakData = self.peakData,
-              labelDims = self.dims.labels,//self.labelDims,
-              barDims = self.dims.bars;//self.barDims;
+        staticObj._setupElements = function(polymerObj){
+          var peakData = polymerObj.peakData,
+              labelDims = polymerObj.dims.labels,//polymerObj.labelDims,
+              barDims = polymerObj.dims.bars;//polymerObj.barDims;
 
-          self.svg = d3.select(self.$.chart);
+          polymerObj.svg = d3.select(polymerObj.$.chart);
 
-          self.container = self.svg
+          polymerObj.container = polymerObj.svg
               .selectAll('.container')
               .data([1])
               .enter()
               .append('g')
               .attr('class','container');
 
-          self.peakLineStart = d3.svg.line()
+          polymerObj.peakLineStart = d3.svg.line()
               .x(function(d) { return d.x; })
-              .y(function(d) { return self.dims.height; });
+              .y(function(d) { return polymerObj.dims.height; });
 
-          self.peaks = self.container.selectAll('.peak')
+          polymerObj.peaks = polymerObj.container.selectAll('.peak')
             .data(peakData)
             .enter()
             .append('path')
               .attr('class', function(d,i){return "peak data"+i;})
-              .attr('d', self.peakLineStart)
+              .attr('d', polymerObj.peakLineStart)
               .attr('opacity', 0);
 
-          self.labels = self.container.selectAll('.label')
-            .data(self.chartData)
+          polymerObj.labels = polymerObj.container.selectAll('.label')
+            .data(polymerObj.chartData)
             .enter().append('text')
               .attr('class', function(d,i){return "label data"+i;})
               .attr('transform', function(d,i){
                 var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
-                var yPos = self.dims.height + self.dims.margin.label;
+                var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
                 var rotation = labelDims.angle;
                 return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
               });              
               
-          self.values = self.container.selectAll('.value')
-            .data(self.chartData)
+          polymerObj.values = polymerObj.container.selectAll('.value')
+            .data(polymerObj.chartData)
             .enter().append('text')
               .attr('class', function(d,i){return "value data"+i;})
-              .attr('y', self.dims.height);
+              .attr('y', polymerObj.dims.height);
               
         },
-        staticObj._setupContainerSize = function(self){ //
-          var margin = self.dims.margin,
-              width = self.dims.width,
-              height = self.dims.height;
-              self.svg = d3.select(self.$.chart);
+        staticObj._setupContainerSize = function(polymerObj){ //
+          var margin = polymerObj.dims.margin,
+              width = polymerObj.dims.width,
+              height = polymerObj.dims.height;
+              polymerObj.svg = d3.select(polymerObj.$.chart);
 
-          self.svg
+          polymerObj.svg
               .attr('width', width + margin.left + margin.right)
               .attr('height', height + margin.top + margin.bottom);
 
           // setting up the size. needed for resizing
-          self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          polymerObj.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
         },
 
-        staticObj._setupElementSizes = function(self){
-          var barDims = self.barDims,
-              labelDims = self.dims.labels,//self.labelDims,
-              barDims = self.dims.bars,//self.barDims;
-              valueDims = self.dims.values,//self.barDims;
-              peakData = self.peakData
-              height = self.height;
+        staticObj._setupElementSizes = function(polymerObj){
+          var barDims = polymerObj.barDims,
+              labelDims = polymerObj.dims.labels,//polymerObj.labelDims,
+              barDims = polymerObj.dims.bars,//polymerObj.barDims;
+              valueDims = polymerObj.dims.values,//polymerObj.barDims;
+              peakData = polymerObj.peakData
+              height = polymerObj.height;
 
-          staticObj._setupContainerSize(self);
+          staticObj._setupContainerSize(polymerObj);
 
           // starting and ending lines to draw peaks
 
-          self.peakLine = d3.svg.line()
+          polymerObj.peakLine = d3.svg.line()
               .x(function(d) { return d.x; })
               .y(function(d) { return -d.y; });    
 
-          self.peaks
+          polymerObj.peaks
             .data(peakData);
 
-          self.labels
+          polymerObj.labels
               .attr('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
               .text(function(d) {return d.label;});
 
-          self.values
+          polymerObj.values
               .attr('text-anchor','middle')
               .attr('font-size', valueDims.size)
               .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
-        },
+        }
 
       
       // Adding private static methods.
