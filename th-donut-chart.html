@@ -33,9 +33,6 @@
   </template>
   <script>
 
-      (function() {
-
-        var privateObj = {};
 
         Polymer('th-donut-chart', {
           chartData: {value: 65},
@@ -55,13 +52,13 @@
                 formatPercent = d3.format(".0%"),
                 outerRadius = height*0.39,
                 innerRadius = height*0.25;
-                privateObj._prevProgress = 0;
+                self._prevProgress = 0;
 
-                privateObj.height = height;
+                self.height = height;
 
             var foreground, text, arc;
 
-            privateObj.inTransition = false;
+            self.inTransition = false;
 
 
             arc = d3.svg.arc()
@@ -126,11 +123,11 @@
                 .attr("text-anchor", "middle")
                 .attr("dy", ".35em");
 
-            privateObj.foreground = foreground;
-            privateObj.formatPercent = formatPercent;
-            privateObj.arc = arc;
-            privateObj.twoPi = twoPi;
-            privateObj.text = text;
+            self.foreground = foreground;
+            self.formatPercent = formatPercent;
+            self.arc = arc;
+            self.twoPi = twoPi;
+            self.text = text;
 
 
           },
@@ -145,19 +142,19 @@
                 var self = this;
                 var progress = self.chartData.value;
                 var total = 100;
-                var i = d3.interpolate(privateObj._prevProgress/total, progress/total);//d3.event.loaded / total);
+                var i = d3.interpolate(self._prevProgress/total, progress/total);//d3.event.loaded / total);
                 d3.transition().duration(1000).tween("progress", function() {
                   return function(t) {
                     progress = i(t);
-                    privateObj.foreground.attr("d", privateObj.arc.endAngle(privateObj.twoPi * progress));
-                    privateObj.text.text(privateObj.formatPercent(progress));
+                    self.foreground.attr("d", self.arc.endAngle(self.twoPi * progress));
+                    self.text.text(self.formatPercent(progress));
                   };
                 }).each("end",function() {
                   self.fire('th-animationend',{ element: self});  // is self too much to expose?
 
                 })
 
-                privateObj._prevProgress = progress; 
+                self._prevProgress = progress; 
           },
           chartSpecificDataValidate: function() {
             
@@ -186,8 +183,6 @@
 
           
         });
-
-    })();
 
 
   </script>
