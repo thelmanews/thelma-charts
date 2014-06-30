@@ -148,8 +148,6 @@ Thelma.chartUtils = {
 	      scales.y.domain(orientation===VERTICAL ? [0, max] : d3.range(chartData.length)); 
 	      scales.x.domain(orientation===VERTICAL ? d3.range(chartData.length) : [0, max]);
 
-        console.log(chartData.map(labelAccessFun));
-        console.log(d3.range(chartData.length));
 	    return scales;
 
 	},
