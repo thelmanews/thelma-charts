@@ -43,7 +43,7 @@
 		        .attr("class", function(d,i){return "value data"+i;})
 		        .attr('text-anchor','middle')
 		        //.style('opacity', 0)
-		        //.attr('x', function(d) { return x(d.label) + privateObj.dims.bars.width/2; })
+		        //.attr('x', function(d) { return x(i) + privateObj.dims.bars.width/2; })
 		        .attr('font-size', privateObj.dims.values.size+"px");
 		       // .attr('y', height)
 		       // .style('opacity', 0);
@@ -71,7 +71,6 @@
 		        	
 		        })
 		        .attr('transform', function(d,i){
-			        	// var xPos = privateObj.x(d.label) + privateObj.dims.bars.width/2 ;
 			        	var xPos = privateObj.x(i) + privateObj.dims.bars.width/2 ;
 			        	var yPos = privateObj.dims.height + privateObj.dims.margin.label;
 			        	var rotation = privateObj.dims.labels.angle;
@@ -180,7 +179,6 @@
 		        var y = privateObj.y;
 		        var height= privateObj.dims.height;
 		        privateObj.bars.transition().duration(this.animationDelay)
-		        // .attr('x', function(d) { return privateObj.x(d.label); })
 		        .attr('x', function(d, i) { return privateObj.x(i); })
 		        .attr('y', function(d) { return height-y(d.value);})
 		        .attr('width', privateObj.dims.bars.width)
@@ -189,7 +187,6 @@
 		        
 		        privateObj.values.transition(this.animationDelay).duration(this.animationDelay)
 		        //.style('opacity', 1)
-		        // .attr('x', function(d) { return privateObj.x(d.label) + privateObj.dims.bars.width/2; })
 		        .attr('x', function(d,i) { return privateObj.x(i) + privateObj.dims.bars.width/2; })
 		        .attr('y', function(d) {return height - y(d.value) - privateObj.dims.values.margin;})
 		        .style('opacity', 1);
@@ -200,7 +197,6 @@
 		        	
 		        })
 		        .attr('transform', function(d,i){
-			        	// var xPos = privateObj.x(d.label) + privateObj.dims.bars.width/2 ;
 			        	var xPos = privateObj.x(i) + privateObj.dims.bars.width/2 ;
 			        	var yPos = height + privateObj.dims.margin.label;
 			        	var rotation = privateObj.dims.labels.angle;
@@ -298,7 +294,7 @@
 			      	.attr('width', 0)
 			      	.style('opacity', 0)
 			      	.attr('x', function(d) {
-			      		return width;//privateObj.x(d.label);
+			      		return width;
 			      	});
 			      privateObj.labels.enter().append('text').attr('class','label');
 			      privateObj.values.enter().append('text').attr('class','value').attr('y', height);

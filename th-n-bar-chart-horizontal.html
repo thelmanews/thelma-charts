@@ -122,7 +122,7 @@
 		      this.bars
 		        .attr("class", function(d,i){return "bar data"+i;})
 		        .attr('x', x(0)) //function(d) { return x(d.label); })  rev
-		        .attr('y', function(d) { return y(d.label); }) //function(d) { return height; })  rev
+		        .attr('y', function(d,i) { return y(i); }) //function(d) { return height; })  rev
 		        .attr('width', 0)
 		        .attr('height', self.dims.bars.width);
 
@@ -132,13 +132,13 @@
 		        //.style('opacity', 0)
 		        .style('text-anchor','left')
 		        .attr('x', 0)
-		        .attr('y', function(d) { return y(d.label) + self.dims.bars.width + self.dims.labels.height* 0.6; });
+		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width + self.dims.labels.height* 0.6; });
 
 		      this.values
 		        .attr("class", function(d,i){return "value data"+i;})
 		        .style('text-anchor','end')
 		        //.style('opacity', 0)
-		        .attr('y', function(d) { return y(d.label) + self.dims.bars.width/2 + self.dims.values.height* 0.4; })
+		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width/2 + self.dims.values.height* 0.4; })
 		        .attr('x', self.dims.values.containerWidth - 8)
 		        .style('font-size', self.dims.values.height+'px');
 
@@ -162,11 +162,7 @@
 		        var x = self.x;
 		        var width= self.dims.width;
 		        this.bars.transition().duration(this.animationDelay)
-		       // .attr('x', function(d) {  return x(d.value);})
 		        .attr('width', function(d) {return x(d.value)});
-		        // rev
-		        //.attr('y', function(d) { return height-y(d.value);})
-		        //.attr('height', function(d) {return y(d.value)});
 		        
 		        
 		  },
