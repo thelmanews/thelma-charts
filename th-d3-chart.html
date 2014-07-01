@@ -1,0 +1,131 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="thelma_core.html">
+      
+
+<polymer-element name="th-d3-chart" extends="th-animated" attributes="chartData chartWidth chartHeight chartOptions">
+  <template>
+    <core-style ref="theme"></core-style>
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+      #chart {
+
+      }
+      #chart text.label {
+        /*font-size: 13px;*/
+        /*font-weight: 300;*/
+      }
+
+      #data_errors {  
+        display: none;
+        font-size: 14px;
+        color: red;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+
+    </style>
+
+    <svg id="chart"></svg>
+
+    <ul id="data_errors">
+    </ul>  
+    
+  </template>
+  <script src="../bower_components/d3/d3.min.js"></script> 
+  <script src="utility.js"></script> 
+  <script>
+
+      Polymer('th-d3-chart', Platform.mixin({
+         chartData: [{label: 'medicaid', value: 20, display_value: '$20'},{label: 'gap', value: 40, display_value: '$40'},{label: 'sub', value: 10, display_value: '$10'}],  // default data just for demo 
+         chartWidth: 200,
+         chartHeight: 300,
+         observe: {
+           // chartData: this.validateChartData  // this is not working,
+         },
+         chartDataChanged: function() {
+            this.validateChartData(this);
+
+            // dont call updateData before init()
+            if(!this.initialized) {
+              //TODO better way of handling this is calling updateData when polymer-ready is fired. good for now!
+              return;
+            }
+            
+            if(this.errors.length==0) {
+              this.updateData();
+            }
+         },
+         chartWidthChanged: function() {
+            
+            if(!this.initialized) {
+              return;
+            }
+            this.resize();
+         },
+         chartHeightChanged: function() {
+            if(!this.initialized) {
+              return;
+            }
+            this.resize();
+         },
+         resize: function() {
+
+         },
+         updateData: function() {
+
+         },
+         extractElementDataPoints : function() {
+
+              //setupMargins();
+              var barInfos = this.querySelectorAll('th-data-point');
+              var dataFromElements = [];
+              [].forEach.call(barInfos, function(dataPointEl) {
+                  var dataPoint = {};
+                  [].forEach.call(dataPointEl.attributes, function(attr) {
+                    dataPoint[attr.name] = attr.value;
+                  });
+                  dataFromElements.push(dataPoint);
+              });
+
+              
+            if(this.validateElementDataPoints(dataFromElements)) {
+              this.chartData= dataFromElements;
+            }
+
+          },
+          validateElementDataPoints : function(data) {
+             
+              if(data.length<1) {
+                return false;
+              }
+              return true;
+          }
+      }, Thelma.chartValidation, Thelma.chartUtils));
+
+
+  </script>
+
+</polymer-element>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

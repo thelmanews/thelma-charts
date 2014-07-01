@@ -1,0 +1,324 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-n-bar-chart-horizontal" extends="th-d3-chart">
+
+	<script>
+
+
+		Polymer('th-n-bar-chart-horizontal', {
+		  chartData: [
+		    {label: 'Player of the day', value: 15, display_value: '$15'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Cheerleader', value: 40, display_value: '$40'},
+		    {label: 'Designer', value: 70, display_value: '$70'}
+		  ],
+		  // for making orientation a attribute
+		  dimensions: {'horizontal': 
+		  		{'setupX': function(d) { return x(d.label); }}
+		  },
+		  init: function() {
+		    
+		  	  var self = this;
+		  	  
+		  	  self.dims = self.setupDimensions(self);
+
+		  	  self.setupBarDims(self, 1, 1.6); // self, overlap, gap
+		      // self.setupLabelDims(self);
+		      // self.setupValueDims(self);
+
+	    	  var margin = self.dims.margin,
+	    	  	  width = self.dims.width,
+	    	      height = self.dims.height;
+
+	    	 // margin.left = 50; //TODO, dependent on max
+		      
+
+		      //self.extractElementDataPoints(); //needed?
+
+		      self.dataLength = self.chartData.length;
+
+		      var maxValueLength = d3.max(self.chartData, function(d) {
+		      	return d.display_value ? d.display_value.length : d.value.length;
+		      });
+
+		      // self.dims.bars.gap = 0.7; // Make this wider than default to make room for text
+		     	// self.dims.barWidth = Math.min(70,((self.dims.width / self.dims.numBars)/(1+self.dims.barGap)));
+		      self.dims.labels =  {};
+		      self.dims.values = {};
+		      self.dims.labels.height = 25;
+		      self.dims.values.height = self.dims.bars.width;
+		      self.dims.values.containerWidth = maxValueLength * self.dims.values.height * 0.75;  // characters x font size x 0.6 (average width/height)
+
+
+		      var chart_svg = self.$.chart;
+
+
+		      //creating all the svg items
+		      self.svg = d3.select(chart_svg);
+
+		      self.container = self.svg
+		          .selectAll('.container')
+		          .data([1])
+		          .enter()
+		          .append('g')
+		          .attr('class','container');
+
+
+		      this.barContainer = this.container.append('g')
+		      		.attr('class','bar_container')
+		      		.attr('transform','translate ('+self.dims.values.containerWidth+',0)');
+
+		      this.bars = this.barContainer.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
+
+		      this.labelContainer = this.container.append('g')
+		      		.attr('transform','translate ('+self.dims.values.containerWidth+',0)')
+		      		.attr('class','label_container');
+
+		      this.labels = this.labelContainer.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+
+		      this.valueContainer = this.container.append('g')
+		      		.attr('class','value_container');
+
+		      this.values = this.valueContainer.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+
+
+		      // this is independent of size but dependent on data
+		      self.labels.text(function(d) {return d.label;});
+		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+		      // creating scales
+		      var scales = self.simpleScaleBuilder(width, height, self.chartData, 'horizontal');
+
+		      var x = scales.x;
+		      var y = scales.y;
+
+		      // is there a better way than exposing these?!
+		      self.y = y;
+		      self.x = x;
+
+		      //setting sizes
+		      self._setElementSizes();
+
+		  },
+		  //TODO make it really private
+		  _setElementSizes: function() {
+
+		  	  var self = this;
+
+	    	  var margin = self.dims.margin,
+		    	  width = self.dims.width,
+		    	  height = self.dims.height,
+		    	  x = self.x,
+		    	  y = self.y;
+
+			  	self.svg
+		      	.attr('width', width + margin.left + margin.right)
+		        .attr('height', height + margin.top + margin.bottom);
+
+		      // setting up the size. needed for resizing
+		      self.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+		      this.bars
+		        .attr("class", function(d,i){return "bar data"+i;})
+		        .attr('x', x(0)) //function(d) { return x(d.label); })  rev
+		        .attr('y', function(d,i) { return y(i); }) //function(d) { return height; })  rev
+		        .attr('width', 0)
+		        .attr('height', self.dims.bars.width);
+
+		      
+		      this.labels
+		        .attr("class", function(d,i){return "label data"+i;})
+		        //.style('opacity', 0)
+		        .style('text-anchor','left')
+		        .attr('x', 0)
+		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width + self.dims.labels.height* 0.6; });
+
+		      this.values
+		        .attr("class", function(d,i){return "value data"+i;})
+		        .style('text-anchor','end')
+		        //.style('opacity', 0)
+		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width/2 + self.dims.values.height* 0.4; })
+		        .attr('x', self.dims.values.containerWidth - 8)
+		        .style('font-size', self.dims.values.height+'px');
+
+		        
+
+		  },
+
+
+		  reset: function() {
+		      
+		      var height= this.height;
+		      this.bars.attr('y', height).attr('height', 0);
+		      this.values.attr('y', height );
+		      
+		  },
+		  
+		  animate: function() {
+
+		  		var self = this;
+
+		        var x = self.x;
+		        var width= self.dims.width;
+		        this.bars.transition().duration(this.animationDelay)
+		        .attr('width', function(d) {return x(d.value)});
+		        
+		        
+		  },
+
+		  resize: function() {
+		  	  /*
+		  	  var self = this;
+		  	  
+		  	  self.dims = self.setupDimensions(self);
+		  	  self.setupBarDims(self, 1, 1.6);
+
+		  	  var maxValueLength = d3.max(self.chartData, function(d) {
+		      	return d.display_value ? d.display_value.length : d.value.length;
+		      });
+
+
+		  	  self.dims.labels =  {};
+		      self.dims.values = {};
+		      self.dims.labels.height = 25;
+		      self.dims.values.height = self.dims.bars.width;
+		      self.dims.values.containerWidth = maxValueLength * self.dims.values.height * 0.75;  // characters x font size x 0.6 (average 
+
+	    	  var margin = self.dims.margin,
+	    	  	  width = self.dims.width,
+	    	      height = self.dims.height;
+
+	    	  var scales = self.simpleScaleBuilder(width, height, self.chartData, 'horizontal');
+
+		      var x = scales.x;
+		      var y = scales.y;
+
+		      // is there a better way than exposing these?!
+		      self.y = y;
+		      self.x = x;
+
+
+		      //setting sizes
+		      self._setElementSizes();
+
+		     // self.reset();
+		      self.animate();
+			*/
+
+		  },
+
+		  updateData: function() {
+
+		  	/*
+
+
+		  	  var self = this;
+
+		  	  //TODO these don't do anything unless dimensions are set
+		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData, 'horizontal');
+
+
+		      var x = scales.x;
+		      var y = scales.y;
+
+		      // is there a better way than exposing these?!
+		      self.y = y;
+		      self.x = x;
+
+		      var width = self.dims.width,
+		      	 height = self.dims.height;	  	  
+
+			      self.bars = this.barContainer.selectAll('.bar').data(self.chartData);
+			      self.labels = self.container.selectAll('.label').data(self.chartData);
+			       self.values=self.container.selectAll('.value').data(self.chartData);
+
+		  	  if(self.dataLength!=self.chartData.length)
+		  	  {
+
+		  	  	  self.dataLength = self.chartData.length;
+
+			      self.bars.enter().append('rect').attr('class','bar').attr('height', 0).attr('y', height);
+
+					
+
+			      self.labels.enter().append('text').attr('class','label');
+			       
+
+			       self.values.enter().append('text').attr('class','value');
+
+			       self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).attr('x', width).style('opacity', 0).remove();
+			       self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+			       self.values.exit().transition().duration(1000).style('opacity', 0).remove();
+
+			        
+
+			    }
+
+			      self.bars
+			        .attr("class", function(d,i){return "data"+i;})
+			        .attr('x', function(d) { return x(d.label); })
+			        .attr('width', self.dims.barWidth);
+
+
+			      
+			      self.labels
+			        .attr("class", function(d,i){return "data"+i;})
+			        .style('text-anchor','left')
+			        .attr('x', function(d) { return 0; })
+		        	.attr('y', function(d) { return y(d.label) + self.dims.bars.width + self.dims.labels.height* 0.6; });
+			      
+			      self.values
+			        .attr("class", function(d,i){return "data"+i;})
+			        .style('text-anchor','middle')
+			        .attr('x', function(d) { return x(d.label) + self.dims.barWidth/2; });
+				  
+
+			      //TODO exit
+
+
+
+
+		      // this is independent of size but dependent on data
+		      self.labels.text(function(d) {return d.label;});
+		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+		      //self.reset();
+		      //setTimeout( function() {self.animate();},500);
+
+		      self.animate();
+		      */
+
+		  },
+
+		  chartSpecificDataValidate: function() {
+	    
+		      var errors = [],
+		          numOfBars = this.chartData.length;
+
+		      // There should be at least value.
+		      if(numOfBars === 0) {
+		        errors.push({input: numOfBars, msg: 'Please provide at least one value for the chart.'});
+		      } else {
+		        for (var i=0; i < numOfBars; i++){
+		          
+		          // There should be a value for every bar.
+		        	if (!this.chartData[i].value){ 
+		          	errors.push({ input: this.chartData, msg: 'You must include a value for every bar.'});
+		        	}
+		          
+		          // There should be a label for every bar.
+		        	if (!this.chartData[i].label){ 
+		          	errors.push({ input: this.chartData, msg: 'You must include a label for every bar.'});
+		        	}
+		        }
+		      }
+
+	          return errors;
+	       }
+		  
+		});
+
+
+	</script>
+</polymer-element>
