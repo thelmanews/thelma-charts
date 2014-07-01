@@ -1,0 +1,68 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+Element providing solution to no problem in particular.
+
+##### Example
+
+    <thelma-components></thelma-components>
+
+@element thelma-components
+@blurb Element providing solution to no problem in particular.
+@status alpha
+@homepage http://sepans.github.io/thelma-components
+-->
+<polymer-element name="thelma-components" attributes="notitle">
+
+  <template>
+
+    <link rel="stylesheet" href="thelma-components.css" />
+
+    <content></content>
+
+  </template>
+
+  <script>
+
+    Polymer('thelma-components', {
+      /**
+       * The `noevent` event is not actually fired from here,
+       * we document it as an example of documenting events.
+       *
+       * @event noevent
+       */
+
+      /**
+       * The `notitle` attribute does not yet have a purpose.
+       *
+       * @attribute notitle
+       * @type string
+       */
+      notitle: '',
+
+      /**
+       * The `aProp` is a property that does something cool.
+       *
+       * @property aProp
+       * @type bool
+       */
+      aProp: false,
+
+      ready: function() {
+      },
+
+      /**
+       * The `task` method does no work at this time.
+       *
+       * @method task
+       * @return {Object} Returns undefined.
+       * @param {String} dummy Serves no purpose today.
+       */
+      task: function(dummy) {
+      }
+
+    });
+
+  </script>
+
+</polymer-element>
