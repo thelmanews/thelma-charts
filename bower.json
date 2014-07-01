@@ -4,6 +4,11 @@
   "keywords": "seed, polymer, web-components",
   "main": "thelma-components.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.3.1"
+    "polymer": "Polymer/polymer#~0.3.1",
+    "d3": "latest",
+    "topojson": "latest",
+    "countUp.js": "latest",
+    "core-style": "Polymer/core-style#~0.3.2",
+    "marked": "~0.3.2"
   }
 }

@@ -1,8 +1,10 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../polymer/polymer.html">
+
 <link rel="import" href="thelma_core.html">
       
 
 <polymer-element name="th-d3-chart" extends="th-animated" attributes="chartData chartWidth chartHeight chartOptions">
+  
   <template>
     <core-style ref="theme"></core-style>
     <style>
@@ -37,7 +39,8 @@
     </ul>  
     
   </template>
-  <script src="../bower_components/d3/d3.min.js"></script> 
+
+  <script src="../d3/d3.min.js"></script> 
   <script src="utility.js"></script> 
   <script>
 
