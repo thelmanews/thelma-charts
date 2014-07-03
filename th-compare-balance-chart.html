@@ -29,8 +29,8 @@
 
 		Polymer('th-compare-balance-chart', {
 		  chartData: [
-		    {label: 'Smoker', count: 3, image: 'images/kid-smoker.png'},
-		    {label: 'Non-Smoker', count: 30, image: 'images/kid.png'}
+		    {label: 'Smoker', count: 3, image: '/thelma-componenets/images/kid.png'},
+		    {label: 'Non-Smoker', count: 30, image: '/thelma-componenets/images/kid.png'}
 		  ],
 		  init: function() {
 
@@ -49,8 +49,6 @@
 		      self.width = width;
 
 		      self.extractElementDataPoints();
-
-		      
 
 
 		      var chartEl = self.$.chart;
