@@ -8,9 +8,10 @@
 
 		Polymer('th-compare-grid-chart', {
 		  chartData: [
-		    {label: 'Non-Smoker', value: 71, image: 'images/kid.png'},
+		    {label: 'Non-Smoker', value: 21, image: 'images/kid.png'},
 		    {label: 'Smoker', value: 1, image: 'images/kid-smoker.png'}
 		  ],
+		  chartHeight: 150,
 		  init: function() {
 		    var margin = {
 		          top : 0,
@@ -51,10 +52,10 @@
 		      };
 
 		      _data.set1_count = this.chartData[0].value;
-		      _data.set1_image = 'images/kid.png';
+		      _data.set1_image = this.chartData[0].image;
 
 		      _data.set2_count = this.chartData[1].value;
-		      _data.set2_image = 'images/kid-smoker.png';
+		      _data.set2_image = this.chartData[1].image;
 
 
 		      this.data = _data;
