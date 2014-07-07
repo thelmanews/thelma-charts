@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
 <polymer-element name="th-split-donut-chart" extends="th-d3-chart">
@@ -6,15 +6,15 @@
   <script>
 
       Polymer('th-split-donut-chart', {
-        chartData: [{value: 26}, {value: 43}], // BUG: this only works when then smaller value comes first; otherwise the labels appear the same.
+        chartData: [{label: 'U.S.', value: 96}, {label: 'China', value: 43}], 
         init: function() {
           var self = this,
               margin = {
-                right : 0,
-                left : 0,
+                top : 12,
+                bottom : 12,
                 label: 3
               }, 
-              width = self.chartWidth*0.95 - margin.left - margin.right, 
+              width = self.chartWidth*0.95, 
               height = width,
               pi = Math.PI,
               progress = 0,
@@ -22,16 +22,24 @@
               formatPercent = d3.format(".0%"),
               outerRadius = height*0.39,
               innerRadius = height*0.25;
-              this._prevProgress = 0;
+              self._prevProgress = 0;
 
-            
+
+            self.labelSize = width/15;
             self.height = height;
+
+            // sort the chartData so smaller value comes first to avoid bug in the tween function
+            function compare(a,b) {
+              if (a.value < b.value)
+                 return -1;
+              if (a.value > b.value)
+                return 1;
+              return 0;
+            }
             
-            var data = [self.chartData[0].value, self.chartData[1].value];
+            self.data = self.chartData.sort(compare);
 
-            var foreground, text, arc;
-
-            arc = d3.svg.arc()
+            self.arc = d3.svg.arc()
               .startAngle(0*(Math.PI/180))
               .endAngle(180*(Math.PI/180))
               .innerRadius(innerRadius)
@@ -39,27 +47,26 @@
 
             var chart_svg = self.$.chart;
             var svg = d3.select(chart_svg);
-
             var container = svg.attr("width", width)
                 .attr("height", height)
                 .append("g")
                 .attr("transform", "translate(" +(width / 2 ) + "," + (height / 2) + ")");
             
-            var meter = container.append("g")
+            self.meter = container.append("g")
                 .attr("class", "progress-meter");
             
-            meter.selectAll("path.background")
-                .data(data)
+            self.meter.selectAll("path.background")
+                .data(self.data)
                 .enter()
                   .append("path")
                   .attr("class", "background fill-foreground")
                   .attr("transform", function(d,i){
                     return i > 0 ? "translate(0, 5) rotate(90) scale(1,-1)" : "rotate(90) scale(-1,-1)";
                   })
-                  .attr("d", arc);
+                  .attr("d", self.arc);
             
-            foreground = meter.selectAll("path.foreground")
-                .data(data)
+            self.foreground = self.meter.selectAll("path.foreground")
+                .data(self.data)
                 .enter()
                   .append("path")
                   .attr("class", function(d,i){ return ("foreground data"+i); })
@@ -67,57 +74,68 @@
                     return i > 0 ? "translate(0, 5) rotate(90) scale(1,-1)" : "rotate(90) scale(-1,-1)";
                   });
             
-            text = meter.selectAll("text.label")
-                .data(data)
+            self.text = self.meter.selectAll("text.label")
+                .data(self.data)
                 .enter()
                   .append("text")
                   .attr("class", function(d,i){ return ("label data"+i); })
+                  .style('font-size', self.labelSize)
                   .attr("text-anchor", "middle")
                   .attr("dy", function(d,i){
-                    return i > 0 ? "2em" : "-1.5em";
+                    return i > 0 ? self.labelSize*2 : -self.labelSize;
                   });
 
-            this.foreground = foreground;
+            self.label = self.meter.selectAll("text.chart")
+                .data(self.data)
+                .enter()
+                  .append("text")
+                  .attr("class", "fill-foreground chart caps")
+                  .attr("text-anchor", "middle")
+                  .style('font-size', self.labelSize)
+                  .attr("dy", function(d,i){
+                    return i > 0 ? height/2 : -(height/2) + self.labelSize;
+                  }) // this doesn't work that well when the chart is small, font sizes should adjust accordingly
+                  .text(function(d) {return d.label});
+
             this.formatPercent = formatPercent;
-            this.arc = arc;
-            this.pi = pi;
-            this.text = text;
-            this.data = data;
-            this.meter = meter;
+
 
         },
         reset: function() {
-            
+            // TODO
             
         },
         
         animate: function() {
-            var total = 100;
-            var self = this;
-            var data = this.data;
-            var meter = this.meter;
+            var self = this,
+                total = 100,
+                pi = Math.PI;
+            
 
-            meter.selectAll("path.foreground").transition().delay(1000).duration(1000)
+            self.meter.selectAll("path.foreground").transition().delay(1000).duration(1000)
               .attrTween('d', function(d){
-                var i = d3.interpolate(self._prevProgress/total, d/total);
-                
+                var i = d3.interpolate(self._prevProgress/total, d.value/total);
+             
                 return function(t) {
                   var progress = i(t);
                   
-                  meter.selectAll("text.label").text(function(d){
-                    return progress > d/total ? self.formatPercent(d/total) : self.formatPercent(progress);
+                  self.meter.selectAll("text.label").text(function(d,i){
+                    // this works when smaller value comes first
+                    return progress > d.value/total ? self.formatPercent(d.value/total) : self.formatPercent(progress);
                   })
 
-                  return self.arc.endAngle(self.pi * progress)();
+                  return self.arc.endAngle(pi * progress)();
                   
                 };
-                this._prevProgress = progress; 
+                self._prevProgress = progress; 
+                console.log(self._prevProgress);
               })
         },
         chartSpecificDataValidate: function() {
 
           var errors = [],
-              numOfSets = this.chartData.length;
+              self = this,
+              numOfSets = self.chartData.length;
               
               // There should be two values.    
               if(numOfSets != 2) {
@@ -126,8 +144,8 @@
 
                 // Each value should be between 1 and 100.
                 for (var i=0; i < numOfSets; i++){
-                  if (this.chartData[i].value > 100 || this.chartData[i].value < 1) {
-                    errors.push({ input: this.chartData[i].value, msg: 'Values must be between 1 and 100' });
+                  if (self.chartData[i].value > 100 || self.chartData[i].value < 1) {
+                    errors.push({ input: self.chartData[i].value, msg: 'Values must be between 1 and 100' });
                   }
                 }
               }
