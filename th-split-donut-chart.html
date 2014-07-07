@@ -6,7 +6,7 @@
   <script>
 
       Polymer('th-split-donut-chart', {
-        chartData: [{label: 'U.S.', value: 96}, {label: 'China', value: 43}], 
+        chartData: [{label: 'U.S.', value: 76}, {label: 'China', value: 43}], 
         init: function() {
           var self = this,
               margin = {
@@ -94,7 +94,7 @@
                   .style('font-size', self.labelSize)
                   .attr("dy", function(d,i){
                     return i > 0 ? height/2 : -(height/2) + self.labelSize;
-                  }) // this doesn't work that well when the chart is small, font sizes should adjust accordingly
+                  })
                   .text(function(d) {return d.label});
 
             this.formatPercent = formatPercent;
@@ -102,8 +102,14 @@
 
         },
         reset: function() {
-            // TODO
-            
+          var self = this;
+          
+          self.meter.selectAll("path.foreground")
+              .attr('d', function(){return self.arc.endAngle(0)();});
+
+          self.meter.selectAll("text.label")
+            .text('');
+                    
         },
         
         animate: function() {
@@ -120,7 +126,6 @@
                   var progress = i(t);
                   
                   self.meter.selectAll("text.label").text(function(d,i){
-                    // this works when smaller value comes first
                     return progress > d.value/total ? self.formatPercent(d.value/total) : self.formatPercent(progress);
                   })
 
@@ -128,8 +133,9 @@
                   
                 };
                 self._prevProgress = progress; 
-                console.log(self._prevProgress);
               })
+                    
+
         },
         chartSpecificDataValidate: function() {
 
