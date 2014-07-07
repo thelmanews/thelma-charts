@@ -40,6 +40,7 @@
       }
 
       .pulse {
+        fill: none;
         -webkit-animation-name: pulse;
         -webkit-animation-duration: 3s;
         -webkit-animation-iteration-count: infinite;
@@ -633,8 +634,9 @@
                   .attr("r", 8)
                   .attr("cx", self.currentPos.x)
                   .attr("cy", 12)
-                  .attr("class", "pulse fill-background stroke-foreground")
+                  .attr("class", "pulse stroke-foreground")
                   .attr("stroke-width", 4.5)
+                  .attr('fill', 'none')
                   .call(drag);
 
               self.joystick.append('rect')
@@ -653,7 +655,8 @@
                 // move the circle
                 d3.select(this)
 
-                  .attr("class", "fill-background stroke-foreground")
+                  .attr("class", "stroke-foreground")
+                  .attr('fill', 'none')
                   .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.width, d3.event.x))); 
            
                 // define current position
