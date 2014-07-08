@@ -47,17 +47,18 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
 
         dims.bars = {};
         dims.bars.count = chartData.length;
-        dims.bars.overlap = overlap || 1; // the higher the number, the more overlap
         dims.bars.gap = gap || 1;
 
+        if (dims.bars.count == 1 || !overlap){
+          dims.bars.overlap = 1;
+        } else { 
+          dims.bars.overlap = overlap;
+        }
 
         dims.bars.width = (dims.width / dims.bars.count)* dims.bars.overlap / dims.bars.gap;
-        dims.bars.widthOverlap = dims.bars.width*dims.bars.overlap;
-
-
-
-        // value margin and dims (depending on bars.width)
+        dims.bars.widthOverlap = dims.bars.count > 1 ? (((dims.bars.width * dims.bars.count) - dims.width)/ (dims.bars.count - 1)) : 0; // used in calculated position of paths for peak chart
         
+        // value margin and dims (depending on bars.width)
         dims.values = {};
         dims.values.maxLength = d3.max(chartData, function(d){  
           return  d.display_value ? d.display_value.length : d.value.toString().length;
@@ -84,6 +85,7 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
 	        dims.labels.angle = 25;
 	        dims.margin.bottom = dims.labels.width + dims.margin.label;
 	        dims.margin.right = dims.labels.width;
+          // console.log(dims.margin.right);
 	        
 	        // need to adjust margin right when last label is long, so it does not cut off
 	    } else {

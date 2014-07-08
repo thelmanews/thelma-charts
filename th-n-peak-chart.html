@@ -29,7 +29,7 @@
             var coordinates = [{ x: lastEdge, y: -height},
                              {x: lastEdge + barDims.width, y: -height},
                              { x: lastEdge + barDims.width/2, y: -height+y(i.value)}];
-            lastEdge = lastEdge + (barDims.width/barDims.overlap)/barDims.overlap;
+            lastEdge = lastEdge + barDims.width - barDims.widthOverlap;
             return coordinates;
           });
           return peakData;
@@ -131,6 +131,7 @@
       Polymer('th-n-peak-chart', {
         chartData: [
           {label: 'Platinum', value: 50, display_value: '$50'},
+          // {label: 'Plataainum', value: 50, display_value: '$50'},
           {label: 'Gold', value: 45, display_value: '$45'},
           {label: 'Silver', value: 30, display_value: '$30'},
           {label: 'Bronze', value: 25, display_value: '$25'}
@@ -145,7 +146,7 @@
 
           self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25);
 
-      
+          console.log(self.dims);
           // format chart elements based on chartData
           //self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
           //self.labelDims = self.setupLabelDims(self);
@@ -195,7 +196,7 @@
           self.values.transition(self.animationDelay)
             .duration(self.animationDelay)
             .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;})
-            .attr('x', function(d,i) { return ((barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap)); })
+            .attr('x', function(d,i) { return ((barDims.width/2) + ((barDims.width - barDims.widthOverlap)*i)); })
             .style('opacity', 1);
 
           self.labels.transition(self.animationDelay)
