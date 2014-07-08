@@ -29,7 +29,7 @@
             var coordinates = [{ x: lastEdge, y: -height},
                              {x: lastEdge + barDims.width, y: -height},
                              { x: lastEdge + barDims.width/2, y: -height+y(i.value)}];
-            lastEdge = lastEdge + (barDims.width/barDims.overlap)/barDims.overlap;
+            lastEdge = lastEdge + barDims.width - barDims.widthOverlap;
             return coordinates;
           });
           return peakData;
@@ -67,7 +67,7 @@
             .enter().append('text')
               .attr('class', function(d,i){return "label data"+i;})
               .attr('transform', function(d,i){
-                var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
+                var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
                 var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
                 var rotation = labelDims.angle;
                 return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
@@ -89,7 +89,7 @@
           polymerObj.svg
               .attr('width', width + margin.left + margin.right)
               .attr('height', height + margin.top + margin.bottom);
-
+              console.log(margin.right);
           // setting up the size. needed for resizing
           polymerObj.container.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
@@ -145,7 +145,6 @@
 
           self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25);
 
-      
           // format chart elements based on chartData
           //self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
           //self.labelDims = self.setupLabelDims(self);
@@ -195,13 +194,13 @@
           self.values.transition(self.animationDelay)
             .duration(self.animationDelay)
             .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;})
-            .attr('x', function(d,i) { return ((barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap)); })
+            .attr('x', function(d,i) { return ((barDims.width/2) + ((barDims.width - barDims.widthOverlap)*i)); })
             .style('opacity', 1);
 
           self.labels.transition(self.animationDelay)
             .duration(self.animationDelay)
             .attr('transform', function(d,i){
-                var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
+                var xPos =  (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
                 var yPos = height + self.dims.margin.label;
                 var rotation = labelDims.angle;
                 return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
@@ -255,7 +254,7 @@
               .attr('opacity', 0);
             self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;})
               .attr('transform', function(d,i){
-                var xPos = (barDims.width/2) + (barDims.width/barDims.overlap*i/barDims.overlap);
+                var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
                 var yPos = height + self.dims.margin.label;
                 var rotation = labelDims.angle;
                 return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
