@@ -85,8 +85,8 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
 	        dims.labels.angle = 25;
 	        dims.margin.bottom = dims.labels.width + dims.margin.label;
 	        
-          // adjust margin right when last label is long, so it does not cut off
-          dims.margin.right = dims.labels.width * 0.25; // this is not being reflected?!
+          // increase right margin by width of last label
+          dims.margin.right = dims.margin.right + chartData[chartData.length-1].label.length*5.25; 
 	        
 	    } else {
 	        dims.labels.angle = 0;
