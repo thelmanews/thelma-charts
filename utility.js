@@ -84,10 +84,10 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
 	    if (dims.labels.width > dims.bars.width/dims.bars.overlap/1.3) { 
 	        dims.labels.angle = 25;
 	        dims.margin.bottom = dims.labels.width + dims.margin.label;
-	        dims.margin.right = dims.labels.width;
-          // console.log(dims.margin.right);
 	        
-	        // need to adjust margin right when last label is long, so it does not cut off
+          // adjust margin right when last label is long, so it does not cut off
+          dims.margin.right = dims.labels.width * 0.25; // this is not being reflected?!
+	        
 	    } else {
 	        dims.labels.angle = 0;
 	    }
