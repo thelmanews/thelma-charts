@@ -131,7 +131,6 @@
       Polymer('th-n-peak-chart', {
         chartData: [
           {label: 'Platinum', value: 50, display_value: '$50'},
-          // {label: 'Plataainum', value: 50, display_value: '$50'},
           {label: 'Gold', value: 45, display_value: '$45'},
           {label: 'Silver', value: 30, display_value: '$30'},
           {label: 'Bronze', value: 25, display_value: '$25'}
@@ -146,7 +145,6 @@
 
           self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25);
 
-          console.log(self.dims);
           // format chart elements based on chartData
           //self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
           //self.labelDims = self.setupLabelDims(self);

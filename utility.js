@@ -92,10 +92,7 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
 	        dims.labels.angle = 0;
 	    }
 
-        return dims;
-
-        
-        
+        return dims;        
 
 	}
 
