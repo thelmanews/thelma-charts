@@ -29,7 +29,7 @@
 
 		Polymer('th-compare-balance-chart', {
 		  chartData: [
-		    {label: 'Smoker', count: 3, image: 'images/kid.png', weight: 2},
+		    {label: 'Smoker', count: 3, image: 'images/kid.png', weight: 1},
 		    {label: 'Non-Smoker', count: 20, image: 'images/kid-smoker.png', weight: 1}
 		  ],
 		  init: function() {
@@ -39,11 +39,11 @@
 		    var margin = {
 		          top : 5,
 		          right : self.chartWidth*0.08,
-		          bottom : 20,
+		          bottom : self.chartHeight* 0.05,
 		          left : self.chartWidth*0.08,
 		          label: 3
 		      }, width = self.chartWidth*0.95 - margin.left - margin.right, height = self.chartHeight*1.0 - margin.top - margin.bottom
-		         , barWidth = height* 0.02 , textLabelMargin = height*0.05;
+		         , barWidth = 5 , textLabelMargin = height*0.05;
 
 		      self.height = height;
 		      self.width = width;
@@ -59,7 +59,8 @@
 
 		      self.container = container;
 
-		      self.holderTranslate = 'translate(' + width / 2 + ',' + (height* 0.91) + ')';
+		      self.holderTranslate = 'translate(' + width / 2 + ',' + (height  - 31) + ')';
+		      self.bargTranslate = 'translate(' + width / 2 + ',' + (height  - 20) + ')';
 
 
 		      var totalCount = self.chartData.reduce(function(prev, cur) {
@@ -83,11 +84,11 @@
 		      
 
 	        container.append('path')
-	            .attr('transform', 'translate(' + (width * 0.40) + ',' + (height *0.95) + ')')
+	            .attr('transform', 'translate(' + (width * 0.40) + ',' + (height -18 ) + ')')
 	            .attr('d', 'M 15 3 L 30 25 L 0 25 L 15 3').attr('class', 'triangle fill-foreground');
 
 	        self.barg = container.append('g')
-	            .attr('transform', 'translate(' + width / 2 + ',' + height*0.95 + ')');
+	            .attr('transform', self.bargTranslate);
 
 	        var bar = self.barg.append('rect')
 	            .attr('x', -width / 2)
@@ -217,7 +218,7 @@
 
 	        // for bar
 	        function tween(d, i, a) {
-	            return d3.interpolateString('translate(' + self.width / 2 + ',' + self.height*0.95 + ') rotate(' + fromAngle + ')', 'translate(' + self.width / 2 + ',' + self.height*0.95 + ') rotate(' + toAngle + ')');
+	            return d3.interpolateString(self.bargTranslate +' rotate(' + fromAngle + ') ', self.bargTranslate+ ' rotate(' + toAngle + ')');
 	        }
 	        // for lefts
 	        function tween2(d, i, a) {
