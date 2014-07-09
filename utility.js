@@ -122,7 +122,7 @@ Thelma.chartUtils = {
 	    // dims.barGap = 0.3;
 	    // dims.numBars = polymerObj.chartData.length;  // DEPENDANT ON CHARTDATA
 	    // dims.barWidth = Math.min(70,((dims.width / dims.numBars)/(1+dims.barGap)));
-
+      console.log(dims.height);
 	    return dims;
 
 	},
