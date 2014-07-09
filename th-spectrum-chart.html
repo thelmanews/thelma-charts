@@ -56,7 +56,7 @@
 	        .attr("x", 0)
 	        .attr("y", 0)
 	        .attr("fill", "url(#pattern-stripe)");
-
+          
 
 	      self.container = self.svg.attr('width', width + margin.left + margin.right)
 	          .attr('height', height + margin.top + margin.bottom)
@@ -64,7 +64,6 @@
             // .attr('width', width + margin.left + margin.right)
 	          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-	      
 	      var dataMargin = 0.1;  // 10% extra space     
 
 	      var minmin = d3.min(self.chartData, function(d) { return d.range_min_value;});
@@ -79,7 +78,7 @@
 	      var spectrum = self.container.selectAll('.spectrum').data([wholeRange]).enter().append('rect').attr('class','spectrum');
 
 	      spectrum.style('fill', function(d,i) {return '#FFF';})
-	        .attr('x', width/2 - barWidth/2)
+	        .attr('x', self.dims.labels.width + self.dims.margin.label )
 	        .attr('y', function(d) {return y(wholeRange.min)})
 	        .attr('width',barWidth)
 	        .attr('height', function(d) {return y(wholeRange.max)});
@@ -88,7 +87,7 @@
 	      self.bars
 	        .attr("class", function(d,i){ return "bar data"+i; })
 	        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
-	        .attr('x', width/2 - barWidth/2)
+	        .attr('x', self.dims.labels.width + self.dims.margin.label )
 	        //.attr('y', 0)
 	        .attr('y', function(d) {return height - y(d.range_max_value)})
 	        .attr('width',barWidth)
@@ -96,13 +95,12 @@
           .style('fill', function(d){ return d.color;})
           .style('stroke', function(d){ return d.color;});
 
-
 	      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
 	      self.labels
 	        .attr("class", function(d,i){return "label data"+i;})
 	        .style('opacity', 0)
 	        .style('text-anchor','end')
-	        .attr('x', width/2 - barWidth/2 - margin.label)
+	        .attr('x', self.dims.labels.width)
 	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
 	        .text(function(d) {return d.label;})
           .style('fill', function(d){ return d.color;})
@@ -115,7 +113,7 @@
 	      	.attr('class', function(d,i){return "defaultvalue value data"+i;});
 	      self.values
 	        .style('opacity', 0)
-	        .attr('x', width/2 + barWidth/2 + margin.label)
+	        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + barWidth)
 	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
 	        .text(function(d) {
             return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
