@@ -170,19 +170,14 @@
 	        }).each('end', function(d, i) {
 
 	        	// after the drop of each object rotate elements
-
-
 	            var angle = ((i+1) / self.chartData[0].count) * maxAngle * self.chartData[0].weight;
-
-	        	console.log(prevAngle);
-	        	console.log(angle);
 
 	            self._animateBar(prevAngle, angle, Math.min(delay.left, dropSpeed*1.5));
 	            prevAngle = angle;
 	            if(i+1 == self.chartData[0].count) {
 
 	            	var rightSideFinalAngle = prevAngle;
-	        		console.log('right');
+
 			        setTimeout(function() {
 		            	//var prevAngle = self.chartData[0].count * self.chartData[0].weight * maxAngle;
 			            self.rights.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
@@ -195,8 +190,6 @@
 				            var angle = /*(self.chartData[0].count * self.chartData[0].weight * maxAngle)*/rightSideFinalAngle - ((i+1) / self.chartData[1].count) * self.chartData[1].weight * maxAngle  ;
 				            self._animateBar(prevAngle, angle, Math.min(delay.right, dropSpeed*1.5));
 				            prevAngle = angle;
-
-			            	console.log(angle);
 
 				        });
 			        }, pauseBeforeRight);
