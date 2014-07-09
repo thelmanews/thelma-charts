@@ -27,11 +27,6 @@
         left: 0;
       }
 
-      .data0 {
-        fill: {{chartData.color}};
-        stroke: {{chartData.color}};
-      }
-
     </style>
 
       <svg id="chart"></svg>
@@ -118,14 +113,17 @@
                 .attr("d", arc.endAngle(twoPi));
             
             foreground = meter.append("path")
-                .attr("class", "data0");
-
+                .attr("class", "data0")
+                .style("fill", self.chartData.color)
+                .style("stroke", self.chartData.color);
                 // .attr("filter", "url(#dropshadow)");
             
             text = meter.append("text")
                 .attr('class','percent data0')
                 .attr("text-anchor", "middle")
-                .attr("dy", ".35em");
+                .attr("dy", ".35em") 
+                .style("fill", self.chartData.color)
+                .style("stroke", self.chartData.color);
 
             self.foreground = foreground;
             self.formatPercent = formatPercent;
