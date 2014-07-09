@@ -31,11 +31,15 @@
 
 		      
 		      polymerObj.bars
-		        .attr("class", function(d,i){return "bar data"+i;});
+		        .attr("class", function(d,i){return "bar data"+i;})
+		        .style("fill", function(d){ return d.color })
+		        .style("stroke", function(d){ return d.color });
 
 		      
 		      polymerObj.labels
-		        .attr("class", function(d,i){return "label data"+i;});
+		        .attr("class", function(d,i){return "label data"+i;})
+		        .style("fill", function(d){ return d.color })
+		        .style("stroke", function(d){ return d.color });
 		        //.style('opacity', 0)
 
 		      
@@ -44,7 +48,9 @@
 		        .attr('text-anchor','middle')
 		        //.style('opacity', 0)
 		        //.attr('x', function(d) { return x(i) + polymerObj.dims.bars.width/2; })
-		        .attr('font-size', polymerObj.dims.values.size+"px");
+		        .attr('font-size', polymerObj.dims.values.size+"px")
+		        .style("fill", function(d){ return d.color })
+		        .style("stroke", function(d){ return d.color });
 		       // .attr('y', height)
 		       // .style('opacity', 0);
 
@@ -113,9 +119,9 @@
 
 		Polymer('th-n-bar-chart', {
 		  chartData: [
-		    {label: 'Player', value: 15, display_value: '$15'},
-		    {label: 'Vendor', value: 20, display_value: '$20'},
-		    {label: 'Mascot', value: 45, display_value: '$45'}
+		    {label: 'Player', value: 15, display_value: '$15', color:''},
+		    {label: 'Vendor', value: 20, display_value: '$20', color:''},
+		    {label: 'Mascot', value: 45, display_value: '$45', color:''}
 		  ],
 		  init: function() {
 		    
