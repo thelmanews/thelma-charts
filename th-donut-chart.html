@@ -26,6 +26,12 @@
         top: 0;
         left: 0;
       }
+
+      .data0 {
+        fill: {{chartData.color}};
+        stroke: {{chartData.color}};
+      }
+
     </style>
 
       <svg id="chart"></svg>
@@ -37,7 +43,7 @@
 
 
         Polymer('th-donut-chart', {
-          chartData: {value: 65},
+          chartData: {value: 65, color:""},
           init: function() {
 
             var self = this;
@@ -113,6 +119,7 @@
             
             foreground = meter.append("path")
                 .attr("class", "data0");
+
                 // .attr("filter", "url(#dropshadow)");
             
             text = meter.append("text")
