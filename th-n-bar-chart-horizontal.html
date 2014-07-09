@@ -8,10 +8,10 @@
 
 		Polymer('th-n-bar-chart-horizontal', {
 		  chartData: [
-		    {label: 'Player of the day', value: 15, display_value: '$15'},
-		    {label: 'Vendor', value: 20, display_value: '$20'},
-		    {label: 'Cheerleader', value: 40, display_value: '$40'},
-		    {label: 'Designer', value: 70, display_value: '$70'}
+		    {label: 'Player of the day', value: 15, display_value: '$15', color:""},
+		    {label: 'Vendor', value: 20, display_value: '$20', color:"", color:""},
+		    {label: 'Cheerleader', value: 40, display_value: '$40', color:""},
+		    {label: 'Designer', value: 70, display_value: '$70', color:""}
 		  ],
 		  // for making orientation a attribute
 		  dimensions: {'horizontal': 
@@ -124,7 +124,9 @@
 		        .attr('x', x(0)) //function(d) { return x(d.label); })  rev
 		        .attr('y', function(d,i) { return y(i); }) //function(d) { return height; })  rev
 		        .attr('width', 0)
-		        .attr('height', self.dims.bars.width);
+		        .attr('height', self.dims.bars.width)
+		        .style('fill', function(d,i){ return d.color})
+		        .style('stroke', function(d,i){ return d.color});
 
 		      
 		      this.labels
@@ -132,7 +134,9 @@
 		        //.style('opacity', 0)
 		        .style('text-anchor','left')
 		        .attr('x', 0)
-		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width + self.dims.labels.height* 0.6; });
+		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width + self.dims.labels.height* 0.6; })
+		        .style('fill', function(d,i){ return d.color})
+		        .style('stroke', function(d,i){ return d.color});
 
 		      this.values
 		        .attr("class", function(d,i){return "value data"+i;})
@@ -140,7 +144,9 @@
 		        //.style('opacity', 0)
 		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width/2 + self.dims.values.height* 0.4; })
 		        .attr('x', self.dims.values.containerWidth - 8)
-		        .style('font-size', self.dims.values.height+'px');
+		        .style('font-size', self.dims.values.height+'px')
+		        .style('fill', function(d,i){ return d.color})
+		        .style('stroke', function(d,i){ return d.color});
 
 		        
 
