@@ -6,9 +6,9 @@
 	<script>
 		Polymer('th-spectrum-chart', {
 		  chartData: [
-		  		{label: 'Medicaid', range_min_value: 10, range_min_display_value: '$10', range_max_value: 50, range_max_display_value: '$50'},
-		        {label: 'Federal', color: '#888', pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60'},
-		        {label: 'Medicare', range_min_value: 70, range_min_display_value: '$70', range_max_value: 100, range_max_display_value: '$100'}],
+		  		{label: 'Medicaid', range_min_value: 10, range_min_display_value: '$10', range_max_value: 50, range_max_display_value: '$50', color:''},
+		        {label: 'Federal',  pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60', color: ''},
+		        {label: 'Medicare', range_min_value: 70, range_min_display_value: '$70', range_max_value: 100, range_max_display_value: '$100', color:''}],
 		  orientation: 'vertical',
 		  init: function() {
 		    var self = this;
@@ -92,7 +92,9 @@
 	        //.attr('y', 0)
 	        .attr('y', function(d) {return height - y(d.range_max_value)})
 	        .attr('width',barWidth)
-	        .attr('height', 0);
+	        .attr('height', 0)
+          .style('fill', function(d){ return d.color;})
+          .style('stroke', function(d){ return d.color;});
 
 
 	      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
@@ -102,7 +104,9 @@
 	        .style('text-anchor','end')
 	        .attr('x', width/2 - barWidth/2 - margin.label)
 	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
-	        .text(function(d) {return d.label;});
+	        .text(function(d) {return d.label;})
+          .style('fill', function(d){ return d.color;})
+          .style('stroke', function(d){ return d.color;});
 	      
 	      self.values = this.container.selectAll('.value').data(this.chartData).enter()
 	      	.append('text')
@@ -115,7 +119,9 @@
 	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
 	        .text(function(d) {
             return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
-          });
+          })
+          .style('fill', function(d){ return d.color;})
+          .style('stroke', function(d){ return d.color;});
 
 		  },
 		  reset: function() {
