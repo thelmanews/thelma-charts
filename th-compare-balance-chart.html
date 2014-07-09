@@ -29,8 +29,8 @@
 
 		Polymer('th-compare-balance-chart', {
 		  chartData: [
-		    {label: 'Smoker', count: 3, image: '/thelma-componenets/images/kid.png'},
-		    {label: 'Non-Smoker', count: 30, image: '/thelma-componenets/images/kid.png'}
+		    {label: 'Smoker', count: 3, image: 'images/kid.png', weight: 2},
+		    {label: 'Non-Smoker', count: 20, image: 'images/kid-smoker.png', weight: 1}
 		  ],
 		  init: function() {
 
@@ -38,9 +38,9 @@
 
 		    var margin = {
 		          top : 5,
-		          right : 10,
+		          right : self.chartWidth*0.08,
 		          bottom : 20,
-		          left : 10,
+		          left : self.chartWidth*0.08,
 		          label: 3
 		      }, width = self.chartWidth*0.95 - margin.left - margin.right, height = self.chartHeight*1.0 - margin.top - margin.bottom
 		         , barWidth = height* 0.02 , textLabelMargin = height*0.05;
@@ -156,28 +156,44 @@
 
 
 	        var prevAngle = 0;
+
+	        //drop left side objects
+
 	        self.lefts.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
 	            return i * delay.left;
 	        }).attr('y', function(d, i) {
 	            return -Math.floor(i / self.chartData[0].elementsPerRow) * (self.chartData[0].height) - 10;
 	        }).each('end', function(d, i) {
-	            
-	            var angle = ((i+1) / self.chartData[0].count) * maxAngle;
+
+	        	// after the drop of each object rotate elements
+
+
+	            var angle = ((i+1) / self.chartData[0].count) * maxAngle * self.chartData[0].weight;
+
+	        	console.log(prevAngle);
+	        	console.log(angle);
+
 	            self._animateBar(prevAngle, angle, Math.min(delay.left, dropSpeed*1.5));
 	            prevAngle = angle;
 	            if(i+1 == self.chartData[0].count) {
 
+	            	var rightSideFinalAngle = prevAngle;
+	        		console.log('right');
 			        setTimeout(function() {
-		            	var prevAngle = maxAngle;
+		            	//var prevAngle = self.chartData[0].count * self.chartData[0].weight * maxAngle;
 			            self.rights.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
 			                return i * delay.right;
 			            }).attr('y', function(d, i) {
 			                return -Math.floor(i / self.chartData[1].elementsPerRow) * (self.chartData[1].height) - 10;
 			            }).each('end', function(d, i) {
-			            
-				            var angle = maxAngle - ((i+1) / self.chartData[1].count) * maxAngle;
+			            	
+
+				            var angle = /*(self.chartData[0].count * self.chartData[0].weight * maxAngle)*/rightSideFinalAngle - ((i+1) / self.chartData[1].count) * self.chartData[1].weight * maxAngle  ;
 				            self._animateBar(prevAngle, angle, Math.min(delay.right, dropSpeed*1.5));
 				            prevAngle = angle;
+
+			            	console.log(angle);
+
 				        });
 			        }, pauseBeforeRight);
 
