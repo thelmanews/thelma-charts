@@ -48,7 +48,7 @@
 		      
 		      self.bars
 		        .attr("class", function(d,i){ return "bar data"+i; })
-		        .attr('x', width/2 - barWidth/2)
+		        .attr('x', self.dims.labels.width + self.dims.margin.label)
 		        //.attr('y', 0)
 		        .attr('y', height)
 		        .attr('width',barWidth)
@@ -62,7 +62,7 @@
 		        .attr("class", function(d,i){return "label data"+i;})
 		        .style('opacity', 0)
 		        .style('text-anchor','end')
-		        .attr('x', width/2 - barWidth/2 - margin.label)
+		        .attr('x', self.dims.labels.width)
 		        .attr('y', height) 
 		        .text(function(d) {return d.label;})
             .style('fill', function(d){ return d.color; })
@@ -77,7 +77,7 @@
 		        .style('opacity', 0)
             .attr('font-size', '13px')
             .attr('font-weight', '300')
-		        .attr('x', width/2 + barWidth/2 + margin.label)
+		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + barWidth)
 		        .attr('y', height) 
 		        .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
