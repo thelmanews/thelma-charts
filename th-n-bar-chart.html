@@ -27,20 +27,29 @@
 		    	  y = polymerObj.y;
 
 		      staticObj._setupContainerSize(polymerObj);
-
-
 		      
 		      polymerObj.bars
 		        .attr("class", function(d,i){return "bar data"+i;})
-		        .style("fill", function(d){ return d.color })
-		        .style("stroke", function(d){ return d.color });
 
+		        .style('fill', function(d,i){ 
+		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
+		        	return polymerObj.colors.accents[i];
+		        })
+		        .style('stroke', function(d,i){ 
+		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
+		        	return polymerObj.colors.accents[i];
+		        });
 		      
 		      polymerObj.labels
 		        .attr("class", function(d,i){return "label data"+i;})
-		        .style("fill", function(d){ return d.color })
-		        .style("stroke", function(d){ return d.color });
-		        //.style('opacity', 0)
+		        .style('fill', function(d,i){ 
+		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
+		        	return polymerObj.colors.accents[i];
+		        })
+		        .style('stroke', function(d,i){ 
+		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
+		        	return polymerObj.colors.accents[i];
+		        });
 
 		      
 		      polymerObj.values
@@ -49,10 +58,15 @@
 		        //.style('opacity', 0)
 		        //.attr('x', function(d) { return x(i) + polymerObj.dims.bars.width/2; })
 		        .attr('font-size', polymerObj.dims.values.size+"px")
-		        .style("fill", function(d){ return d.color })
-		        .style("stroke", function(d){ return d.color });
-		       // .attr('y', height)
-		       // .style('opacity', 0);
+
+		        .style('fill', function(d,i){ 
+		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
+		        	return polymerObj.colors.accents[i];
+		        })
+		        .style('stroke', function(d,i){ 
+		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
+		        	return polymerObj.colors.accents[i];
+		        });
 
 		};
 
@@ -119,9 +133,18 @@
 
 		Polymer('th-n-bar-chart', {
 		  chartData: [
-		    {label: 'Player', value: 15, display_value: '$15', color:''},
-		    {label: 'Vendor', value: 20, display_value: '$20', color:''},
-		    {label: 'Mascot', value: 45, display_value: '$45', color:''}
+		    {label: 'Player', value: 15, display_value: '$15'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Vendor', value: 20, display_value: '$20'},
+		    {label: 'Mascot', value: 45, display_value: '$45'}
 		  ],
 		  init: function() {
 		    
@@ -130,6 +153,8 @@
 		  	  self.dims = self.setupDimensions(self);
 
 		      self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1, 1.3);
+
+		      self.colors = self.getColors();
 
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,

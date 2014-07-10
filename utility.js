@@ -95,6 +95,7 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
         return dims;        
 
 	}
+  
 
 	
 }
@@ -254,6 +255,42 @@ Thelma.chartUtils = {
 
       return dims;
 
+    },
+    getColors: function(){
+      colors = {};
+      colors.theme = window.CoreStyle.g.theme;
+      colors.accents = [];
+
+      for (var color in colors.theme){
+        if(/^accent/.test(color)){
+          colors.accents.push(colors.theme[color]);
+        }
+      }
+
+      colors.count = colors.accents.length - 1; // length minus 1 to match index
+
+      return colors;
+    },
+    chooseColor: function(d,i, polymerObj){
+      if(i > (polymerObj.colors.count-1)){
+        polymerObj.colors.accents = polymerObj.addMoreColors(polymerObj.colors.accents);
+        polymerObj.colors.count = polymerObj.colors.accents.length;
+      }
+      
+      return polymerObj.colors.accents[i];
+
+    },
+    addMoreColors: function(polymerObj){
+      var newAccents = polymerObj.colors.accents.map(function(color){
+        return 'blue';
+      });
+
+      polymerObj.colors.accents = polymerObj.colors.accents.concat(newAccents);
+      polymerObj.colors.count = polymerObj.colors.accents.length - 1;  // length minus 1 to match index
+      
+      return polymerObj.colors.accents;
+
     }
+
 
 }
