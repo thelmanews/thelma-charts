@@ -284,7 +284,7 @@ Thelma.chartUtils = {
       var newAccents = polymerObj.colors.accents.map(function(color){
         
         var color = color,
-            lum = 0.3, // represents % lighter or darker (negative values are darker)
+            lum = 0.25, // represents % lighter or darker (negative values are darker)
             hex = "#", c, i;
         
         // validate color and make it always 6 chars 
