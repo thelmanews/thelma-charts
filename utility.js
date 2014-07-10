@@ -271,20 +271,11 @@ Thelma.chartUtils = {
 
       return colors;
     },
-    chooseColor: function(d,i, polymerObj){
-      if(i > (polymerObj.colors.count-1)){
-        polymerObj.colors.accents = polymerObj.addMoreColors(polymerObj.colors.accents);
-        polymerObj.colors.count = polymerObj.colors.accents.length;
-      }
-      
-      return polymerObj.colors.accents[i];
-
-    },
     addMoreColors: function(polymerObj){
       var newAccents = polymerObj.colors.accents.map(function(color){
         
         var color = color,
-            lum = 0.25, // represents % lighter or darker (negative values are darker)
+            lum = 0.3, // represents % lighter or darker (negative values are darker)
             hex = "#", c, i;
         
         // validate color and make it always 6 chars 
