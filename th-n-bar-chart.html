@@ -154,9 +154,6 @@
 
 		      self.dataLength = self.chartData.length;
 
-
-
-
 		      // creating scales
 		      var scales = self.simpleScaleBuilder(width, height, self.chartData);
 
@@ -174,11 +171,8 @@
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
 		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
-
 		        
 		  },
-
-
 		  reset: function(hard) {
 
 		      
