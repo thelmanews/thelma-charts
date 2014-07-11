@@ -27,30 +27,21 @@
 		    	  y = polymerObj.y;
 
 		      staticObj._setupContainerSize(polymerObj);
-		      
+		    	
+		    	// add more colors if there are more bars than colors
+		      while (polymerObj.chartData.length > polymerObj.colors.count) {
+		      	polymerObj.addMoreColors(polymerObj);
+		      }
+		
 		      polymerObj.bars
 		        .attr("class", function(d,i){return "bar data"+i;})
-
-		        .style('fill', function(d,i){ 
-		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
-		        	return polymerObj.colors.accents[i];
-		        })
-		        .style('stroke', function(d,i){ 
-		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
-		        	return polymerObj.colors.accents[i];
-		        });
+		        .style('fill', function(d,i){ return polymerObj.colors.accents[i]; })
+		        .style('stroke', function(d,i){ return polymerObj.colors.accents[i]; });
 		      
 		      polymerObj.labels
 		        .attr("class", function(d,i){return "label data"+i;})
-		        .style('fill', function(d,i){ 
-		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
-		        	return polymerObj.colors.accents[i];
-		        })
-		        .style('stroke', function(d,i){ 
-		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
-		        	return polymerObj.colors.accents[i];
-		        });
-
+		        .style('fill', function(d,i){ return polymerObj.colors.accents[i]; })
+		        .style('stroke', function(d,i){ return polymerObj.colors.accents[i]; });
 		      
 		      polymerObj.values
 		        .attr("class", function(d,i){return "value data"+i;})
@@ -58,15 +49,8 @@
 		        //.style('opacity', 0)
 		        //.attr('x', function(d) { return x(i) + polymerObj.dims.bars.width/2; })
 		        .attr('font-size', polymerObj.dims.values.size+"px")
-
-		        .style('fill', function(d,i){ 
-		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
-		        	return polymerObj.colors.accents[i];
-		        })
-		        .style('stroke', function(d,i){ 
-		        	if (i > polymerObj.colors.count) {  polymerObj.addMoreColors(polymerObj) };
-		        	return polymerObj.colors.accents[i];
-		        });
+		        .style('fill', function(d,i){ return polymerObj.colors.accents[i]; })
+		        .style('stroke', function(d,i){ return polymerObj.colors.accents[i]; });
 
 		};
 

@@ -267,7 +267,7 @@ Thelma.chartUtils = {
         }
       }
 
-      colors.count = colors.accents.length - 1; // length minus 1 to match index
+      colors.count = colors.accents.length;
 
       return colors;
     },
@@ -299,7 +299,7 @@ Thelma.chartUtils = {
       polymerObj.colors.accents = polymerObj.colors.accents.concat(newAccents);
 
       // update total count of colors
-      polymerObj.colors.count = polymerObj.colors.accents.length - 1;  // length minus 1 to match index
+      polymerObj.colors.count = polymerObj.colors.accents.length; 
       
       return polymerObj.colors.accents;
     }
