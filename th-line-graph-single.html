@@ -83,7 +83,7 @@
                   data = polymerObj.chartData,
                   line = polymerObj.line,
                   startingLine = polymerObj.startingLine,
-                  animateStyle = polymerObj.chartOptions.animateStyle; 
+                  animateStyle = polymerObj.animateStyle; 
 
               polymerObj.currentPos = {};
 
@@ -102,7 +102,7 @@
               polymerObj.xAxis = g.append("line")
                 .attr("class", "axis")
                 .attr("stroke-width", 2)
-                .attr("opacity", function(d) { return polymerObj.chartOptions.xAxisLine ? 1 : 0; });
+                .attr("opacity", function(d) { return polymerObj.xAxisLine ? 1 : 0; });
                
               // y-axis
               polymerObj.yAxis = g.append("line")
@@ -115,7 +115,7 @@
                 .enter().append("text")
                 .attr("class", "xLabel axis")
                 .text(function(d){ return d;})
-                .attr("opacity", function(d) { return polymerObj.chartOptions.xAxisLabels ? 1 : 0; })
+                .attr("opacity", function(d) { return polymerObj.xAxisLabels ? 1 : 0; })
                 .attr("text-anchor", "middle");
               
               // y labels
@@ -125,14 +125,14 @@
                 .attr("class", "yLabel axis")
                 .text(function(d){ return d;})
                 .attr("dy", 4)
-                .attr("opacity", function(d) { return polymerObj.chartOptions.animateAxis || !polymerObj.chartOptions.yAxisLabels ? 0 : 1; })
+                .attr("opacity", function(d) { return polymerObj.animateAxis || !polymerObj.yAxisLabels ? 0 : 1; })
                 .style("text-anchor", "start");
               
               // large display value
               polymerObj.displayValue = g.append('g').append('text')
                 .attr("class", "fill-foreground")
                 .attr("opacity", function(){
-                  return polymerObj.chartOptions.joyStick ? 0.7 : 0;
+                  return polymerObj.joyStick ? 0.7 : 0;
                 }); // this can start as 0 and fade in after datapoint and joystick appear
 
               // fill area path
@@ -145,7 +145,7 @@
                   .attr("class", "data0 no-fill")
                   .attr("stroke-width", "3")
                   .attr("fill", "none")
-                  .style("stroke", polymerObj.chartOptions.color);
+                  .style("stroke", polymerObj.color);
 
               // datapoints
               polymerObj.circles = g.selectAll(".circle")
@@ -153,7 +153,7 @@
               .enter().append("circle")
               .attr("class", "circle data0 stroke-foreground")
               .attr("r", 0)
-              .style("fill", polymerObj.chartOptions.color);
+              .style("fill", polymerObj.color);
               
               // tooltips
               polymerObj.tips = g.selectAll('.tip')
@@ -191,10 +191,10 @@
                 .attr("y2", 0);
 
               polymerObj.yAxis
-                .attr("y1", function(d) { return polymerObj.chartOptions.animateAxis ? y(0) : -1 * y(polymerObj.minValue); }) 
-                .attr("y2", function(d) { return polymerObj.chartOptions.animateAxis ? y(0) : -1 * y(polymerObj.maxValue); });
+                .attr("y1", function(d) { return polymerObj.animateAxis ? y(0) : -1 * y(polymerObj.minValue); }) 
+                .attr("y2", function(d) { return polymerObj.animateAxis ? y(0) : -1 * y(polymerObj.maxValue); });
                 // .attr("stroke-width", 2)
-                // .attr("opacity", function(d) { return polymerObj.chartOptions.animateAxis ? 0 : 1; });
+                // .attr("opacity", function(d) { return polymerObj.animateAxis ? 0 : 1; });
 
               polymerObj.xLabels
                 // .data(x.ticks(5))// TODO: Replace with formula (number of labels)
@@ -205,14 +205,14 @@
               polymerObj.yLabels
                 .text(function(d){ return d;})
                 .attr("transform", function(d){
-                  var yPos = polymerObj.chartOptions.animateAxis ? 0 : -1 * y(d);
+                  var yPos = polymerObj.animateAxis ? 0 : -1 * y(d);
                   return "translate(0,"+ yPos +") rotate(-90)";
                 } );
 
 
               polymerObj.displayValue
-                .attr("text-anchor", function(){ return polymerObj.chartOptions.dataPosition === "left" ? "start" : "end"; })
-                .attr("x", function(){ return polymerObj.chartOptions.dataPosition === "left" ? polymerObj.dims.margin.left : (width-polymerObj.dims.margin.left); })
+                .attr("text-anchor", function(){ return polymerObj.dataPosition === "left" ? "start" : "end"; })
+                .attr("x", function(){ return polymerObj.dataPosition === "left" ? polymerObj.dims.margin.left : (width-polymerObj.dims.margin.left); })
                 .attr("y", -(height - valueSize - polymerObj.dims.margin.top)) 
                 .attr("font-size", valueSize) 
                 .text(polymerObj.currentPos.value);
@@ -221,59 +221,59 @@
               // line data, starting state (raise)
               polymerObj.startingLine = d3.svg.line()
                 .x(function(d) { return x(d.label); })
-                .y(0).interpolate(polymerObj.chartOptions.lineStyle);
+                .y(0).interpolate(polymerObj.lineStyle);
 
               // line data, ending state
               polymerObj.line = d3.svg.line()
                 .x(function(d) { return x(d.label); })
                 .y(function(d) { return -y(d.value); })
-                .interpolate(polymerObj.chartOptions.lineStyle);
+                .interpolate(polymerObj.lineStyle);
 
               // data for fill area, starting state (raise)
               polymerObj.areaDataStart = d3.svg.area()
                 .x(function(d) { return x(d.label); })
-                .y1(0).interpolate(polymerObj.chartOptions.lineStyle);
+                .y1(0).interpolate(polymerObj.lineStyle);
 
               // data for fill area, ending state
               polymerObj.areaData = d3.svg.area()
                 .x(function(d) { return x(d.label); })
                 .y1(function(d) { return -y(d.value); })
-                .interpolate(polymerObj.chartOptions.lineStyle);
+                .interpolate(polymerObj.lineStyle);
 
               // update path for fill area and lines
-                if (polymerObj.chartOptions.animateStyle == "draw"){
+                if (polymerObj.animateStyle == "draw"){
 
                   polymerObj.linePath 
                     .data(data)
                     .attr("d", polymerObj.line(data)); 
 
-                  if (polymerObj.chartOptions.fillArea){   
+                  if (polymerObj.fillArea){   
                     polymerObj.areaPath
                       .datum(data)
                         .attr("class", "data0 area")
                         .attr("opacity", 0)
                         .attr("d", polymerObj.areaData)
-                        .style("fill", polymerObj.chartOptions.color)
-                        .style("stroke", polymerObj.chartOptions.color);
+                        .style("fill", polymerObj.color)
+                        .style("stroke", polymerObj.color);
                   }
                 } else {
                 
                   polymerObj.linePath
                     .data(data)
-                    .attr("d", function(){ return polymerObj.chartOptions.fillArea ? polymerObj.line(data) : polymerObj.startingLine(data);})
+                    .attr("d", function(){ return polymerObj.fillArea ? polymerObj.line(data) : polymerObj.startingLine(data);})
                     .attr("class", "data0 no-fill")
                     .attr("stroke-width", "2.5")
-                    .attr("opacity", function(){ return polymerObj.chartOptions.fillArea ? 0 : 1;})
-                    .style("stroke", polymerObj.chartOptions.color);
+                    .attr("opacity", function(){ return polymerObj.fillArea ? 0 : 1;})
+                    .style("stroke", polymerObj.color);
 
-                  if (polymerObj.chartOptions.fillArea){   
+                  if (polymerObj.fillArea){   
                     polymerObj.areaPath 
                       .datum(data)
                       .attr("class", "area data0")
                       .attr("opacity", 0)
                       .attr("d", polymerObj.areaDataStart)
-                      .style("fill", polymerObj.chartOptions.color)
-                      .style("stroke", polymerObj.chartOptions.color);     
+                      .style("fill", polymerObj.color)
+                      .style("stroke", polymerObj.color);     
                     }
                 }
                 
@@ -294,7 +294,7 @@
 
 
         Polymer('th-line-graph-single', {
-          chartOptions: {
+          
             lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
             animateStyle: "draw", // options: raise, draw
             fillArea: false, 
@@ -305,8 +305,7 @@
             animateAxis: false, // not currently working
             dataPosition: "left",  // options: left, right
             joyStick: true,
-            color: ""
-          },
+            color: "",
           chartData: [
             {'label': 2010, 'value': 104,'display_value': '$104', 'note': ''},
             {'label': 2011, 'value': 108,'display_value': '$108', 'note': ''},
@@ -347,7 +346,7 @@
             staticObj._scaleBuilder(self);
             staticObj._setupElementSizes(self);
 
-            if (self.chartOptions.joyStick) {
+            if (self.joyStick) {
               self.moveJoystick();
             } else {
               self.showTooltips();
@@ -389,7 +388,7 @@
               .attr("class", "yLabel axis")
               .text(function(d){ return d;})
               .attr("dy", 4)
-              .attr("opacity", function(d) { return self.chartOptions.animateAxis ? 0 : 1; })
+              .attr("opacity", function(d) { return self.animateAxis ? 0 : 1; })
               .style("text-anchor", "start");
 
             self.xAxis
@@ -402,10 +401,10 @@
               .enter().append("circle")
               .attr("class", "circle data0 stroke-foreground")
               .attr("r", function(){
-                return self.chartOptions.joyStick ? 0 : 4;
+                return self.joyStick ? 0 : 4;
               })
               .attr("r", 0)
-              .style("fill", self.chartOptions.color);
+              .style("fill", self.color);
 
             self.tips
               .enter().append('text')
@@ -421,7 +420,7 @@
             self.tips.exit().remove();
             staticObj._setupElementSizes(self);
             
-            if (self.chartOptions.joyStick) {
+            if (self.joyStick) {
               self.moveJoystick();
             } else {
               self.showTooltips();
@@ -448,7 +447,7 @@
             self.animateAxis();
             self.animateLines();
             
-            if (self.chartOptions.joyStick) {
+            if (self.joyStick) {
               self.moveJoystick();
               self.showCurrentData(self.currentPos, firstTime=true);
             } else {
@@ -465,10 +464,10 @@
                 y = self.y,
                 
                 startingLine = self.startingLine,
-                animateStyle = self.chartOptions.animateStyle; 
+                animateStyle = self.animateStyle; 
                 
             if (animateStyle === "draw"){
-                if (self.chartOptions.fillArea){
+                if (self.fillArea){
                   // path for fill area
 
                   self.areaPath
@@ -492,7 +491,7 @@
                     .attr("stroke-dashoffset", 0);
 
               } else { // raise style 
-                if (self.chartOptions.fillArea){ 
+                if (self.fillArea){ 
                   self.areaPath  
                     // .datum(data)
                       .transition()
@@ -506,17 +505,17 @@
                 // transition for ending state of line
                 self.linePath
                   .transition()
-                    .duration(function(){ return self.chartOptions.fillArea ? 5000 : 1000;})
+                    .duration(function(){ return self.fillArea ? 5000 : 1000;})
                     .attr("d", self.line(data))
                     .attr("opacity", 1);
 
               }
 
               // If no joystick, format circles as same color as line, no stroke)
-              if (!self.chartOptions.joyStick){
+              if (!self.joyStick){
                 self.circles
-                  .style("fill", self.chartOptions.color)
-                  .style("stroke", self.chartOptions.color)
+                  .style("fill", self.color)
+                  .style("stroke", self.color)
                   .transition()
                   .delay(1000)
                   .duration(500)
@@ -537,7 +536,7 @@
           },
           animateAxis: function(){
             var self = this;
-            if (self.chartOptions.animateAxis) {
+            if (self.animateAxis) {
               var yAxis = self.yAxis,
                   y = self.y,
                   maxValue = self.maxValue,
