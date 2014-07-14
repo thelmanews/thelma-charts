@@ -145,7 +145,7 @@
                   .attr("class", "data0 no-fill")
                   .attr("stroke-width", "3")
                   .attr("fill", "none")
-                  .style("stroke", polymerObj.chartOptions.color);
+                  .style("stroke", polymerObj.color);
 
               // datapoints
               polymerObj.circles = g.selectAll(".circle")
@@ -153,7 +153,7 @@
               .enter().append("circle")
               .attr("class", "circle data0 stroke-foreground")
               .attr("r", 0)
-              .style("fill", polymerObj.chartOptions.color);
+              .style("fill", polymerObj.color);
               
               // tooltips
               polymerObj.tips = g.selectAll('.tip')
@@ -253,8 +253,8 @@
                         .attr("class", "data0 area")
                         .attr("opacity", 0)
                         .attr("d", polymerObj.areaData)
-                        .style("fill", polymerObj.chartOptions.color)
-                        .style("stroke", polymerObj.chartOptions.color);
+                        .style("fill", polymerObj.color)
+                        .style("stroke", polymerObj.color);
                   }
                 } else {
                 
@@ -272,8 +272,8 @@
                       .attr("class", "area data0")
                       .attr("opacity", 0)
                       .attr("d", polymerObj.areaDataStart)
-                      .style("fill", polymerObj.chartOptions.color)
-                      .style("stroke", polymerObj.chartOptions.color);     
+                      .style("fill", polymerObj.color)
+                      .style("stroke", polymerObj.color);     
                     }
                 }
                 
@@ -294,7 +294,7 @@
 
 
         Polymer('th-line-graph-single', {
-          chartOptions: {
+          
             lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
             animateStyle: "draw", // options: raise, draw
             fillArea: false, 
@@ -305,9 +305,7 @@
             animateAxis: false, // not currently working
             dataPosition: "left",  // options: left, right
             joyStick: true,
-            color: ""
-          },
-
+            color: "",
           chartData: [
             {'label': 2010, 'value': 104,'display_value': '$104', 'note': ''},
             {'label': 2011, 'value': 108,'display_value': '$108', 'note': ''},
@@ -406,7 +404,7 @@
                 return self.joyStick ? 0 : 4;
               })
               .attr("r", 0)
-              .style("fill", self.chartOptions.color);
+              .style("fill", self.color);
 
             self.tips
               .enter().append('text')
@@ -516,8 +514,8 @@
               // If no joystick, format circles as same color as line, no stroke)
               if (!self.joyStick){
                 self.circles
-                  .style("fill", self.chartOptions.color)
-                  .style("stroke", self.chartOptions.color)
+                  .style("fill", self.color)
+                  .style("stroke", self.color)
                   .transition()
                   .delay(1000)
                   .duration(500)
