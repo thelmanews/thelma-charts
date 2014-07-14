@@ -29,8 +29,8 @@
 
 		Polymer('th-compare-balance-chart', {
 		  chartData: [
-		    {label: 'Smoker', count: 3, image: '/thelma-componenets/images/kid.png'},
-		    {label: 'Non-Smoker', count: 30, image: '/thelma-componenets/images/kid.png'}
+		    {label: 'Smoker', count: 3, image: 'images/kid.png', weight: 1},
+		    {label: 'Non-Smoker', count: 20, image: 'images/kid-smoker.png', weight: 1}
 		  ],
 		  init: function() {
 
@@ -38,12 +38,12 @@
 
 		    var margin = {
 		          top : 5,
-		          right : 10,
-		          bottom : 20,
-		          left : 10,
+		          right : self.chartWidth*0.08,
+		          bottom : self.chartHeight* 0.05,
+		          left : self.chartWidth*0.08,
 		          label: 3
 		      }, width = self.chartWidth*0.95 - margin.left - margin.right, height = self.chartHeight*1.0 - margin.top - margin.bottom
-		         , barWidth = height* 0.02 , textLabelMargin = height*0.05;
+		         , barWidth = 5 , textLabelMargin = height*0.05;
 
 		      self.height = height;
 		      self.width = width;
@@ -59,13 +59,17 @@
 
 		      self.container = container;
 
-		      self.holderTranslate = 'translate(' + width / 2 + ',' + (height* 0.91) + ')';
+		      self.holderTranslate = 'translate(' + width / 2 + ',' + (height  - 31) + ')';
+		      self.bargTranslate = 'translate(' + width / 2 + ',' + (height  - 20) + ')';
 
 
 		      var totalCount = self.chartData.reduce(function(prev, cur) {
 		          return prev+= parseInt(cur.value);
 		      }, 0);
 
+
+		      self.chartData[0].weight = self.chartData[0].weight || 1;
+		      self.chartData[1].weight = self.chartData[1].weight || 1;
 
 		      self.chartData[0].width = self.chartData[0].width || 25;
 		      self.chartData[0].height = self.chartData[0].height || 20;
@@ -80,11 +84,11 @@
 		      
 
 	        container.append('path')
-	            .attr('transform', 'translate(' + (width * 0.40) + ',' + (height *0.95) + ')')
+	            .attr('transform', 'translate(' + (width * 0.40) + ',' + (height -18 ) + ')')
 	            .attr('d', 'M 15 3 L 30 25 L 0 25 L 15 3').attr('class', 'triangle fill-foreground');
 
 	        self.barg = container.append('g')
-	            .attr('transform', 'translate(' + width / 2 + ',' + height*0.95 + ')');
+	            .attr('transform', self.bargTranslate);
 
 	        var bar = self.barg.append('rect')
 	            .attr('x', -width / 2)
@@ -156,28 +160,37 @@
 
 
 	        var prevAngle = 0;
+
+	        //drop left side objects
+
 	        self.lefts.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
 	            return i * delay.left;
 	        }).attr('y', function(d, i) {
 	            return -Math.floor(i / self.chartData[0].elementsPerRow) * (self.chartData[0].height) - 10;
 	        }).each('end', function(d, i) {
-	            
-	            var angle = ((i+1) / self.chartData[0].count) * maxAngle;
+
+	        	// after the drop of each object rotate elements
+	            var angle = ((i+1) / self.chartData[0].count) * maxAngle * self.chartData[0].weight;
+
 	            self._animateBar(prevAngle, angle, Math.min(delay.left, dropSpeed*1.5));
 	            prevAngle = angle;
 	            if(i+1 == self.chartData[0].count) {
 
+	            	var rightSideFinalAngle = prevAngle;
+
 			        setTimeout(function() {
-		            	var prevAngle = maxAngle;
+		            	//var prevAngle = self.chartData[0].count * self.chartData[0].weight * maxAngle;
 			            self.rights.transition().ease('linear').duration(dropSpeed).delay(function(d, i) {
 			                return i * delay.right;
 			            }).attr('y', function(d, i) {
 			                return -Math.floor(i / self.chartData[1].elementsPerRow) * (self.chartData[1].height) - 10;
 			            }).each('end', function(d, i) {
-			            
-				            var angle = maxAngle - ((i+1) / self.chartData[1].count) * maxAngle;
+			            	
+
+				            var angle = /*(self.chartData[0].count * self.chartData[0].weight * maxAngle)*/rightSideFinalAngle - ((i+1) / self.chartData[1].count) * self.chartData[1].weight * maxAngle  ;
 				            self._animateBar(prevAngle, angle, Math.min(delay.right, dropSpeed*1.5));
 				            prevAngle = angle;
+
 				        });
 			        }, pauseBeforeRight);
 
@@ -198,7 +211,7 @@
 
 	        // for bar
 	        function tween(d, i, a) {
-	            return d3.interpolateString('translate(' + self.width / 2 + ',' + self.height*0.95 + ') rotate(' + fromAngle + ')', 'translate(' + self.width / 2 + ',' + self.height*0.95 + ') rotate(' + toAngle + ')');
+	            return d3.interpolateString(self.bargTranslate +' rotate(' + fromAngle + ') ', self.bargTranslate+ ' rotate(' + toAngle + ')');
 	        }
 	        // for lefts
 	        function tween2(d, i, a) {
