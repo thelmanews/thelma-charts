@@ -43,6 +43,13 @@
 
           polymerObj.svg = d3.select(polymerObj.$.chart);
 
+
+          // add more colors if there are more bars than colors
+          while (polymerObj.chartData.length > polymerObj.colors.count) {
+            polymerObj.addMoreColors(polymerObj);
+          }
+
+
           polymerObj.container = polymerObj.svg
               .selectAll('.container')
               .data([1])
@@ -61,6 +68,8 @@
               .attr('class', function(d,i){return "peak data"+i;})
               .attr('d', polymerObj.peakLineStart)
               .attr('opacity', 0)
+              .attr('fill', function(d,i){ return polymerObj.colors.accents[i]; })
+              .attr('stroke', function(d,i){ return polymerObj.colors.accents[i]; })
               .style('fill', function(d,i){ return polymerObj.chartData[i].color })
               .style('stroke', function(d,i){ return polymerObj.chartData[i].color });
 
@@ -68,6 +77,8 @@
             .data(polymerObj.chartData)
             .enter().append('text')
               .attr('class', function(d,i){return "label data"+i;})
+              .attr('fill', function(d,i){ return polymerObj.colors.accents[i]; })
+              .attr('stroke', function(d,i){ return polymerObj.colors.accents[i]; })
               .style('fill', function(d){ return d.color })
               .style('stroke', function(d){ return d.color })
               .attr('transform', function(d,i){
@@ -82,6 +93,8 @@
             .enter().append('text')
               .attr('class', function(d,i){return "value data"+i;})
               .attr('y', polymerObj.dims.height)
+              .attr('fill', function(d,i){ return polymerObj.colors.accents[i]; })
+              .attr('stroke', function(d,i){ return polymerObj.colors.accents[i]; })
               .style('fill', function(d){ return d.color })
               .style('stroke', function(d){ return d.color });
               
@@ -150,6 +163,7 @@
 
           self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25);
 
+          self.colors = self.getColors();
           // format chart elements based on chartData
           //self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
           //self.labelDims = self.setupLabelDims(self);
