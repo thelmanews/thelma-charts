@@ -52,7 +52,9 @@
 		        //.attr('y', 0)
 		        .attr('y', height)
 		        .attr('width',barWidth)
-		        .attr('height', 0);
+		        .attr('height', 0)
+            .style('fill', function(d){ return d.color; })
+            .style('stroke', function(d){ return d.color; });
 
 		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
 		      
@@ -62,9 +64,13 @@
 		        .style('text-anchor','end')
 		        .attr('x', width/2 - barWidth/2 - margin.label)
 		        .attr('y', height) 
-		        .text(function(d) {return d.label;});
+		        .text(function(d) {return d.label;})
+            .style('fill', function(d){ return d.color; })
+            .style('stroke', function(d){ return d.color; });
 		      
-		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value')
+            .style('fill', function(d){ return d.color; })
+            .style('stroke', function(d){ return d.color; });
 		      
 		      self.values
 		        .attr("class", function(d,i){return "value data"+i;})

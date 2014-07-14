@@ -144,14 +144,16 @@
                   .enter().append("path")
                   .attr("class", "data0 no-fill")
                   .attr("stroke-width", "3")
-                  .attr("fill", "none");
+                  .attr("fill", "none")
+                  .style("stroke", polymerObj.chartOptions.color);
 
               // datapoints
               polymerObj.circles = g.selectAll(".circle")
               .data(data)
               .enter().append("circle")
               .attr("class", "circle data0 stroke-foreground")
-              .attr("r", 0);
+              .attr("r", 0)
+              .style("fill", polymerObj.chartOptions.color);
               
               // tooltips
               polymerObj.tips = g.selectAll('.tip')
@@ -250,7 +252,9 @@
                       .datum(data)
                         .attr("class", "data0 area")
                         .attr("opacity", 0)
-                        .attr("d", polymerObj.areaData);
+                        .attr("d", polymerObj.areaData)
+                        .style("fill", polymerObj.chartOptions.color)
+                        .style("stroke", polymerObj.chartOptions.color);
                   }
                 } else {
                 
@@ -259,14 +263,17 @@
                     .attr("d", function(){ return polymerObj.chartOptions.fillArea ? polymerObj.line(data) : polymerObj.startingLine(data);})
                     .attr("class", "data0 no-fill")
                     .attr("stroke-width", "2.5")
-                    .attr("opacity", function(){ return polymerObj.chartOptions.fillArea ? 0 : 1;});
+                    .attr("opacity", function(){ return polymerObj.chartOptions.fillArea ? 0 : 1;})
+                    .style("stroke", polymerObj.chartOptions.color);
 
                   if (polymerObj.chartOptions.fillArea){   
                     polymerObj.areaPath 
                       .datum(data)
                       .attr("class", "area data0")
                       .attr("opacity", 0)
-                      .attr("d", polymerObj.areaDataStart)     
+                      .attr("d", polymerObj.areaDataStart)
+                      .style("fill", polymerObj.chartOptions.color)
+                      .style("stroke", polymerObj.chartOptions.color);     
                     }
                 }
                 
@@ -297,7 +304,8 @@
             yAxisLabels: false,
             animateAxis: false, // need to restyle the axis
             dataPosition: "left",  // options: left, right
-            joyStick: true 
+            joyStick: true,
+            color: ""
           },
           chartData: [
             {'label': 2010, 'value': 104,'display_value': '$104', 'note': ''},
@@ -405,7 +413,8 @@
               .attr("r", function(){
                 return self.chartOptions.joyStick ? 0 : 4;
               })
-              .attr("r", 0);
+              .attr("r", 0)
+              .style("fill", self.chartOptions.color);
 
             self.tips
               .enter().append('text')
@@ -515,11 +524,14 @@
               // If no joystick, format circles as same color as line, no stroke)
               if (!self.chartOptions.joyStick){
                 self.circles
+                  .style("fill", self.chartOptions.color)
+                  .style("stroke", self.chartOptions.color)
                   .transition()
                   .delay(1000)
                   .duration(500)
                   .attr('class', 'data0 circle')
                   .attr('r', 4);
+                  
               }
 
                 // // append circles to datapoints

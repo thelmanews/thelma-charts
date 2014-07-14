@@ -30,7 +30,6 @@
         left: 0;
       }
 
-
     </style>
 
     <svg id="chart"></svg>
@@ -45,7 +44,7 @@
   <script>
 
       Polymer('th-d3-chart', Platform.mixin({
-         chartData: [{label: 'medicaid', value: 20, display_value: '$20'},{label: 'gap', value: 40, display_value: '$40'},{label: 'sub', value: 10, display_value: '$10'}],  // default data just for demo 
+         chartData: [{label: 'medicaid', value: 20, display_value: '$20', color:''},{label: 'gap', value: 40, display_value: '$40', color:''},{label: 'sub', value: 10, display_value: '$10', color:''}],  // default data just for demo 
          chartWidth: 200,
          chartHeight: 300,
          observe: {

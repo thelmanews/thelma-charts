@@ -6,7 +6,7 @@
   <script>
 
       Polymer('th-split-donut-chart', {
-        chartData: [{label: 'U.S.', value: 76}, {label: 'China', value: 43}], 
+        chartData: [{label: 'U.S.', value: 76, color:''}, {label: 'China', value: 43, color:''}], 
         init: function() {
           var self = this,
               margin = {
@@ -72,7 +72,9 @@
                   .attr("class", function(d,i){ return ("foreground data"+i); })
                   .attr("transform", function(d,i){
                     return i > 0 ? "translate(0, 5) rotate(90) scale(1,-1)" : "rotate(90) scale(-1,-1)";
-                  });
+                  })
+                  .style("fill", function(d){return d.color;})
+                  .style("stroke", function(d){return d.color;});
             
             self.text = self.meter.selectAll("text.label")
                 .data(self.data)
@@ -83,7 +85,9 @@
                   .attr("text-anchor", "middle")
                   .attr("dy", function(d,i){
                     return i > 0 ? self.labelSize*2 : -self.labelSize;
-                  });
+                  })
+                  .style("fill", function(d){return d.color;})
+                  .style("stroke", function(d){return d.color;});
 
             self.label = self.meter.selectAll("text.chart")
                 .data(self.data)

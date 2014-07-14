@@ -60,12 +60,16 @@
             .append('path')
               .attr('class', function(d,i){return "peak data"+i;})
               .attr('d', polymerObj.peakLineStart)
-              .attr('opacity', 0);
+              .attr('opacity', 0)
+              .style('fill', function(d,i){ return polymerObj.chartData[i].color })
+              .style('stroke', function(d,i){ return polymerObj.chartData[i].color });
 
           polymerObj.labels = polymerObj.container.selectAll('.label')
             .data(polymerObj.chartData)
             .enter().append('text')
               .attr('class', function(d,i){return "label data"+i;})
+              .style('fill', function(d){ return d.color })
+              .style('stroke', function(d){ return d.color })
               .attr('transform', function(d,i){
                 var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
                 var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
@@ -77,7 +81,9 @@
             .data(polymerObj.chartData)
             .enter().append('text')
               .attr('class', function(d,i){return "value data"+i;})
-              .attr('y', polymerObj.dims.height);
+              .attr('y', polymerObj.dims.height)
+              .style('fill', function(d){ return d.color })
+              .style('stroke', function(d){ return d.color });
               
         },
         staticObj._setupContainerSize = function(polymerObj){ //
@@ -130,10 +136,10 @@
 
       Polymer('th-n-peak-chart', {
         chartData: [
-          {label: 'Platinum', value: 50, display_value: '$50'},
-          {label: 'Gold', value: 45, display_value: '$45'},
-          {label: 'Silver', value: 30, display_value: '$30'},
-          {label: 'Bronze', value: 25, display_value: '$25'}
+          {label: 'Platinum', value: 50, display_value: '$50', color:''},
+          {label: 'Gold', value: 45, display_value: '$45', color:''},
+          {label: 'Silver', value: 30, display_value: '$30', color:''},
+          {label: 'Bronze', value: 25, display_value: '$25', color:''}
         ],
         init: function() {
           var self = this;
@@ -251,8 +257,13 @@
               .attr('height', 0)
               .attr('y', height)
               .attr('d', self.peakLineStart)
-              .attr('opacity', 0);
+              .attr('opacity', 0)
+              .style('fill', function(d,i){ return polymerObj.chartData[i].color })
+              .style('stroke', function(d,i){ return polymerObj.chartData[i].color });
+
             self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;})
+              .style('fill', function(d){ return d.color })
+              .style('stroke', function(d){ return d.color })
               .attr('transform', function(d,i){
                 var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
                 var yPos = height + self.dims.margin.label;
@@ -261,7 +272,9 @@
               });
             self.values.enter().append('text')
               .attr('class', function(d,i){return "value data"+i;})
-              .attr('y', height);
+              .attr('y', height)
+              .style('fill', function(d){ return d.color })
+              .style('stroke', function(d){ return d.color });
 
             self.peaks.exit().transition().duration(1000).style('opacity', 0).remove();
             self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
