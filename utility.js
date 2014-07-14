@@ -122,7 +122,6 @@ Thelma.chartUtils = {
 	    // dims.barGap = 0.3;
 	    // dims.numBars = polymerObj.chartData.length;  // DEPENDANT ON CHARTDATA
 	    // dims.barWidth = Math.min(70,((dims.width / dims.numBars)/(1+dims.barGap)));
-
 	    return dims;
 
 	},
@@ -223,8 +222,8 @@ Thelma.chartUtils = {
               label: 10,
           }, 
 
-      dims.width = Math.max(100,(polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right)), 
-      dims.height = Math.max(150,(polymerObj.chartHeight*0.95 - dims.margin.top - dims.margin.bottom)),
+      dims.width = Math.max(100,(polymerObj.chartWidth - dims.margin.left - dims.margin.right)), 
+      dims.height = Math.max(150,(polymerObj.chartHeight - dims.margin.top - dims.margin.bottom)),
       
       dims.labels = {};
       dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
@@ -242,13 +241,14 @@ Thelma.chartUtils = {
       }); 
       dims.values.width = dims.values.maxLength * 8; // This calc usually works? Might need more sophistication
       
+      
       dims.bar = {};
       dims.bar.minWidth = 10;
-      dims.bar.maxWidth = 100;
-      dims.bar.width = Math.min(dims.bar.maxWidth, ( (dims.width/2 - (Math.max(dims.values.width,dims.labels.width))-dims.margin.label) *2)); 
+      dims.bar.maxWidth = 125;
+      dims.bar.width = Math.min(dims.bar.maxWidth, (dims.width - dims.values.width - dims.labels.width -dims.margin.label*2)); 
       dims.bar.width = dims.bar.width < dims.bar.minWidth ? dims.bar.minWidth : dims.bar.width; 
       
-      dims.minWidth = dims.bar.minWidth + (Math.max(dims.values.width,dims.labels.width)*2);
+      dims.minWidth = dims.bar.minWidth + dims.values.width + dims.labels.width + dims.margin.label*2;
       dims.width = dims.width < dims.minWidth ? dims.minWidth : dims.width;  // cannot resize to smaller than this;
       // dims.labels.charLimit - calculate the character limit for labels, given the min width of the bar and the width of the component
       // dims.minHeight - need to set this also

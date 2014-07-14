@@ -10,22 +10,22 @@
         init: function() {
           var self = this,
               margin = {
-                top : 12,
-                bottom : 12,
+                top : self.chartWidth*0.14,
+                bottom : self.chartWidth*0.14,
                 label: 3
               }, 
               width = self.chartWidth*0.95, 
-              height = width,
+              height = width + margin.top + margin.bottom,
               pi = Math.PI,
               progress = 0,
               total = 100,
               formatPercent = d3.format(".0%"),
-              outerRadius = height*0.39,
-              innerRadius = height*0.25;
+              outerRadius = width*0.49,
+              innerRadius = width*0.32;
               self._prevProgress = 0;
 
 
-            self.labelSize = width/15;
+            self.labelSize = width/12;
             self.height = height;
 
             // sort the chartData so smaller value comes first to avoid bug in the tween function
@@ -97,7 +97,7 @@
                   .attr("text-anchor", "middle")
                   .style('font-size', self.labelSize)
                   .attr("dy", function(d,i){
-                    return i > 0 ? height/2 : -(height/2) + self.labelSize;
+                    return i > 0 ? height/2 - 1  : -(height/2) + self.labelSize + 1; // 1px adjustment otherwise it cuts off
                   })
                   .text(function(d) {return d.label});
 

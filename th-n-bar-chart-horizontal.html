@@ -23,9 +23,12 @@
 		  	  
 		  	  self.dims = self.setupDimensions(self);
 
+		  	  // TODO: figure out a cleaner way to override margin defaults 
+		  	  self.dims.height = self.dims.height - self.dims.margin.top - self.dims.margin.bottom; // override default margin, not necessary
+		  	  self.dims.margin.top = 0; // override default margin, not necessary
+		  	  self.dims.margin.bottom = 0; // override default margin, not necessary
+
 		  	  self.setupBarDims(self, 1, 1.6); // self, overlap, gap
-		      // self.setupLabelDims(self);
-		      // self.setupValueDims(self);
 
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
@@ -33,9 +36,6 @@
 
 	    	 // margin.left = 50; //TODO, dependent on max
 		      
-
-		      //self.extractElementDataPoints(); //needed?
-
 		      self.dataLength = self.chartData.length;
 
 		      var maxValueLength = d3.max(self.chartData, function(d) {
@@ -49,8 +49,8 @@
 		      self.dims.labels.height = 25;
 		      self.dims.values.height = self.dims.bars.width;
 		      self.dims.values.containerWidth = maxValueLength * self.dims.values.height * 0.75;  // characters x font size x 0.6 (average width/height)
-
-
+		      self.dims.bars.area = width - self.dims.values.containerWidth; // increase width by the extra space taken by values
+		      
 		      var chart_svg = self.$.chart;
 
 
@@ -88,7 +88,7 @@
 		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
 		      // creating scales
-		      var scales = self.simpleScaleBuilder(width, height, self.chartData, 'horizontal');
+		      var scales = self.simpleScaleBuilder(self.dims.bars.area, height, self.chartData, 'horizontal');
 
 		      var x = scales.x;
 		      var y = scales.y;
@@ -107,10 +107,10 @@
 		  	  var self = this;
 
 	    	  var margin = self.dims.margin,
-		    	  width = self.dims.width,
-		    	  height = self.dims.height,
-		    	  x = self.x,
-		    	  y = self.y;
+			    	  width = self.dims.width,
+			    	  height = self.dims.height,
+			    	  x = self.x,
+			    	  y = self.y;
 
 			  	self.svg
 		      	.attr('width', width + margin.left + margin.right)

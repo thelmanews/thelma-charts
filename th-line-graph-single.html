@@ -7,7 +7,7 @@
     <style>
       #chart {
         
-        padding: 10px;
+        padding: 5px;
         box-sizing: border-box;
       }
 
@@ -68,14 +68,14 @@
               polymerObj.minValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
               
               polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([polymerObj.dims.margin.top, 
-                      (polymerObj.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom)) ]), //30 to make room for the joystick
+                      (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom)) ]), //30 to make room for the joystick
 
-              polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.width ]); 
+              polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]); 
 
             },
             _setupElements: function(polymerObj){
-              var width = polymerObj.width,
-                  height = polymerObj.height,
+              var width = polymerObj.dims.width,
+                  height = polymerObj.dims.height,
                   y = polymerObj.y,
                   x = polymerObj.x;
                   g = polymerObj.g, 
@@ -166,17 +166,17 @@
             _setupContainerSize: function(polymerObj){
 
               polymerObj.svg
-                .attr("width", polymerObj.width)
-                .attr("height", polymerObj.height); 
+                .attr("width", polymerObj.dims.width+ polymerObj.dims.margin.right) // TODO: need to fix so the svg width already accounts for this!
+                .attr("height", polymerObj.dims.height); 
 
               polymerObj.g
-                .attr("transform", "translate(0,"+ (polymerObj.height-polymerObj.dims.margin.top/2) +")");
+                .attr("transform", "translate(0,"+ (polymerObj.dims.height-polymerObj.dims.margin.top/2) +")");
 
          
             },
             _setupElementSizes: function(polymerObj){
-              var width = polymerObj.width,
-                  height = polymerObj.height,
+              var width = polymerObj.dims.width,
+                  height = polymerObj.dims.height,
                   y = polymerObj.y,
                   x = polymerObj.x,
                   data = polymerObj.chartData,
@@ -301,8 +301,8 @@
             xAxisLine: true,
             xAxisLabels: true,
             yAxisLine: false, // doesnt do anything, there is never a line
-            yAxisLabels: false,
-            animateAxis: false, // need to restyle the axis
+            yAxisLabels: true,
+            animateAxis: false, // not currently working
             dataPosition: "left",  // options: left, right
             joyStick: true,
             color: ""
@@ -320,19 +320,12 @@
             // setup dimensions
             self.dims = self.setupDimensions(self);
 
-
-            self.width = self.dims.width;
-            self.height = self.dims.height;     //NEEDED?!?
-
-
             // adjust the margins because labels and joystick need more space
             self.dims.margin.right = 10;
             self.dims.margin.left = 15;
             self.dims.margin.top = 30;
             self.dims.margin.bottom = 30;
-            self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
-
-            //NEEDED ?!?
+            self.dims.width = self.dims.width = Math.max(100,(self.chartWidth -self.dims.margin.left - self.dims.margin.right));
           
             staticObj._scaleBuilder(self);
             staticObj._setupElements(self);
@@ -343,15 +336,13 @@
           resize: function(){
             var self = this;
             self.dims = self.setupDimensions(self);
-            self.width = self.dims.width;
-            self.height = self.dims.height;
-
+            
             // adjust the margins because labels and joystick need more space
             self.dims.margin.right = 10;
             self.dims.margin.left = 15;
             self.dims.margin.top = 30;
             self.dims.margin.bottom = 30;
-            self.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
+            self.dims.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
           
             staticObj._scaleBuilder(self);
             staticObj._setupElementSizes(self);
@@ -620,8 +611,8 @@
             var self = this, 
                 svg = self.svg,
                 x = self.x,
-                w = self.width,
-                h = self.height,
+                w = self.dims.width,
+                h = self.dims.height,
                 g = self.g;
 
             self.currentPos.x = x(self.currentPos.label);  
@@ -668,7 +659,7 @@
 
                   .attr("class", "stroke-foreground")
                   .attr('fill', 'none')
-                  .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.width, d3.event.x))); 
+                  .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.dims.width, d3.event.x))); 
            
                 // define current position
                 self.currentPos.x = d3.select(this).attr("cx");
