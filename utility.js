@@ -95,6 +95,7 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
         return dims;        
 
 	}
+  
 
 	
 }
@@ -254,6 +255,53 @@ Thelma.chartUtils = {
 
       return dims;
 
+    },
+    getColors: function(){
+      colors = {};
+      colors.theme = window.CoreStyle.g.theme;
+      colors.accents = [];
+
+      for (var color in colors.theme){
+        if(/^accent/.test(color)){
+          colors.accents.push(colors.theme[color]);
+        }
+      }
+
+      colors.count = colors.accents.length;
+
+      return colors;
+    },
+    addMoreColors: function(polymerObj){
+      var newAccents = polymerObj.colors.accents.map(function(color){
+        
+        var color = color,
+            lum = 0.3, // represents % lighter or darker (negative values are darker)
+            hex = "#", c, i;
+        
+        // validate color and make it always 6 chars 
+        color = String(color).replace(/[^0-9a-f]/gi, '');
+        if (color.length < 6) {
+          color = color[0]+color[0]+color[1]+color[1]+color[2]+color[2];
+        }
+
+        // convert color to decimal, adjust lumosity, and convert back to hex;
+        for (i = 0; i < 3; i++) {
+          c = parseInt(color.substr(i*2,2), 16);
+          c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+          hex += ("00"+c).substr(c.length);
+        }
+
+        return hex;
+        
+      });
+
+      // add new colors to accents array
+      polymerObj.colors.accents = polymerObj.colors.accents.concat(newAccents);
+
+      // update total count of colors
+      polymerObj.colors.count = polymerObj.colors.accents.length; 
+      
+      return polymerObj.colors.accents;
     }
 
 }

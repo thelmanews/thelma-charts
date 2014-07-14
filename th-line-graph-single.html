@@ -22,13 +22,13 @@
 
       @-webkit-keyframes pulse {  
         from {
-         stroke: rgba(255, 255, 255, 0.9);
+         stroke-opacity: 0.9;
         }
         50% {
-          stroke: rgba(255, 255, 255, 0.4);
+         stroke-opacity: 0.4;
         }
         to {
-          stroke: rgba(255, 255, 255, 0.9);      
+         stroke-opacity: 0.9;
         }
       }
 
@@ -720,7 +720,7 @@
              // Lock the joystick in place
             
                 d3.select(this)
-                  .attr('class','pulse')
+                  .attr('class','pulse stroke-foreground')
                   .transition()
                     .duration(50)
                     .attr('cx', self.currentPos.closestX);
