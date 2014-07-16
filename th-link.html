@@ -2,36 +2,106 @@
 <link rel="import" href="thelma_core.html">
 <link rel="import" href="../core-ajax/core-ajax.html">
 
-<polymer-element name="th-link" attributes="width linkUrl" noscript>
+<polymer-element name="th-link" attributes="width url theme">
   <template>
       <core-style ref="theme"></core-style>
-        
+      <style>
+        :host{
+          width: {{width}}
+        }
+
+        a {
+          text-decoration: none;
+        }
+
+        li {
+          list-style: none;
+          font-size: 0.8em;
+          font-weight: 300;
+          -webkit-background-size: cover;
+          -moz-background-size: cover;
+          -o-background-size: cover;
+          background-size: cover;
+          color: {{color}};
+         }
+
+        .layer {
+          background-color: {{bgcolor}};
+          width: 100%;
+          height: 100%;
+          padding: 8px;
+          box-sizing: border-box;
+        }
+
+        .title {
+          margin: 4px 0px 0px 0px;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;    
+          -webkit-line-clamp: 2;
+          overflow: hidden;        
+        }
+
+        .favicon {
+          display: inline-block;
+          position: absolute;
+          bottom: 3px;
+          right: 3px;
+          width: 16px;
+          height: 16px;
+          border-radius: 8px;
+          text-align: center;
+        }
+
+        .favicon:before {
+          content: "\0074"; /* replace with correct thelma unicode symbol */
+        }
+
+      </style>
       <core-ajax
         auto
-        url="http://www.corsproxy.com/online.wsj.com/articles/israel-shoots-down-palestinian-drone-1405336514"
+        url={{requestUrl}}
         handleAs="text"  
         on-core-response="{{handleResponse}}">
       </core-ajax>
-      <!-- handleAs="document" -->
+
+      <template if="{{title}}">
+        <a href={{url}} target="_blank">
+          <li style="background: url({{image}}) center center no-repeat; background-size: cover;"> 
+            <div class="layer">
+              <content></content>
+              <p class="title headline">{{title}}</p>
+              <template if={{thelma}}> <span class="favicon"></span> </template>
+            </div>
+          </li>
+        </a>
+      </template>
   </template>
 
   <script>
       Polymer('th-link', {
         ready: function(){
-          // add corsproxy to url using regex
+          var self = this;
+          self.requestUrl = self.url.replace(/(ftp|http|https):\/\//,'http://www.corsproxy.com/');
+          
+          // Check if it's a thelma story for favicon
+          self.thelma = /.*thelma.*/.test(self.url);
+
+          // Set styles based on light or dark theme
+          self.color = self.theme == "light" ? "black" : "white";
+          self.bgcolor = self.theme == "light" ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
         },
-        handleResponse: function(event, response) {
-            var parser=new DOMParser();
-            var xmlDoc=parser.parseFromString(response,"text/xml");
-            var head = response.response.head;
-            // console.log(response.response.head);
-            console.log(response.response);
-            var titlePattern = /"twitter:title"\s*content=\s*"(.*)"/;
-            console.log(titlePattern.test(response.response));
-
+        handleResponse: function(event, r) {
+          var self = this,
+              response = r.response,
+              // These matches work when content is listed after the name in the meta tag only.
+              titleMatch = response.match(/"twitter:title"\s*content=\s*"(.*)"/) || response.match(/"og:title"\s*content=\s*"(.*)"/), 
+              descMatch = response.match(/"twitter:description"\s*content=\s*"(.*)"/) || response.match(/"og:description"\s*content=\s*"(.*)"/),
+              imgMatch = response.match(/"twitter:image"\s*content=\s*"(.*)"/) || response.match(/"og:image"\s*content=\s*"(.*)"/);
+          
+          self.title = titleMatch ? titleMatch[1] : "";
+          self.description = descMatch ? descMatch[1] : "";
+          self.image = imgMatch ? imgMatch[1] : "";
         }
-
-
       });
 
   </script>
