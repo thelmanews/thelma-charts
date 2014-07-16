@@ -41,7 +41,7 @@
       }
 
       .pulse {
-        fill: none;
+        fill-opacity: 0;
         -webkit-animation-name: pulse;
         -webkit-animation-duration: 3s;
         -webkit-animation-iteration-count: infinite;
@@ -637,7 +637,7 @@
                   .attr("r", 8)
                   .attr("cx", self.currentPos.x)
                   .attr("cy", 12)
-                  .attr("class", "pulse stroke-foreground")
+                  .attr("class", "pulse stroke-foreground fill-background")
                   .attr("stroke-width", 4.5)
                   .call(drag);
 
@@ -657,8 +657,8 @@
                 // move the circle
                 d3.select(this)
 
-                  .attr("class", "stroke-foreground")
-                  .attr('fill', 'none')
+                  .attr("class", "stroke-foreground fill-background")
+                  .attr('fill-opacity', 0)
                   .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.dims.width, d3.event.x))); 
            
                 // define current position
@@ -711,7 +711,7 @@
              // Lock the joystick in place
             
                 d3.select(this)
-                  .attr('class','pulse stroke-foreground')
+                  .attr('class','pulse stroke-foreground fill-background')
                   .transition()
                     .duration(50)
                     .attr('cx', self.currentPos.closestX);
