@@ -9,10 +9,7 @@
       <core-ajax
         auto
         url="http://www.corsproxy.com/online.wsj.com/articles/israel-shoots-down-palestinian-drone-1405336514"
-        
-        handleAs="text"
-        
-        
+        handleAs="text"  
         on-core-response="{{handleResponse}}">
       </core-ajax>
       <!-- handleAs="document" -->
@@ -24,10 +21,14 @@
           // add corsproxy to url using regex
         },
         handleResponse: function(event, response) {
-            // var parser=new DOMParser();
-            // var xmlDoc=parser.parseFromString(response,"text/xml");
-            // console.log((response.response.querySelectorAll('head')[0]['innerHTML']));
-            console.log(response);
+            var parser=new DOMParser();
+            var xmlDoc=parser.parseFromString(response,"text/xml");
+            var head = response.response.head;
+            // console.log(response.response.head);
+            console.log(response.response);
+            var titlePattern = /"twitter:title"\s*content=\s*"(.*)"/;
+            console.log(titlePattern.test(response.response));
+
         }
 
 
