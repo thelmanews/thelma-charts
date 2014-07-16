@@ -1,0 +1,19 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="thelma_core.html">
+
+<polymer-element name="th-linked-list" attributes="width" noscript>
+  <template>
+      <core-style ref="theme"></core-style>
+      <style>
+        ul {
+          -webkit-column-count: 1;
+             -moz-column-count: 1;
+                  column-count: 1;
+          width: {{width}};
+        }
+      </style>
+      <ul>
+        <content></content>
+      </ul>
+  </template>
+</polymer-element>
