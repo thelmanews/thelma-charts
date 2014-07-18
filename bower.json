@@ -10,6 +10,7 @@
     "countUp.js": "latest",
     "core-style": "Polymer/core-style#~0.3.2",
     "marked": "~0.3.2",
-    "core-ajax": "Polymer/core-ajax#~0.3.3"
+    "core-ajax": "Polymer/core-ajax#~0.3.3",
+    "modernizr": "~2.8.3"
   }
 }
