@@ -222,6 +222,11 @@
                 var xPos =  (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
                 var yPos = height + self.dims.margin.label;
                 var rotation = labelDims.angle;
+                //if there is an angle, move labels slightly to top left
+                if(rotation> 0) {
+                  xPos = xPos -7;
+                  yPos = yPos -3;
+                }
                 return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
               })
             .style('opacity', 1);
