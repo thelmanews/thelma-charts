@@ -69,7 +69,7 @@
               polymerObj.minValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
               
               polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([polymerObj.dims.margin.top, 
-                      (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom)) ]), //30 to make room for the joystick
+                      (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom + polymerObj.dims.joystick.d))]), 
 
               polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]); 
 
@@ -167,11 +167,11 @@
             _setupContainerSize: function(polymerObj){
 
               polymerObj.svg
-                .attr("width", polymerObj.dims.width+ polymerObj.dims.margin.right) // TODO: need to fix so the svg width already accounts for this!
+                .attr("width", polymerObj.dims.width+ polymerObj.dims.margin.right + polymerObj.dims.margin.left) // TODO: need to fix so the svg width already accounts for this!
                 .attr("height", polymerObj.dims.height); 
 
               polymerObj.g
-                .attr("transform", "translate(0,"+ (polymerObj.dims.height-polymerObj.dims.margin.top/2) +")");
+                .attr("transform", "translate(0,"+ (polymerObj.dims.height-polymerObj.dims.margin.top) +")");
 
          
             },
@@ -214,7 +214,7 @@
               polymerObj.displayValue
                 .attr("text-anchor", function(){ return polymerObj.dataPosition === "left" ? "start" : "end"; })
                 .attr("x", function(){ return polymerObj.dataPosition === "left" ? polymerObj.dims.margin.left : (width-polymerObj.dims.margin.left); })
-                .attr("y", -(height - valueSize - polymerObj.dims.margin.top)) 
+                .attr("y", -(height - valueSize - polymerObj.dims.margin.top - polymerObj.dims.joystick.d)) 
                 .attr("font-size", valueSize) 
                 .text(polymerObj.currentPos.value);
 
@@ -321,10 +321,11 @@
             self.dims = self.setupDimensions(self);
 
             // adjust the margins because labels and joystick need more space
+            self.dims.joystick = { r: 8, d: 16};
             self.dims.margin.right = 10;
             self.dims.margin.left = 15;
-            self.dims.margin.top = 30;
-            self.dims.margin.bottom = 30;
+            self.dims.margin.top += self.dims.joystick.d;
+            self.dims.margin.bottom += self.dims.joystick.d;
             self.dims.width = self.dims.width = Math.max(100,(self.chartWidth -self.dims.margin.left - self.dims.margin.right));
           
             staticObj._scaleBuilder(self);
@@ -340,8 +341,9 @@
             // adjust the margins because labels and joystick need more space
             self.dims.margin.right = 10;
             self.dims.margin.left = 15;
-            self.dims.margin.top = 30;
-            self.dims.margin.bottom = 30;
+            self.dims.margin.top += self.dims.joystick.d;
+            self.dims.margin.bottom += self.dims.joystick.d;
+
             self.dims.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
           
             staticObj._scaleBuilder(self);
@@ -636,15 +638,15 @@
                   .attr("class", "target")
                   .attr("r", 8)
                   .attr("cx", self.currentPos.x)
-                  .attr("cy", 12)
+                  .attr("cy", self.dims.joystick.r)
                   .attr("class", "pulse stroke-foreground fill-background")
                   .attr("stroke-width", 4.5)
                   .call(drag);
 
               self.joystick.append('rect')
-                  .attr('y', 22)
+                  .attr('y', self.dims.joystick.r*2 +2)
                   .attr('x', self.currentPos.x-1.5)
-                  .attr("height", h-36)
+                  .attr("height", h-self.dims.joystick.d - self.dims.margin.bottom)
                   .attr("width", 3)
                   .attr("class", "fill-foreground")
                   .attr('opacity', 0.4);
