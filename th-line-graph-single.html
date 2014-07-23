@@ -682,9 +682,10 @@
                 // determine which circles/notes are to be displayed
                 g.selectAll(".circle")
                   .attr("r", function(d){
-                    if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
+                    if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 3) {
                       self.currentPos.note = d.note;
                       self.currentPos.value = d.display_value ? d.display_value : d.value;
+                      self.displayValue.text(self.currentPos.value);
                       return 4;
                     } else {
                       return 0;
