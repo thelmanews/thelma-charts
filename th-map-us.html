@@ -141,7 +141,8 @@
 	             self.map = self.svg.append('g')
 	                .attr('class','states_map');
 	            
-	            d3.json(self.dataUrls.us, function(error, us) {
+
+	            d3.json(self.resolvePath(self.dataUrls.us), function(error, us) {
 	                self.render(error,us);
 	            
 	            });    
