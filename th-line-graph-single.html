@@ -48,6 +48,10 @@
         animation-timing-function: linear;
       }
 
+      .target {
+
+      }
+
     </style>
     <svg id="chart"></svg> 
     <div id="info"></div> 
@@ -628,6 +632,7 @@
                   .on("drag", dragMove)
                   .on('dragend', dragEnd);
 
+
               self.joystick.append("circle")
                   .attr("class", "target")
                   .attr("r", 8)
@@ -651,7 +656,7 @@
             function dragMove(d){
               var x = self.x;
                 // move the circle
-                d3.select(this)
+                self.joystick.select('circle')
 
                   .attr("class", "stroke-foreground fill-background")
                   .attr('fill-opacity', 0)
