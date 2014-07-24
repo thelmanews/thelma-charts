@@ -38,7 +38,7 @@
 
 
         Polymer('th-donut-chart', {
-          chartData: {value: 65, color:""},
+          chartData: [{value: 65, color:""}],
           chartSize: "200",
           init: function() {
 
@@ -115,16 +115,16 @@
             
             foreground = meter.append("path")
                 .attr("class", "data0")
-                .style("fill", self.chartData.color)
-                .style("stroke", self.chartData.color);
+                .style("fill", self.chartData[0].color)
+                .style("stroke", self.chartData[0].color);
                 // .attr("filter", "url(#dropshadow)");
             
             text = meter.append("text")
                 .attr('class','percent data0')
                 .attr("text-anchor", "middle")
                 .attr("dy", ".35em") 
-                .style("fill", self.chartData.color)
-                .style("stroke", self.chartData.color);
+                .style("fill", self.chartData[0].color)
+                .style("stroke", self.chartData[0].color);
 
             self.foreground = foreground;
             self.formatPercent = formatPercent;
@@ -143,7 +143,7 @@
           animate: function() {
 
                 var self = this;
-                var progress = self.chartData.value;
+                var progress = self.chartData[0].value;
                 var total = 100;
                 var i = d3.interpolate(self._prevProgress/total, progress/total);//d3.event.loaded / total);
                 d3.transition().duration(1000).tween("progress", function() {
@@ -166,8 +166,12 @@
 
             var self = this;
 
+            if(!chartData.length || chartData.length<1) {
+              errors.push({input: currentVal, msg: 'Chart data needs to be an array with one data element.'});
+            }
+
             var errors = [],
-                currentVal = self.chartData.value;
+                currentVal = self.chartData[0].value;
 
             if(currentVal === undefined) {
               errors.push({input: currentVal, msg: 'Please provide a value for the chart.'});
