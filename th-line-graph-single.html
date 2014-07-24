@@ -738,7 +738,7 @@
                 y = self.y;
 
             self.tips          
-              .text( function(d){return d.display_value ? d.display_value : d.value; })
+              .text( function(d){return d.display_value; })
               .attr("x", function(d) { return  x(d.label); })
               .attr("y", function(d) { return -y(d.value) - 15; })
               .attr('opacity', 0)
