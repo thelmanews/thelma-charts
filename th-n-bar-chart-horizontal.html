@@ -79,7 +79,7 @@
 		      self.values
 		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width/2 + self.dims.values.height* 0.4; })
 		        .attr('x', self.dims.values.containerWidth - 8)
-		        .style('font-size', Math.min(self.dims.values.height, 42)+'px');
+		        .style('font-size', function(d) { return self.dims.values.fontSize+'px';});
 
 
 		  },
@@ -130,7 +130,7 @@
 		  	  self.dims = self.setupDimensions(self);
 
 		  	  self.dims.height = self.dims.height - self.dims.margin.top - self.dims.margin.bottom; // override default margin, not necessary
-		  	  self.dims.margin.top = 0; // override default margin, not necessary
+		  	  self.dims.margin.top = 5; // override default margin, not necessary
 		  	  self.dims.margin.bottom = 0; // override default margin, not necessary
 
 		  	  self.setupBarDims(self, 1, 1.6, 'horizontal'); // self, overlap, gap
@@ -154,7 +154,8 @@
 		      self.dims.values = {};
 		      self.dims.labels.height = 25;
 		      self.dims.values.height = self.dims.bars.width;
-		      self.dims.values.containerWidth = maxValueLength * Math.min(self.dims.values.height,42) * 0.75;  // characters x font size x 0.75 (average width/height)
+		      self.dims.values.fontSize = Math.max (Math.min(self.dims.values.height,42) , 15);
+		      self.dims.values.containerWidth = maxValueLength * self.dims.values.fontSize * 0.75;  // characters x font size x 0.75 (average width/height)
 		      self.dims.bars.area = width - self.dims.values.containerWidth; // increase width by the extra space taken by values
 
 		  },
@@ -247,6 +248,7 @@
 		  animate: function() {
 
 		  		var self = this;
+		  		console.log(self.dims);
 
 		        var x = self.x,
 		        	y = self.y;
@@ -266,7 +268,7 @@
 		      this.values
 		        .attr('y', function(d,i) { return y(i) + self.dims.bars.width/2 + self.dims.values.height* 0.4; })
 		        .attr('x', self.dims.values.containerWidth - 8)
-		        .style('font-size', Math.min(self.dims.values.height, 42)+'px')
+		        .style('font-size', function(d) { return self.dims.values.fontSize+'px';})
 		        .style('opacity', 1);
 		        
 		        
