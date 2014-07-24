@@ -2,7 +2,7 @@
 <link rel="import" href="th-d3-chart.html">
 
 <polymer-element name="th-line-graph-single" extends="th-d3-chart" attributes="lineStyle animateStyle fillArea xAxisLine 
-  xAxisLabels yAxisLabels yAxisLine animateAxis dataPosition joyStick color">
+  xAxisLabels yAxisLabels yAxisLine axisAnimation dataPosition joyStick color">
   <template>
     <core-style ref="theme"> </core-style>
     <style>
@@ -68,10 +68,13 @@
               polymerObj.maxValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
               polymerObj.minValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
               
-              polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([polymerObj.dims.margin.top, 
-                      (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom)) ]), //30 to make room for the joystick
+              polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([15, 
+                      (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom + polymerObj.dims.joystick.d))]), 
 
               polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]); 
+
+              polymerObj.numXticks = Math.min(5, polymerObj.chartData.length);
+              polymerObj.numYticks = 4;
 
             },
             _setupElements: function(polymerObj){
@@ -112,7 +115,7 @@
 
               // x labels
               polymerObj.xLabels = g.selectAll(".xLabel")
-                .data(x.ticks(4))// TODO: Replace with formula (number of labels)
+                .data(x.ticks(polymerObj.numXticks))
                 .enter().append("text")
                 .attr("class", "xLabel axis")
                 .text(function(d){ return d;})
@@ -121,13 +124,13 @@
               
               // y labels
               polymerObj.yLabels = g.selectAll(".yLabel")
-                .data(y.ticks(4)) // TODO: Replace with formula (number of labels)
+                .data(y.ticks(polymerObj.numYticks))
                 .enter().append("text")
                 .attr("class", "yLabel axis")
                 .text(function(d){ return d;})
                 .attr("dy", 4)
-                .attr("opacity", function(d) { return polymerObj.animateAxis || !polymerObj.yAxisLabels ? 0 : 1; })
-                .style("text-anchor", "start");
+                .attr("opacity", function(d) { return polymerObj.axisAnimation || !polymerObj.yAxisLabels ? 0 : 1; })
+                .style("text-anchor", "middle");
               
               // large display value
               polymerObj.displayValue = g.append('g').append('text')
@@ -167,11 +170,11 @@
             _setupContainerSize: function(polymerObj){
 
               polymerObj.svg
-                .attr("width", polymerObj.dims.width+ polymerObj.dims.margin.right) // TODO: need to fix so the svg width already accounts for this!
+                .attr("width", polymerObj.dims.width+ polymerObj.dims.margin.right + polymerObj.dims.margin.left) // TODO: need to fix so the svg width already accounts for this!
                 .attr("height", polymerObj.dims.height); 
 
               polymerObj.g
-                .attr("transform", "translate(0,"+ (polymerObj.dims.height-polymerObj.dims.margin.top/2) +")");
+                .attr("transform", "translate(0,"+ (polymerObj.dims.height-polymerObj.dims.margin.top) +")");
 
          
             },
@@ -181,8 +184,9 @@
                   y = polymerObj.y,
                   x = polymerObj.x,
                   data = polymerObj.chartData,
-                  valueSize = Math.min(width, height)/3; // this should adapt if width is narrow
-
+                  valueSize = Math.min(width, height)/3;
+                  
+              
               staticObj._setupContainerSize(polymerObj);
               
               polymerObj.xAxis
@@ -192,13 +196,13 @@
                 .attr("y2", 0);
 
               polymerObj.yAxis
-                .attr("y1", function(d) { return polymerObj.animateAxis ? y(0) : -1 * y(polymerObj.minValue); }) 
-                .attr("y2", function(d) { return polymerObj.animateAxis ? y(0) : -1 * y(polymerObj.maxValue); });
+                .attr("y1", function(d) { return polymerObj.axisAnimation ? y(0) : -1 * y(polymerObj.minValue); }) 
+                .attr("y2", function(d) { return polymerObj.axisAnimation ? y(0) : -1 * y(polymerObj.maxValue); });
                 // .attr("stroke-width", 2)
-                // .attr("opacity", function(d) { return polymerObj.animateAxis ? 0 : 1; });
+                // .attr("opacity", function(d) { return polymerObj.axisAnimation ? 0 : 1; });
 
               polymerObj.xLabels
-                // .data(x.ticks(5))// TODO: Replace with formula (number of labels)
+                // .data(x.ticks(polymerObj.numXticks))
                 .text(function(d){ return d;})
                 .attr("x", function(d) { return x(d) })
                 .attr("y", polymerObj.dims.margin.top/2);
@@ -206,7 +210,7 @@
               polymerObj.yLabels
                 .text(function(d){ return d;})
                 .attr("transform", function(d){
-                  var yPos = polymerObj.animateAxis ? 0 : -1 * y(d);
+                  var yPos = polymerObj.axisAnimation ? 0 : -1*y(d);
                   return "translate(0,"+ yPos +") rotate(-90)";
                 } );
 
@@ -214,7 +218,7 @@
               polymerObj.displayValue
                 .attr("text-anchor", function(){ return polymerObj.dataPosition === "left" ? "start" : "end"; })
                 .attr("x", function(){ return polymerObj.dataPosition === "left" ? polymerObj.dims.margin.left : (width-polymerObj.dims.margin.left); })
-                .attr("y", -(height - valueSize - polymerObj.dims.margin.top)) 
+                .attr("y", -(height - valueSize - polymerObj.dims.margin.top - polymerObj.dims.joystick.d)) 
                 .attr("font-size", valueSize) 
                 .text(polymerObj.currentPos.value);
 
@@ -302,8 +306,8 @@
             xAxisLine: true,
             xAxisLabels: true,
             yAxisLine: false, // doesnt do anything, there is never a line
-            yAxisLabels: true,
-            animateAxis: false, // not currently working
+            yAxisLabels: false,
+            axisAnimation: false, // not currently working
             dataPosition: "left",  // options: left, right
             joyStick: true,
             color: "",
@@ -321,10 +325,11 @@
             self.dims = self.setupDimensions(self);
 
             // adjust the margins because labels and joystick need more space
+            self.dims.joystick = { r: 8, d: 16};
             self.dims.margin.right = 10;
             self.dims.margin.left = 15;
-            self.dims.margin.top = 30;
-            self.dims.margin.bottom = 30;
+            self.dims.margin.top += self.dims.joystick.d;
+            self.dims.margin.bottom += self.dims.joystick.d;
             self.dims.width = self.dims.width = Math.max(100,(self.chartWidth -self.dims.margin.left - self.dims.margin.right));
           
             staticObj._scaleBuilder(self);
@@ -340,8 +345,9 @@
             // adjust the margins because labels and joystick need more space
             self.dims.margin.right = 10;
             self.dims.margin.left = 15;
-            self.dims.margin.top = 30;
-            self.dims.margin.bottom = 30;
+            self.dims.margin.top += self.dims.joystick.d;
+            self.dims.margin.bottom += self.dims.joystick.d;
+
             self.dims.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
           
             staticObj._scaleBuilder(self);
@@ -366,8 +372,8 @@
                 y = self.y;
             
             // select elements
-            self.yLabels = self.g.selectAll('.yLabel').data(y.ticks(4));
-            self.xLabels = self.g.selectAll('.xLabel').data(x.ticks(4));
+            self.yLabels = self.g.selectAll('.yLabel').data(y.ticks(self.numYticks));
+            self.xLabels = self.g.selectAll('.xLabel').data(x.ticks(self.numXticks));
             self.linePath = self.g.selectAll('path.data0').data(data);
             self.circles = self.g.selectAll('.circle').data(data);
             self.xAxis = self.g.selectAll('path.axis').data(data);
@@ -389,7 +395,7 @@
               .attr("class", "yLabel axis")
               .text(function(d){ return d;})
               .attr("dy", 4)
-              .attr("opacity", function(d) { return self.animateAxis ? 0 : 1; })
+              .attr("opacity", function(d) { return self.axisAnimation ? 0 : 1; })
               .style("text-anchor", "start");
 
             self.xAxis
@@ -524,37 +530,27 @@
                   .attr('r', 4);
                   
               }
-
-                // // append circles to datapoints
-                // g.selectAll(".circle")
-                // .data(data)
-                // .enter().append("circle")
-                // .attr("class", "circle data0 stroke-foreground")
-                // .attr("r", 0)
-                // .attr("stroke-width", 3)
-                // .attr("cx", function(d) { return  x(d.label); })
-                // .attr("cy", function(d) { return -1 * y(d.value); })
           },
           animateAxis: function(){
-            var self = this;
-            if (self.animateAxis) {
-              var yAxis = self.yAxis,
-                  y = self.y,
-                  maxValue = self.maxValue,
-                  yLabels = self.yLabels;
+            // var self = this;
+            // if (self.axisAnimation) {
+            //   var yAxis = self.yAxis,
+            //       y = self.y,
+            //       maxValue = self.maxValue,
+            //       yLabels = self.yLabels;
 
-              yAxis.transition()
-                .duration(1000)
-                .attr("y1", -1 * 0)
-                .attr("y2", -1 * y(maxValue))
-                .attr("opacity", 1);
+            //   yAxis.transition()
+            //     .duration(1000)
+            //     .attr("y1", -1 * 0)
+            //     .attr("y2", -1 * y(maxValue))
+            //     .attr("opacity", 1);
 
-              yLabels.transition()
-                .duration(1000)
-                .attr("y", function(d) { return -1 * y(d) })
-                .attr("opacity", 1);
+            //   yLabels.transition()
+            //     .duration(1000)
+            //     .attr("y", function(d) { return -1 * y(d) })
+            //     .attr("opacity", 1);
 
-            }
+            // }
           },
           setStartingPosition: function(){
             var self = this,
@@ -632,19 +628,20 @@
                   .on("drag", dragMove)
                   .on('dragend', dragEnd);
 
+
               self.joystick.append("circle")
                   .attr("class", "target")
                   .attr("r", 8)
                   .attr("cx", self.currentPos.x)
-                  .attr("cy", 12)
+                  .attr("cy", self.dims.joystick.r)
                   .attr("class", "pulse stroke-foreground fill-background")
                   .attr("stroke-width", 4.5)
                   .call(drag);
 
               self.joystick.append('rect')
-                  .attr('y', 22)
+                  .attr('y', self.dims.joystick.r*2 +2)
                   .attr('x', self.currentPos.x-1.5)
-                  .attr("height", h-36)
+                  .attr("height", h-self.dims.joystick.d - self.dims.margin.bottom)
                   .attr("width", 3)
                   .attr("class", "fill-foreground")
                   .attr('opacity', 0.4);
@@ -655,7 +652,7 @@
             function dragMove(d){
               var x = self.x;
                 // move the circle
-                d3.select(this)
+                self.joystick.select('circle')
 
                   .attr("class", "stroke-foreground fill-background")
                   .attr('fill-opacity', 0)
@@ -680,9 +677,14 @@
                 // determine which circles/notes are to be displayed
                 g.selectAll(".circle")
                   .attr("r", function(d){
-                    if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 10) {
+                    if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 3) {
                       self.currentPos.note = d.note;
                       self.currentPos.value = d.display_value ? d.display_value : d.value;
+                      self.displayValue.text(self.currentPos.value);
+                      self.note.transition() 
+                          .duration(100)      
+                          .style("opacity", 1);      
+                      self.note.html(d.note); 
                       return 4;
                     } else {
                       return 0;
