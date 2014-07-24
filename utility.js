@@ -171,7 +171,10 @@ Thelma.chartUtils = {
 
       },
 
-   setupBarDims: function(polymerObj, overlap, gap){ 
+   setupBarDims: function(polymerObj, overlap, gap, orientation){ 
+
+          orientation = orientation || 'vertical';
+
           var dims = polymerObj.dims,
               chartData = polymerObj.chartData;
 
@@ -179,7 +182,8 @@ Thelma.chartUtils = {
           dims.bars.count = chartData.length;
           dims.bars.overlap = overlap || 1; // the higher the number, the more overlap
           dims.bars.gap = gap || 1;
-          dims.bars.width = (dims.width / dims.bars.count)* dims.bars.overlap / dims.bars.gap;
+          dims.bars.width = (orientation== 'horizontal') ?  ((dims.height / dims.bars.count)* dims.bars.overlap / dims.bars.gap) - 8 
+                                                        : (dims.width / dims.bars.count)* dims.bars.overlap / dims.bars.gap;
           dims.bars.widthOverlap = dims.bars.width*dims.bars.overlap;
        
           return dims.bars
