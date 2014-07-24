@@ -1,20 +1,21 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-split-donut-chart" extends="th-d3-chart">
+<polymer-element name="th-split-donut-chart" extends="th-d3-chart" attributes="chartWidth">
 
   <script>
 
       Polymer('th-split-donut-chart', {
         chartData: [{label: 'U.S.', value: 76, color:''}, {label: 'China', value: 43, color:''}], 
+        chartSize: "200",
         init: function() {
           var self = this,
               margin = {
-                top : self.chartWidth*0.14,
-                bottom : self.chartWidth*0.14,
+                top : self.chartSize*0.14,
+                bottom : self.chartSize*0.14,
                 label: 3
               }, 
-              width = self.chartWidth*0.95, 
+              width = self.chartSize*0.95, 
               height = width + margin.top + margin.bottom,
               pi = Math.PI,
               progress = 0,

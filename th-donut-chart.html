@@ -3,7 +3,7 @@
 <link rel="import" href="th-d3-chart.html">
 <link rel="import" href="../thelma-utils/th-theme.html">
 
-<polymer-element name="th-donut-chart" extends="th-d3-chart">
+<polymer-element name="th-donut-chart" extends="th-d3-chart" attributes="chartSize">
   <template>
     <core-style ref="theme"></core-style>
     <style>
@@ -39,6 +39,7 @@
 
         Polymer('th-donut-chart', {
           chartData: {value: 65, color:""},
+          chartSize: "200",
           init: function() {
 
             var self = this;
@@ -47,7 +48,7 @@
                   left : 0,
                   label: 3
                 }, 
-                width = self.chartWidth*0.95 - margin.left - margin.right, 
+                width = self.chartSize*0.95 - margin.left - margin.right, 
                 height = width,
                 twoPi = 2 * Math.PI,
                 progress = 0,
