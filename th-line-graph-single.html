@@ -628,16 +628,21 @@
                   .on("drag", dragMove)
                   .on('dragend', dragEnd);
 
+              self.joystick.append("circle")
+                  .attr("class", "target-area")
+                  .attr("r", 25)
+                  .attr("cx", self.currentPos.x)
+                  .attr("cy", self.dims.joystick.r)
+                  .style("fill-opacity", 0);
 
               self.joystick.append("circle")
                   .attr("class", "target")
                   .attr("r", 8)
                   .attr("cx", self.currentPos.x)
                   .attr("cy", self.dims.joystick.r)
-                  .attr("class", "pulse stroke-foreground fill-background")
-                  .attr("stroke-width", 4.5)
-                  .call(drag);
-
+                  .attr("class", "target pulse stroke-foreground fill-background")
+                  .attr("stroke-width", 4.5);
+              
               self.joystick.append('rect')
                   .attr('y', self.dims.joystick.r*2 +2)
                   .attr('x', self.currentPos.x-1.5)
@@ -646,22 +651,29 @@
                   .attr("class", "fill-foreground")
                   .attr('opacity', 0.4);
 
-              self.lastPosX = self.joystick.select("circle").attr("cx");
+              self.joystick
+                .call(drag);
+
+              self.lastPosX = self.joystick.select("circle.target").attr("cx");
             }
 
             function dragMove(d){
               var x = self.x;
-                // move the circle
-                self.joystick.select('circle')
 
-                  .attr("class", "stroke-foreground fill-background")
-                  .attr('fill-opacity', 0)
-                  .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.dims.width, d3.event.x))); 
-           
+                // style the circle
+                self.joystick.selectAll('.target')
+                  .attr("class", "target stroke-foreground fill-background")
+                  .attr('fill-opacity', 0);
+
+                // move the circle
+                d3.select(this).selectAll('circle')
+                  .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.dims.width, d3.event.x)));
+
                 // define current position
-                self.currentPos.x = d3.select(this).attr("cx");
+                self.currentPos.x = self.joystick.selectAll('circle').attr("cx");
+                
                 // move the line
-                self.joystick.select('rect')
+                d3.select(this).select('rect')
                   .attr('x', self.currentPos.x-1)
                   .attr('opacity', 1);
 
@@ -712,11 +724,14 @@
              var x = self.x;
              // Lock the joystick in place
             
-                d3.select(this)
-                  .attr('class','pulse stroke-foreground fill-background')
+                self.joystick.selectAll('circle')
                   .transition()
                     .duration(50)
                     .attr('cx', self.currentPos.closestX);
+
+                self.joystick.selectAll('.target')
+                  .attr('class','pulse target stroke-foreground fill-background');
+                  
                 self.joystick.select('rect')
                   .transition()
                     .duration(50)
