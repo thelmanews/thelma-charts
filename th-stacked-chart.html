@@ -8,81 +8,99 @@
 		Polymer('th-stacked-chart', {
 
 		  init: function() {
-          var self = this;
-          
-          // setup dimensions
-          // self.dims = self.setupDimensions(self);
-          self.dims = self.setupStackedDims(self);
-
-          var margin = self.dims.margin,
-              width = self.dims.width,
-              height = self.dims.height,
-              barWidth = self.dims.bar.width;
-
-          // setup scales
-          var scales = self.simpleScaleBuilder(width, height, self.chartData),
-              x = scales.x,
-              y = scales.y;
-          self.y = y;
-          self.x = x;
+		      var self = this;
 		      
-          // setup chart area
-          var chart_svg = this.$.chart;
-          self.svg = d3.select(chart_svg);
+		      // setup dimensions
+		      // self.dims = self.setupDimensions(self);
+		      self.dims = self.setupStackedDims(self);
 
-		      self.container = self.svg.attr('width', width + margin.left + margin.right)
-		          .attr('height', height + margin.top + margin.bottom)
-		          .append('g')
-		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-          
+		      var margin = self.dims.margin,
+		          width = self.dims.width,
+		          height = self.dims.height,
+		          barWidth = self.dims.bar.width;
+
+		      // setup scales
+		      var scales = self.simpleScaleBuilder(width, height, self.chartData),
+		      x = scales.x,
+		      y = scales.y;
+		      self.y = y;
+		      self.x = x;
+
 		      var total = 0;
 		      self.chartData.forEach(function(d) {
 		          d.total = total;
 		          total+=parseInt(d.value);
 		      });
 
-		      y.domain([0, total]); 
+		      self.y.domain([0, total]); 
+			      
+		      // setup chart area
+		      var chart_svg = this.$.chart;
+		      self.svg = d3.select(chart_svg);
 
-          // set up initial state of data
+
+		      self.container = self.svg.append('g');
+
+      
+
+	      // set up initial state of data
+
 		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
-		      
-		      self.bars
-		        .attr("class", function(d,i){ return "bar data"+i; })
-		        .attr('x', self.dims.labels.width + self.dims.margin.label)
-		        //.attr('y', 0)
-		        .attr('y', height)
-		        .attr('width',barWidth)
-		        .attr('height', 0)
-            .style('fill', function(d){ return d.color; })
-            .style('stroke', function(d){ return d.color; });
 
 		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+
+		      self._setElementSizes();
+
+		      // first time size settings
+		      self.bars.attr('y', self.dims.height)
+			        .attr('height', 0);
+
+			  self.labels.attr('height', 0);
+
+			  self.values.attr('height', 0);
+	      
+
+		  },
+
+		  _setElementSizes: function() {
+
+		  	  var self = this;
+
+		      self.svg.attr('width', self.dims.width + self.dims.margin.left + self.dims.margin.right)
+		          .attr('height', self.dims.height + self.dims.margin.top + self.dims.margin.bottom);
+
+
+	          self.container.attr('transform', 'translate(' + self.dims.margin.left + ',' + self.dims.margin.top + ')');
+
+		  	  self.bars
+		        .attr("class", function(d,i){ return "bar data"+i; })
+		        .style('fill', function(d){ return d.color; })
+		        .style('stroke', function(d){ return d.color; });
+
 		      
 		      self.labels
 		        .attr("class", function(d,i){return "label data"+i;})
 		        .style('opacity', 0)
 		        .style('text-anchor','end')
-		        .attr('x', self.dims.labels.width)
-		        .attr('y', height) 
 		        .text(function(d) {return d.label;})
-            .style('fill', function(d){ return d.color; })
-            .style('stroke', function(d){ return d.color; });
+		        .style('fill', function(d){ return d.color; })
+		        .style('stroke', function(d){ return d.color; });
 		      
-		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value')
-            .style('fill', function(d){ return d.color; })
-            .style('stroke', function(d){ return d.color; });
 		      
 		      self.values
 		        .attr("class", function(d,i){return "value data"+i;})
 		        .style('opacity', 0)
-            .attr('font-size', '13px')
-            .attr('font-weight', '300')
-		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + barWidth)
-		        .attr('y', height) 
+		        .attr('font-size', '13px')
+		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
+		        .style('fill', function(d){ return d.color; })
+		        .style('stroke', function(d){ return d.color; })
 		        .text(function(d) {return d.display_value ? d.display_value : d.value ;});
 
 
 		  },
+
 		  reset: function() {
 		      var self = this;
 		      var height= this.height;
@@ -91,21 +109,111 @@
 		      self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
 		      
 		  },
+
+		  resize: function() {
+
+		      var self = this;
+		      self.dims = self.setupStackedDims(self);
+
+		      console.log(self.dims);
+
+		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData),
+		      x = scales.x,
+		      y = scales.y;
+		      self.y = y;
+		      self.x = x;
+
+		      var total = 0;
+		      self.chartData.forEach(function(d) {
+		          d.total = total;
+		          total+=parseInt(d.value);
+		      });
+
+		      self.y.domain([0, total]); 
+
+
+		      self._setElementSizes();
+
+		      self.animate();
+
+		  },
+
+		  updateData: function() {
+
+
+		  	  var self = this;
+
+		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData);
+
+		      var x = scales.x;
+		      var y = scales.y;
+
+		      // is there a better way than exposing these?!
+		      self.y = y;
+		      self.x = x;
+
+		      var width = self.dims.width,
+		      	 height = self.dims.height;	  	  
+
+			  self.bars = self.container.selectAll('.bar').data(self.chartData);
+			  self.labels = self.container.selectAll('.label').data(self.chartData);
+			  self.values=self.container.selectAll('.value').data(self.chartData);
+
+		  	  if(self.dataLength!=self.chartData.length)
+		  	  {
+
+
+		  	  	  self.dataLength = self.chartData.length;
+
+				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
+
+				  // self.setupExtraDimensions();
+
+
+				 // staticObj._setupContainerSize(self); // correct size if margins are changed (by setting the label diagonal)
+
+			      self.bars.enter().append('rect').attr('class','bar')
+			      	.attr('height', 0);
+
+			      self.labels.enter().append('text').attr('class','label');
+			      self.values.enter().append('text').attr('class','value').attr('y', height);
+
+
+			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();
+			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
+			      
+			     self.resize();
+
+			    }
+
+		      // this is independent of size but dependent on data
+		      self.labels.text(function(d) {return d.label;});
+		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+
+		      self.animate();
+
+		  },
 		  
 		  animate: function() {
             var self = this;
 		        var y = self.y;
 		        
-		        self.bars.transition().duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
-		        .attr('y', function(d) {return y(d.total)})
-		        .attr('height', function(d) {return y(d.value)});
+		        self.bars.transition().duration(self.animationDelay)
+			        .attr('x', self.dims.labels.width + self.dims.margin.label)
+			        .attr('width', self.dims.bar.width)
+			        .attr('y', function(d) {return y(d.total)})
+			        .attr('height', function(d) {return y(d.value)});
 
-		        self.labels.transition(self.animationDelay).duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        self.labels.transition(self.animationDelay).duration(self.animationDelay)
 		        .style('opacity', 1)
+		        .attr('x', self.dims.labels.width)
 		        .attr('y', function(d) {return y(d.total + d.value/2) + 6; }); //12: font size
 		        
-		        self.values.transition(self.animationDelay).duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        self.values.transition(self.animationDelay).duration(self.animationDelay)
 		        .style('opacity', 1)
+		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
 		        .attr('y', function(d) {return y(d.total + d.value/2) + 6 }); //12: font size
 
 		  },

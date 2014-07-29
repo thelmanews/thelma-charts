@@ -215,7 +215,13 @@ Thelma.chartUtils = {
           return d[property];
         });
     },
+    /**
+     * Setting up dimension for stacked bar chart and spectrum chart
+     * @param  {[type]} polymerObj
+     * @return {[type]}
+     */
     setupStackedDims: function(polymerObj){
+
       var dims = {},
           chartData = polymerObj.chartData;
       dims.margin = {
@@ -254,8 +260,10 @@ Thelma.chartUtils = {
       
       dims.minWidth = dims.bar.minWidth + dims.values.width + dims.labels.width + dims.margin.label*2;
       dims.width = dims.width < dims.minWidth ? dims.minWidth : dims.width;  // cannot resize to smaller than this;
+
       // dims.labels.charLimit - calculate the character limit for labels, given the min width of the bar and the width of the component
       // dims.minHeight - need to set this also
+
 
       return dims;
 

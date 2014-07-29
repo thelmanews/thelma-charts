@@ -266,9 +266,7 @@
 
 		  	  var self = this;
 
-		      
 		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData);
-
 
 		      var x = scales.x;
 		      var y = scales.y;
@@ -313,12 +311,7 @@
 			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
 			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
 			      
-
-
-
-
-
-			     self.resize();
+				  self.resize();
 
 			    }
 

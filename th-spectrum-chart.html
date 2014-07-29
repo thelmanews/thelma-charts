@@ -10,28 +10,23 @@
 		        {label: 'Federal',  pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60', color: ''},
 		        {label: 'Medicare', range_min_value: 70, range_min_display_value: '$70', range_max_value: 100, range_max_display_value: '$100', color:''}],
 		  orientation: 'vertical',
+		  //animationDelay: 500,
 		  init: function() {
 		    var self = this;
           
         // setup dimensions
         // self.dims = self.setupDimensions(self);
-        self.dims = self.setupStackedDims(self);
-        var margin = self.dims.margin,
-            width = self.dims.width,
-            height = self.dims.height,
-            barWidth = self.dims.bar.width; // override the default
+
+        self._setAllDims();
+
+        
 
         // setup scales
-        var scales = self.simpleScaleBuilder(width, height, self.chartData),
-            x = scales.x,
-            y = scales.y;
 
-        self.y = y;
-        self.x = x;
 	      
-        // setup chart area
-        var chart_svg = this.$.chart;
-        self.svg = d3.select(chart_svg);
+          // setup chart area
+	      var chart_svg = this.$.chart;
+          self.svg = d3.select(chart_svg);
 
 	      /* adding stripe pattern and mask */
 
@@ -58,92 +53,207 @@
 	        .attr("fill", "url(#pattern-stripe)");
           
 
-	      self.container = self.svg.attr('width', width + margin.left + margin.right)
-	          .attr('height', height + margin.top + margin.bottom)
-	          .append('g')
-            // .attr('width', width + margin.left + margin.right)
-	          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+		      self.container =  self.svg.append('g');
 
-	      var dataMargin = 0.1;  // 10% extra space     
 
-	      var minmin = d3.min(self.chartData, function(d) { return d.range_min_value;});
 
-	      var maxmax = d3.max(self.chartData, function(d) { return d.range_max_value;});
+		      self.spectrum = self.container.selectAll('.spectrum').data([self._wholeRange]).enter().append('rect')
+		      	
+		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
 
-	      var marginValue = (maxmax-minmin)* dataMargin;
-	      var wholeRange = {min : minmin-marginValue, max:  maxmax+marginValue};
+		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text');
 
-	      y.domain([wholeRange.min,wholeRange.max]); 
+		      self.spectrum.attr('class','spectrum')
+		      	.style('fill', function(d,i) {return '#FFF';});
 
-	      var spectrum = self.container.selectAll('.spectrum').data([wholeRange]).enter().append('rect').attr('class','spectrum');
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text')
 
-	      spectrum.style('fill', function(d,i) {return '#FFF';})
-	        .attr('x', self.dims.labels.width + self.dims.margin.label )
-	        .attr('y', function(d) {return y(wholeRange.min)})
-	        .attr('width',barWidth)
-	        .attr('height', function(d) {return y(wholeRange.max)});
+		      self._setElementSizes();	
 
-	      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect').attr('class','bar');
-	      self.bars
-	        .attr("class", function(d,i){ return "bar data"+i; })
-	        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
-	        .attr('x', self.dims.labels.width + self.dims.margin.label )
-	        //.attr('y', 0)
-	        .attr('y', function(d) {return height - y(d.range_max_value)})
-	        .attr('width',barWidth)
-	        .attr('height', 0)
-          .style('fill', function(d){ return d.color;})
-          .style('stroke', function(d){ return d.color;});
+		      self.bars.attr('height', 0)
+		      		   .attr('width',self.dims.bar.width);
 
-	      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
-	      self.labels
-	        .attr("class", function(d,i){return "label data"+i;})
-	        .style('opacity', 0)
-	        .style('text-anchor','end')
-	        .attr('x', self.dims.labels.width)
-	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
-	        .text(function(d) {return d.label;})
-          .style('fill', function(d){ return d.color;})
-          .style('stroke', function(d){ return d.color;});
+
+		      self.labels.style('opacity', 0);
+
+		      self.values.style('opacity', 0);
+
+		      self.spectrum
+		        .attr('x', self.dims.labels.width + self.dims.margin.label )
+		        .attr('y', function(d) {return self.y(self._wholeRange.min)})
+		        .attr('width',self.dims.bar.width)
+		        .attr('height', function(d) {return self.y(self._wholeRange.max)});
+
+
 	      
-	      self.values = this.container.selectAll('.value').data(this.chartData).enter()
-	      	.append('text')
-	      	// .attr('font-size', '13px')
-	      	.attr('font-weight', 300)
-	      	.attr('class', function(d,i){return "defaultvalue value data"+i;});
-	      self.values
-	        .style('opacity', 0)
-	        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + barWidth)
-	        .attr('y', function(d) {return height - y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
-	        .text(function(d) {
-            return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
-          })
-          .style('fill', function(d){ return d.color;})
-          .style('stroke', function(d){ return d.color;});
+
 
 		  },
-		  reset: function() {
-	      var self = this;
-	      var height= this.height;
-	      self.bars.transition().duration(this.animationDelay).attr('height', 0);
-	      self.labels.transition().duration(this.animationDelay).style('opacity', 0);
-	      self.values.transition().duration(this.animationDelay).style('opacity', 0);
+
+		  _setAllDims: function() {
+
+		  	  var self = this;
+
+	          self.dims = self.setupStackedDims(self);
+
+		      var dataMargin = 0.1;  // 10% extra space     
+
+		      var minmin = d3.min(self.chartData, function(d) { return d.range_min_value;});
+
+		      var maxmax = d3.max(self.chartData, function(d) { return d.range_max_value;});
+
+		      var marginValue = (maxmax-minmin)* dataMargin;
+		      self._wholeRange = {min : minmin-marginValue, max:  maxmax+marginValue};
+
+
+	          var scales = self.simpleScaleBuilder(this.dims.width, this.dims.height, self.chartData);
+
+	          self.y = scales.y;
+	          self.x = scales.x;
+
+		      self.y.domain([self._wholeRange.min, self._wholeRange.max]); 
+        
+		  },
+
+
+		  _setElementSizes: function() {
+
+			  	var self = this;
+
+			  	self.svg.attr('width', self.dims.width + self.dims.margin.left + self.dims.margin.right)
+		          .attr('height', self.dims.height + self.dims.margin.top + self.dims.margin.bottom);
+
+
+	           self.container.attr('transform', 'translate(' + self.dims.margin.left + ',' + self.dims.margin.top + ')');
+
+
+			   self.bars
+		        .attr('class','bar')
+		        .attr("class", function(d,i){ return "bar data"+i; })
+		        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
+		        .style('fill', function(d){ return d.color;})
+		        .style('stroke', function(d){ return d.color;});
+
+		      self.labels
+		      	.attr('class','label')
+		        .attr("class", function(d,i){return "label data"+i;})
+		        .style('text-anchor','end')
+		        .text(function(d) {return d.label;})
+	            .style('fill', function(d){ return d.color;})
+	            .style('stroke', function(d){ return d.color;});
+		      
+		      self.values
+		      	.attr('font-weight', 300)
+		      	.attr('class', function(d,i){return "defaultvalue value data"+i;})
+		        .style('opacity', 0)
+		        .text(function(d) {
+	            return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
+	          	})
+	            .style('fill', function(d){ return d.color;})
+	            .style('stroke', function(d){ return d.color;});
+
+
+		  },
+
+		  resize: function() {
+
+		      var self = this;
+		      
+		      self._setAllDims();
+
+		      self._setElementSizes();
+
+		      self.animate();
+
+		  },
+
+
+		  reset: function(hard) {
+		      var self = this;
+		      var height= this.height;
+		      if(hard) {
+			      self.bars.transition().duration(1).attr('height', 0);
+			      self.labels.transition().duration(1).style('opacity', 0);
+			      self.values.transition().duration(1).style('opacity', 0);
+		      }
+		      else {
+			      self.bars.transition().duration(this.animationDelay).attr('height', 0);
+			      self.labels.transition().duration(this.animationDelay).style('opacity', 0);
+			      self.values.transition().duration(this.animationDelay).style('opacity', 0);
+			  }
 		      
 		  },
 		  
 		  animate: function() {
-	  		var self = this;
-        var y = self.y;
-        var labels = self.labels;
-        var delay = self.animationDelay;
-        self.bars.transition().duration(delay).delay(function(d,i) { return i*delay;})
-        .attr('height', function(d) {return y(d.range_max_value - d.range_min_value)});
 
-        self.labels.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
-        .style('opacity', 1);
+	  		var self = this;
+	        var y = self.y;
+	        var labels = self.labels;
+	        var delay = self.animationDelay;
+
+	        self.spectrum.transition().duration(delay)
+		        .attr('x', self.dims.labels.width + self.dims.margin.label )
+		        .attr('y', function(d) {return self.y(self._wholeRange.min)})
+		        .attr('width',self.dims.bar.width)
+		        .attr('height', function(d) {return self.y(self._wholeRange.max)});
+
+	        self.bars.transition().duration(delay)
+	        	.attr('x', self.dims.labels.width + self.dims.margin.label )
+		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value)})
+		        .attr('width',self.dims.bar.width)
+	        	.attr('height', function(d) {return y(d.range_max_value - d.range_min_value)});
+
+	        self.labels.transition(delay).duration(delay)//.delay(function(d,i) { return i*delay;})
+		        .attr('x', self.dims.labels.width)
+		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
+		        .style('opacity', 1);
 	        
-	        self.values.transition(delay).duration(delay).delay(function(d,i) { return i*delay;})
-	        .style('opacity', 1);
+	        self.values.transition(delay).duration(delay)//.delay(function(d,i) { return i*delay;})
+		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
+		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
+		        .style('opacity', 1);
+
+		  },
+
+		  updateData: function() {
+
+
+		  	  var self = this;
+
+		      self._setAllDims();  	  
+
+			  self.bars = self.container.selectAll('.bar').data(self.chartData);
+			  self.labels = self.container.selectAll('.label').data(self.chartData);
+			  self.values=self.container.selectAll('.value').data(self.chartData);
+
+		  	  if(self.dataLength!=self.chartData.length)
+		  	  {
+
+
+
+			      self.bars.enter().append('rect').attr('class','bar')
+
+			      	.attr('height', 0);
+
+			      self.labels.enter().append('text').attr('class','label');
+			      self.values.enter().append('text').attr('class','value').attr('y', height);
+
+
+			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();
+			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
+			      
+			     //self.resize();
+			     self._setElementSizes();
+
+			    }
+
+		      // this is independent of size but dependent on data
+		      self.labels.text(function(d) {return d.label;});
+		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+
+		      self.animate();
 
 		  },
 		  chartSpecificDataValidate: function() {
