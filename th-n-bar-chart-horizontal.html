@@ -2,6 +2,34 @@
 <link rel="import" href="th-d3-chart.html">
 
 <polymer-element name="th-n-bar-chart-horizontal" extends="th-d3-chart">
+	<template>
+	    <core-style ref="theme"></core-style>
+	    <style>
+	       :host {
+	        display: inline-block;
+	        position: relative;
+	      }
+	      #chart {
+	       }
+	      #chart text.label {
+	        /*font-size: 13px;*/
+	        /*font-weight: 300;*/
+	      }
+	       #data_errors {  
+	        display: none;
+	        font-size: 14px;
+	        color: red;
+	        position: absolute;
+	        top: 0;
+	        left: 0;
+	      }
+	      </style>
+	     <svg id="chart"></svg>
+	     <ul id="data_errors">
+	     </ul> 
+	     <content select="th-editor"></content> 
+	    
+	    </template>  
 
 	<script>
 
