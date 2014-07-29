@@ -3,6 +3,44 @@
 
 
 <polymer-element name="th-stacked-chart" extends="th-d3-chart">
+
+	<template>
+	    <core-style ref="theme"></core-style>
+	    <style>
+
+	      :host {
+	        display: inline-block;
+	        position: relative;
+	      }
+	      #chart {
+
+	      }
+	      #chart text.label {
+	        /*font-size: 13px;*/
+	        /*font-weight: 300;*/
+	      }
+
+	      #data_errors {  
+	        display: none;
+	        font-size: 14px;
+	        color: red;
+	        position: absolute;
+	        top: 0;
+	        left: 0;
+	      }
+
+	    </style>
+
+	    <svg id="chart"></svg>
+
+	    <ul id="data_errors">
+	    </ul>  
+
+	    <!-- to allow embeded th-editor component -->
+	    <content select="th-editor"></content> 
+	    
+	</template>
+
 	<script>
 
 		Polymer('th-stacked-chart', {
@@ -57,9 +95,9 @@
 		      self.bars.attr('y', self.dims.height)
 			        .attr('height', 0);
 
-			  self.labels.attr('height', 0);
+			  self.labels.attr('height', 0).style('opacity', 0);
 
-			  self.values.attr('height', 0);
+			  self.values.attr('height', 0).style('opacity', 0);
 	      
 
 		  },
@@ -82,7 +120,6 @@
 		      
 		      self.labels
 		        .attr("class", function(d,i){return "label data"+i;})
-		        .style('opacity', 0)
 		        .style('text-anchor','end')
 		        .text(function(d) {return d.label;})
 		        .style('fill', function(d){ return d.color; })
@@ -91,7 +128,6 @@
 		      
 		      self.values
 		        .attr("class", function(d,i){return "value data"+i;})
-		        .style('opacity', 0)
 		        .attr('font-size', '13px')
 		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
 		        .style('fill', function(d){ return d.color; })
@@ -112,6 +148,8 @@
 
 		  resize: function() {
 
+		  	  console.log('resize');
+
 		      var self = this;
 		      self.dims = self.setupStackedDims(self);
 
@@ -129,6 +167,8 @@
 		          total+=parseFloat(d.value);
 		      });
 
+		      console.log(total);
+
 		      self.y.domain([0, total]); 
 
 
@@ -140,6 +180,7 @@
 
 		  updateData: function() {
 
+			    console.log('UUpdate');
 
 		  	  var self = this;
 
@@ -183,9 +224,12 @@
 			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
 			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
 			      
-			     self.resize();
+			     //self.resize();
 
 			    }
+
+			    //resize is needed to recalculate the total and set domain
+			    self.resize();
 
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
@@ -247,7 +291,34 @@
         	}
         
           return errors;
-        }
+          },
+
+          getMetaData: function() {
+          	return {
+				  "name": "th-stacked-chart",
+				  "description": "Thelma stacked chart",
+				  "category":"chart",
+				  "version": "0.0.1",
+				  "thumbnail":"stacked.jpg", 
+				  "tags":["chart", "column", "animated"],
+				  "inputAttr": {
+				    "chartWidth":{"friendly":"Width", "type":"int", "default":200},
+				    "chartHeight":{"friendly":"Height", "type":"int", "default":250},
+				    "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
+				      "fields":{
+				        "label":{"friendly":"Label", "type":"string", "default":"Player"},
+				        "value":{"friendly":"Value", "type":"int", "default":15},
+				        "display_value":{"friendly":"Display Value", "type":"string", "default":"$15"},
+				        "color":{"friendly":"Color", "type":"colorPicker", "default":"", "optional":true}
+				      },
+				      "default":[
+				      {"label": "medicaid", "value": 20, "color":""},
+				      {"label": "gap", "value": 40, "color":""},
+				      {"label": "sub", "value": 10, "color":""}]
+				    }
+				  }
+				};
+          }
 		  
 		  
 		});
