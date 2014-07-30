@@ -73,7 +73,7 @@
 
 		      polymerObj.bars = polymerObj.container.selectAll('.bar').data(polymerObj.chartData).enter().append('rect').attr('class','bar')
 		      .attr('height', 0)
-		      .attr('y', polymerObj.dims.height);
+		      .attr('y', function(d){ return polymerObj.y(0);});
 
 		      polymerObj.labels = polymerObj.container.selectAll('.label').data(polymerObj.chartData).enter().append('text').attr('class','label')
 		      .attr('text-anchor',function(){ 
@@ -125,7 +125,7 @@
 		  chartData: [
 		    {label: 'Player', value: 15, display_value: '$15', color:''},
 		    {label: 'Vendor', value: 20, display_value: '$20', color:''},
-		    {label: 'Mascot', value: 45, display_value: '$35', color:''}
+		    {label: 'Mascot', value: -35, display_value: '$35', color:''}
 		  ],
 		  init: function() {
 		    
@@ -189,9 +189,15 @@
 		        var height= self.dims.height;
 		        self.bars.transition().duration(this.animationDelay)
 		        .attr('x', function(d, i) { return self.x(i); })
-		        .attr('y', function(d) { return height-y(d.value);})
+		        .attr('y', function(d) { 
+		        	console.log(height-y(d.value));
+		        	// how make positive bars go up and negative ones down?
+		        	return y(0);})
 		        .attr('width', self.dims.bars.width)
-		        .attr('height', function(d) {return y(d.value)})
+		        .attr('height', function(d) {
+		        	// console.log(Mascotth.abs(y(d.value) - y(0)));
+		        	// height cant take negaive values, so get the absolute value.
+		        	return Math.abs(y(d.value) - y(0))})
 		        .style('opacity', 1);
 		        
 		        self.values.transition(this.animationDelay).duration(this.animationDelay)
@@ -274,6 +280,8 @@
 		      // is there a better way than exposing these?!
 		      self.y = y;
 		      self.x = x;
+		      console.log("***");
+		      console.log(y(-25));
 
 		      var width = self.dims.width,
 		      	 height = self.dims.height;	  	  
