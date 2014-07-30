@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-n-bar-chart" extends="th-d3-chart">
+<polymer-element name="th-n-bar-chart" extends="th-d3-chart" attributes="showHorizontalAxis">
 
 	<script>
 
@@ -103,7 +103,9 @@
 		      .attr('y', polymerObj.dims.height)
 		      .style('opacity', 0);
 
-		      polymerObj.horAxis = polymerObj.container.selectAll('.horAxis').data([1]).enter().append('line').attr('class','horAxis stroke-foreground');
+		      var horClass = 'horAxis'+(polymerObj.showHorizontalAxis ? ' stroke-foreground' : '');
+
+		      polymerObj.horAxis = polymerObj.container.selectAll('.horAxis').data([1]).enter().append('line').attr('class', horClass);
 
 
 
@@ -136,6 +138,11 @@
 		    {label: 'Vendor', value: -20, color:''},
 		    {label: 'Mascot', value: -35, color:''}
 		  ],
+		  /**
+		   * show horizontal line from zero point when dealing with negative values
+		   * @type {Boolean}
+		   */
+		  showHorizontalAxis: false,
 		  init: function() {
 		    
 		  	  var self = this;
