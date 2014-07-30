@@ -1,16 +1,16 @@
 
 
-var horChart = document.querySelector('th-spectrum-chart');
+var horChart = document.querySelector('th-n-bar-chart');
 
 
-
+/*
 
 setTimeout(function() {
 	horChart.chartHeight = 450;
 },4000);
 
 
-/*
+
 setTimeout(function() {
 	horChart.chartHeight = 200;
 },6000);
@@ -24,7 +24,7 @@ setTimeout(function() {
 setTimeout(function() {
 	horChart.chartWidth = 150;
 },10000);
-*/
+
 
 setTimeout(function() {
 
@@ -42,22 +42,24 @@ setTimeout(function() {
 		        {label: 'Federal',  pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60', color: ''}];
 		   },10000);
 
-/*
+*/
 setTimeout(function() {
 	horChart.chartData = [
-		    {label: 'Player of the day', value: 15, display_value: '$15', color:""},
-		    {label: 'Vendor', value: 20, display_value: '$20', color:"", color:""},
-		    {label: 'Cheerleader', value: 40, display_value: '$40', color:""}
+		    {label: 'Player', value: -15},
+		    {label: 'Vendor', value: 20},
+		    {label: 'Cheerleader', value: 40}
 		  ];
 },4000);
 
 setTimeout(function() {
 	horChart.chartData = [
-		    {label: 'Player of the day', value: 15, display_value: '$15', color:""},
-		    {label: 'Vendor', value: 20, display_value: '$20', color:"", color:""}
+		    {label: 'Player', value: -5},
+		    {label: 'Vendor', value: 0},
+		    {label: 'Cheerleader', value: -10}
 		  ];
 },6000);
 
+/*
 setTimeout(function() {
 	horChart.chartData = [
 		    {label: 'Player of the day', value: 15, display_value: '$15', color:""},
