@@ -143,9 +143,11 @@ Thelma.chartUtils = {
 	      									: d3.scale.ordinal().rangeRoundBands([0, height]);
       
 	      var max = d3.max(chartData, valueAccessFun);
+        //start charts from 0 or smallest negative value.
+        var min = Math.min(0, d3.min(chartData, valueAccessFun));
      
-	      scales.y.domain(orientation===VERTICAL ? [0, max] : d3.range(chartData.length)); 
-	      scales.x.domain(orientation===VERTICAL ? d3.range(chartData.length) : [0, max]);
+	      scales.y.domain(orientation===VERTICAL ? [min, max] : d3.range(chartData.length)); 
+	      scales.x.domain(orientation===VERTICAL ? d3.range(chartData.length) : [min, max]);
 
 	    return scales;
 
