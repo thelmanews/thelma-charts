@@ -1,0 +1,102 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+<link rel="import" href="../thelma-text/th-countup-num.html">
+
+<polymer-element name="th-bubble" extends="th-d3-chart" attributes="startFrom value display_value color duration chartSize">
+  <template>
+    <core-style ref="theme"></core-style>
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+
+      .countup-container {
+        width: 100%;
+        text-align: center;
+        margin: 0 auto;
+      }
+
+    </style>
+
+      <svg id="chart">
+          <div class="countup-container">
+            <th-countup-num type="mainpoint" numberSize="{{numberSize}}" animateOnInit="true" startFrom="{{startFrom}}" duration="{{duration}}"> {{display_value}}</th-countup-num>
+          </div>
+      </svg>
+
+  </template>
+  <script>
+        Polymer('th-bubble', {
+          startFrom: 0,
+          value: 65,
+          display_value: "+65%",
+          color: "",
+          chartSize: "125",
+          duration: "3",
+          init: function() {
+            var self = this;
+            var svg = d3.select(self.$.chart);
+
+            self.bubbleArea = self.chartSize * 0.75;
+            self.numberSize = self.chartSize * 0.25;
+
+            self.bubbleRadiusStart = (self.bubbleArea * (self.startFrom/100))/2;
+            self.bubbleRadiusEnd = (self.bubbleArea * (self.value/100))/2;
+
+            self.container = svg.attr("width", self.bubbleArea)
+                .attr("height", self.bubbleArea)
+                .append("g")
+                .attr("transform", "translate(" +(self.bubbleArea / 2 ) + "," + (self.bubbleArea / 2) + ")");
+            
+            self.bubble = self.container.append("circle")
+                .attr("class", "data0")
+                .attr("r", self.bubbleRadiusStart)
+                .style("fill", self.color)
+                .style("stroke", self.color);
+        
+          },
+          reset: function() {
+            var self = this;
+            self.bubble
+              .transition()
+              .duration(self.duration*1000)
+              .attr("r", self.bubbleRadiusStart);
+          },
+          
+          animate: function() {
+            var self = this;
+
+            self.bubble
+              .transition()
+              .duration(self.duration*1000)
+              .attr("r", self.bubbleRadiusEnd);
+
+              
+          },
+          chartSpecificDataValidate: function() {
+            
+           
+          },
+          updateData: function() {
+            var self = this;
+            
+            self.animate();
+
+          },
+          resize: function() {
+
+          }
+        });
+  
+  // TODO:
+  // Documentation
+  // Should there be labels?
+  // Is this the best way to structure the inputs?
+  // updateData method
+  // resize function
+  // Do we need a scale? What if the number is greater than 100%? Or negative?
+  // Metadata
+
+  </script>
+</polymer-element>
