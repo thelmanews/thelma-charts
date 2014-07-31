@@ -34,65 +34,49 @@ the animation, which is provided by the th-countup-num element.
     </style>
       <svg id="chart">
           <div class="countup-container">
-            <th-countup-num id="countup" type="mainpoint" numberSize="{{numberSize}}" animateOnInit="true" startFrom="{{startFrom}}" duration="{{duration}}"> {{display_value || value}}</th-countup-num>
+            <th-countup-num id="countup" type="mainpoint" numberSize="{{numberSize}}" animateOnInit="true" startFrom="{{chartData[0].startValue}}" duration="{{chartData[0].duration}}"> {{chartData[0].display_value || chartData[0].endValue}}</th-countup-num>
           </div>
       </svg>
 
   </template>
   <script>
         Polymer('th-bubble', {
-          /**
-           * 'startFrom' determines the starting size of the bubble and number for countup
+          /** CHARTDATA:
+           ** 'duration' determines the animation duration of the bubble, in seconds.
            * @type {Number}
-           */
-          startFrom: 0,
-          
-          /**
-           * 'value' determines the final size of the bubble and the ending number
+           * 
+           ** 'startFrom' determines the starting size of the bubble and number for countup
            * @type {Number}
-           */
-          value: 65,
-          
-          /**
-           * 'display_value' can be used to show special characters in the number, such as
+           * 
+           ** 'value' determines the final size of the bubble and the ending number
+           * @type {Number}
+           *
+           ** 'display_value' can be used to show special characters in the number, such as
            * $, %, +, -, #. If it not provided, the value will be used in place. 
            *
            * For example, if the startValue is 0 and value is 65, you could set display_value 
            * to "+65%" and it will count from "+0%" to "+65%".
            * 
            * @type {String}
-           */
-          display_value: "",
-          
-          /**
-           * 'color' determines the fill color of the bubble and overrides the default
+           *
+           ** 'color' determines the fill color of the bubble and overrides the default
            * @type {String}
            */
-          color: "",
-          
-          /**
-           * 'chartSize' determines the size of the element's container
-           * @type {Number}
-           */
+          chartData: [{duration:2, startValue: 0, endValue: 65, prefix:"", suffix:"", color:"" }],
           chartSize: 125,
-
-          /**
-           * 'duration' determines the animation duration of the bubble, in seconds.
-           * @type {Number}
-           */
-          duration: 2,
           init: function() {
             var self = this;
             var svg = d3.select(self.$.chart);
-
+            self.data = self.chartData[0];
             // Set sizes of the containers for the bubble and number
             self.bubbleArea = self.chartSize * 0.85;
             self.numberSize = self.chartSize * 0.15;
 
             // Determine bubble start and end radius, given values
-            self.bubbleRadiusStart = (self.bubbleArea * (self.startFrom/100))/2;
-            self.bubbleRadiusEnd = (self.bubbleArea * (self.value/100))/2;
-
+            self.bubbleRadiusStart = (self.bubbleArea * (self.data.startValue/100))/2;
+            self.bubbleRadiusEnd = (self.bubbleArea * (self.data.endValue/100))/2;
+            console.log(self.numberSize);
+            console.log(self.bubbleRadiusEnd);
             // Append a g for the bubble and center it within SVG
             var container = svg.attr("width", self.bubbleArea)
                 .attr("height", self.bubbleArea)
@@ -103,8 +87,8 @@ the animation, which is provided by the th-countup-num element.
             self.bubble = container.append("circle")
                 .attr("class", "data0")
                 .attr("r", self.bubbleRadiusStart)
-                .style("fill", self.color)
-                .style("stroke", self.color);
+                .style("fill", self.data.color)
+                .style("stroke", self.data.color);
         
           },
           // Reset bubble and number back to starting state.
@@ -112,7 +96,7 @@ the animation, which is provided by the th-countup-num element.
             var self = this;
             self.bubble
               .transition()
-              .duration(self.duration*1000)
+              .duration(self.data.duration*1000)
               .attr("r", self.bubbleRadiusStart);
 
             self.$.countup.reset();
@@ -123,7 +107,7 @@ the animation, which is provided by the th-countup-num element.
 
             self.bubble
               .transition()
-              .duration(self.duration*1000)
+              .duration(self.data.duration*1000)
               .attr("r", self.bubbleRadiusEnd);  
           },
           // If data changes, reset the starting/ending radius and call animate again.
