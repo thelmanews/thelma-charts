@@ -1,6 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
-<link rel="import" href="../thelma-text/th-countup-num.html">
 
 <!--
 'Bubble' component provides a visual effect of a growing or shrinking 
@@ -25,81 +24,120 @@ the animation, which is provided by the th-countup-num element.
         position: relative;
       }
 
-      .countup-container {
-        width: 100%;
+      .text {
+        width: {{chartSize* 0.8}}px;
         text-align: center;
         margin: 0 auto;
       }
 
     </style>
       <svg id="chart">
-          <div class="countup-container">
-            <th-countup-num id="countup" type="mainpoint" numberSize="{{numberSize}}" animateOnInit="true" startFrom="{{chartData[0].startValue}}" duration="{{chartData[0].duration}}"> {{chartData[0].display_value || chartData[0].endValue}}</th-countup-num>
-          </div>
+          
       </svg>
+      <div id="value" class="text"></div>
+      <div id="label" class="text"></div>
 
   </template>
   <script>
         Polymer('th-bubble', {
           /** CHARTDATA:
-           ** 'duration' determines the animation duration of the bubble, in seconds.
-           * @type {Number}
-           * 
            ** 'startFrom' determines the starting size of the bubble and number for countup
            * @type {Number}
            * 
            ** 'value' determines the final size of the bubble and the ending number
            * @type {Number}
            *
-           ** 'display_value' can be used to show special characters in the number, such as
-           * $, %, +, -, #. If it not provided, the value will be used in place. 
+           *  'prefix' marks such as '$' to be put before value
+           *  @type {String}
+           *  
+           *  'suffix' marks such as '$' to be put before value
+           *  @type {String}
            *
-           * For example, if the startValue is 0 and value is 65, you could set display_value 
-           * to "+65%" and it will count from "+0%" to "+65%".
-           * 
-           * @type {String}
-           *
-           ** 'color' determines the fill color of the bubble and overrides the default
+           *  'color' determines the fill color of the bubble and overrides the default
            * @type {String}
            */
-          chartData: [{duration:2, startValue: 0, endValue: 65, prefix:"", suffix:"", color:"" }],
+          chartData:[{ value: 65, startValue: 0, color: "", prefix:"", suffix:""}],
+          /**
+           * 'duration' determines the animation duration of the bubble, in seconds.
+           * @type {Number}
+           */
+          duration: 2,
           chartSize: 125,
+          /**
+           * charData observer only shalow observes chartData. this is needed for deep observation 
+           */
+          observe: {
+            'chartData[0].value': 'chartDataChanged',
+          },
           init: function() {
+            
             var self = this;
-            var svg = d3.select(self.$.chart);
+            self.svg = d3.select(self.$.chart);
             self.data = self.chartData[0];
-            // Set sizes of the containers for the bubble and number
+
+            self.chartData[0].startValue = self.chartData[0].startValue || 0;
+            self.chartData[0].prefix = self.chartData[0].prefix || "";
+            self.chartData[0].suffix = self.chartData[0].suffix || "";
+            self.chartData[0].label = self.chartData[0].label || "";
+
+            // create container and bubble for the first time
+
+            self.container = self.svg.append("g").attr('class','container');
+
+            self.bubble = self.container.append("circle")
+                .attr("class", "bubble data0");
+
+            self._setupElements();
+
+
+        
+          },
+
+
+          /**
+           * setting up element properties after each data size change 
+           * @return {[type]}
+           */
+          _setupElements: function() {
+
+            var self = this;
+
             self.bubbleArea = self.chartSize * 0.85;
             self.numberSize = self.chartSize * 0.15;
 
             // Determine bubble start and end radius, given values
             self.bubbleRadiusStart = (self.bubbleArea * (self.data.startValue/100))/2;
-            self.bubbleRadiusEnd = (self.bubbleArea * (self.data.endValue/100))/2;
-            console.log(self.numberSize);
-            console.log(self.bubbleRadiusEnd);
-            // Append a g for the bubble and center it within SVG
-            var container = svg.attr("width", self.bubbleArea)
-                .attr("height", self.bubbleArea)
-                .append("g")
+            self.bubbleRadiusEnd = (self.bubbleArea * (self.data.value/100))/2;
+
+            self.svg.attr("width", self.bubbleArea)
+                .attr("height", self.bubbleArea);
+
+            
+            self.container
                 .attr("transform", "translate(" +(self.bubbleArea / 2 ) + "," + (self.bubbleArea / 2) + ")");
             
             // Append a circle to the g and set starting radius
-            self.bubble = container.append("circle")
-                .attr("class", "data0")
+            
+              self.bubble
                 .attr("r", self.bubbleRadiusStart)
                 .style("fill", self.data.color)
                 .style("stroke", self.data.color);
-        
+
+            self.value = d3.select(self.$.value)
+              .text(self.chartData[0].prefix+self.chartData[0].startValue+self.chartData[0].suffix);
+
+            self.label = d3.select(self.$.label)
+              .text(self.chartData[0].label);
+
           },
           // Reset bubble and number back to starting state.
           reset: function() {
             var self = this;
             self.bubble
               .transition()
-              .duration(self.data.duration*1000)
+              .duration(self.duration*1000)
               .attr("r", self.bubbleRadiusStart);
 
-            self.$.countup.reset();
           },
           // Transition of bubble to final state.
           animate: function() {
@@ -107,20 +145,30 @@ the animation, which is provided by the th-countup-num element.
 
             self.bubble
               .transition()
-              .duration(self.data.duration*1000)
-              .attr("r", self.bubbleRadiusEnd);  
+              .duration(self.duration*1000)
+              .attr("r",  self.bubbleRadiusEnd); 
+
+            var i = d3.interpolate(self.chartData[0].startValue, self.chartData[0].value);
+            //var formatPercent = d3.format(".0");
+            self.value.transition().duration(self.duration*1000).tween("countup", function() {
+                  return function(t) {
+                    var num = i(t);
+                    self.value.text(self.chartData[0].prefix+Math.round(num)+self.chartData[0].suffix);
+                  };
+            });
+
           },
           // If data changes, reset the starting/ending radius and call animate again.
           updateData: function() {
             var self = this;
-            self.init();
+            self._setupElements();
             self.animate();
 
           },
           // If element size changes, reset the starting/ending radius and call animate again.
           resize: function() {
             var self = this;
-            self.init();
+            self._setupElements();
             self.animate();
           }
         });
