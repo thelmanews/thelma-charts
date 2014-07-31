@@ -8,9 +8,9 @@ console.log(bubble);
 
 setTimeout(function() {
 	console.log('timeoit');
-	bubble.value=90;
-	bubble.updateData();
-},4000);
+	bubble.chartData[0].startValue = 65;
+	bubble.chartData[0].value = 40;
+},8000);
 
 
 
@@ -18,7 +18,7 @@ setTimeout(function() {
 
 setTimeout(function() {
 	//horChart.chartHeight = 450;
-},4000);
+},8000);
 
 
 
