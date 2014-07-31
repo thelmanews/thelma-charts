@@ -2,12 +2,21 @@
 
 var horChart = document.querySelector('th-spectrum-chart');
 
+var bubble = document.querySelector('#bubble');
+console.log(bubble);
+
+setTimeout(function() {
+	console.log('timeoit');
+	bubble.chartData[0].startValue = 65;
+	bubble.chartData[0].value = 40;
+},8000);
+
 
 
 
 setTimeout(function() {
-	horChart.chartHeight = 450;
-},4000);
+	//horChart.chartHeight = 450;
+},8000);
 
 
 /*

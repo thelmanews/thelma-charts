@@ -22,7 +22,7 @@
   <link rel="import" href="th-compare-grid-chart.html">
   <link rel="import" href="th-compare-balance-chart.html">
   <link rel="import" href="th-line-graph-single.html">
-
+  <link rel="import" href="th-bubble.html">
 
 
   <style>
@@ -38,6 +38,9 @@
 
   <p>thelma-components looks like this:</p>
 
+  <th-bubble id="bubble" animateAfter="2000" ></th-bubble>
+
+  <th-bubble animateAfter="2000"  chartData="[{'startValue': '10', 'value': '95', 'color':'orange', 'suffix': '%', 'label': 'below poverty line' }]"></th-bubble>
 
   <th-donut-chart animateOnInit="true" style="margin: 20px;"></th-donut-chart>
 
