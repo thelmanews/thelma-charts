@@ -2,7 +2,21 @@
 <link rel="import" href="th-d3-chart.html">
 <link rel="import" href="../thelma-text/th-countup-num.html">
 
-<polymer-element name="th-bubble" extends="th-d3-chart" attributes="startFrom value display_value color duration chartSize">
+<!--
+'Bubble' component provides a visual effect of a growing or shrinking 
+circle in size by a certain percentage. It can be used side by side with
+another bubble to compare growth. The associated number also counts with
+the animation, which is provided by the th-countup-num element.
+
+@group Thelma Charts
+@element th-bubble
+@blurb Element providing a visual effect of a growing or shrinking circle
+@status alpha
+@homepage http://github.com/thelmanews/thelma-charts/blob/master/th-bubble.html
+-->
+
+<polymer-element name="th-bubble" extends="th-d3-chart" attributes="startFrom value 
+  display_value color duration chartSize">
   <template>
     <core-style ref="theme"></core-style>
     <style>
@@ -18,85 +32,121 @@
       }
 
     </style>
-
       <svg id="chart">
           <div class="countup-container">
-            <th-countup-num type="mainpoint" numberSize="{{numberSize}}" animateOnInit="true" startFrom="{{startFrom}}" duration="{{duration}}"> {{display_value}}</th-countup-num>
+            <th-countup-num id="countup" type="mainpoint" numberSize="{{numberSize}}" animateOnInit="true" startFrom="{{startFrom}}" duration="{{duration}}"> {{display_value || value}}</th-countup-num>
           </div>
       </svg>
 
   </template>
   <script>
         Polymer('th-bubble', {
+          /**
+           * 'startFrom' determines the starting size of the bubble and number for countup
+           * @type {Number}
+           */
           startFrom: 0,
+          
+          /**
+           * 'value' determines the final size of the bubble and the ending number
+           * @type {Number}
+           */
           value: 65,
-          display_value: "+65%",
+          
+          /**
+           * 'display_value' can be used to show special characters in the number, such as
+           * $, %, +, -, #. If it not provided, the value will be used in place. 
+           *
+           * For example, if the startValue is 0 and value is 65, you could set display_value 
+           * to "+65%" and it will count from "+0%" to "+65%".
+           * 
+           * @type {String}
+           */
+          display_value: "",
+          
+          /**
+           * 'color' determines the fill color of the bubble and overrides the default
+           * @type {String}
+           */
           color: "",
-          chartSize: "125",
-          duration: "3",
+          
+          /**
+           * 'chartSize' determines the size of the element's container
+           * @type {Number}
+           */
+          chartSize: 125,
+
+          /**
+           * 'duration' determines the animation duration of the bubble, in seconds.
+           * @type {Number}
+           */
+          duration: 2,
+          ready: function(){
+            var self = this;
+
+            // Set sizes of the containers for the bubble and number
+            self.bubbleArea = self.chartSize * 0.85;
+            self.numberSize = self.chartSize * 0.15;
+
+            // Determine bubble start and end radius, given values
+            self.bubbleRadiusStart = (self.bubbleArea * (self.startFrom/100))/2;
+            self.bubbleRadiusEnd = (self.bubbleArea * (self.value/100))/2;
+          },
           init: function() {
             var self = this;
             var svg = d3.select(self.$.chart);
 
-            self.bubbleArea = self.chartSize * 0.75;
-            self.numberSize = self.chartSize * 0.25;
-
-            self.bubbleRadiusStart = (self.bubbleArea * (self.startFrom/100))/2;
-            self.bubbleRadiusEnd = (self.bubbleArea * (self.value/100))/2;
-
-            self.container = svg.attr("width", self.bubbleArea)
+            // Append a g for the bubble and center it within SVG
+            var container = svg.attr("width", self.bubbleArea)
                 .attr("height", self.bubbleArea)
                 .append("g")
                 .attr("transform", "translate(" +(self.bubbleArea / 2 ) + "," + (self.bubbleArea / 2) + ")");
             
-            self.bubble = self.container.append("circle")
+            // Append a circle to the g and set starting radius
+            self.bubble = container.append("circle")
                 .attr("class", "data0")
                 .attr("r", self.bubbleRadiusStart)
                 .style("fill", self.color)
                 .style("stroke", self.color);
         
           },
+          // Reset bubble and number back to starting state.
           reset: function() {
             var self = this;
             self.bubble
               .transition()
               .duration(self.duration*1000)
               .attr("r", self.bubbleRadiusStart);
+
+            self.$.countup.reset();
           },
-          
+          // Transition of bubble to final state.
           animate: function() {
             var self = this;
 
             self.bubble
               .transition()
               .duration(self.duration*1000)
-              .attr("r", self.bubbleRadiusEnd);
-
-              
+              .attr("r", self.bubbleRadiusEnd);  
           },
-          chartSpecificDataValidate: function() {
-            
-           
-          },
+          // If data changes, reset the starting/ending radius and call animate again.
           updateData: function() {
             var self = this;
-            
+            self.init();
             self.animate();
 
           },
+          // If element size changes, reset the starting/ending radius and call animate again.
           resize: function() {
-
+            var self = this;
+            self.init();
+            self.animate();
           }
         });
   
-  // TODO:
-  // Documentation
-  // Should there be labels?
+  // QUESTIONS:
   // Is this the best way to structure the inputs?
-  // updateData method
-  // resize function
   // Do we need a scale? What if the number is greater than 100%? Or negative?
-  // Metadata
 
   </script>
 </polymer-element>
