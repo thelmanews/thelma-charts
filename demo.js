@@ -2,11 +2,20 @@
 
 var horChart = document.querySelector('th-spectrum-chart');
 
+var bubble = document.querySelector('#bubble');
+console.log(bubble);
+
+setTimeout(function() {
+	console.log('timeoit');
+	bubble.value=90;
+	bubble.updateData();
+},4000);
+
 
 
 
 setTimeout(function() {
-	horChart.chartHeight = 450;
+	//horChart.chartHeight = 450;
 },4000);
 
 
