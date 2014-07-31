@@ -81,8 +81,9 @@ the animation, which is provided by the th-countup-num element.
            * @type {Number}
            */
           duration: 2,
-          ready: function(){
+          init: function() {
             var self = this;
+            var svg = d3.select(self.$.chart);
 
             // Set sizes of the containers for the bubble and number
             self.bubbleArea = self.chartSize * 0.85;
@@ -91,10 +92,6 @@ the animation, which is provided by the th-countup-num element.
             // Determine bubble start and end radius, given values
             self.bubbleRadiusStart = (self.bubbleArea * (self.startFrom/100))/2;
             self.bubbleRadiusEnd = (self.bubbleArea * (self.value/100))/2;
-          },
-          init: function() {
-            var self = this;
-            var svg = d3.select(self.$.chart);
 
             // Append a g for the bubble and center it within SVG
             var container = svg.attr("width", self.bubbleArea)
