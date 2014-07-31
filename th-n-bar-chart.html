@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-n-bar-chart" extends="th-d3-chart">
+<polymer-element name="th-n-bar-chart" extends="th-d3-chart" attributes="showHorizontalAxis">
 
 	<script>
 
@@ -58,6 +58,12 @@
 		        .style("fill", function(d){ return d.color })
  		        .style("stroke", function(d){ return d.color });
 
+ 		     polymerObj.horAxis
+	 		     	.attr('x1', 0)
+	 		     	.attr('y1', polymerObj.dims.height - y(0))
+	 		     	.attr('x2', polymerObj.dims.width)
+	 		     	.attr('y2', polymerObj.dims.height - y(0));
+
 		};
 
 		 staticObj._setupElements = function(polymerObj) {
@@ -97,6 +103,11 @@
 		      .attr('y', polymerObj.dims.height)
 		      .style('opacity', 0);
 
+		      var horClass = 'horAxis'+(polymerObj.showHorizontalAxis ? ' stroke-foreground' : '');
+
+		      polymerObj.horAxis = polymerObj.container.selectAll('.horAxis').data([1]).enter().append('line').attr('class', horClass);
+
+
 
 		  };
 
@@ -123,10 +134,15 @@
 
 		Polymer('th-n-bar-chart', {
 		  chartData: [
-		    {label: 'Player', value: 15, display_value: '$15', color:''},
-		    {label: 'Vendor', value: 20, display_value: '$20', color:''},
-		    {label: 'Mascot', value: -35, display_value: '$35', color:''}
+		    {label: 'Player', value: 15, color:''},
+		    {label: 'Vendor', value: -20, color:''},
+		    {label: 'Mascot', value: -35, color:''}
 		  ],
+		  /**
+		   * show horizontal line from zero point when dealing with negative values
+		   * @type {Boolean}
+		   */
+		  showHorizontalAxis: false,
 		  init: function() {
 		    
 		  	  var self = this;
@@ -190,23 +206,25 @@
 		        self.bars.transition().duration(this.animationDelay)
 		        .attr('x', function(d, i) { return self.x(i); })
 		        .attr('y', function(d) { 
-		        	console.log(height-y(d.value));
-		        	// how make positive bars go up and negative ones down?
-		        	return y(0);})
+		        	// or, if data<0 start bar from 0 otherwise from value
+		        	return height - Math.max(y(d.value), y(0));})
 		        .attr('width', self.dims.bars.width)
 		        .attr('height', function(d) {
-		        	// console.log(Mascotth.abs(y(d.value) - y(0)));
-		        	// height cant take negaive values, so get the absolute value.
-		        	return Math.abs(y(d.value) - y(0))})
+		        	// subtract y(0) from height to support neg. values
+		        	return Math.abs(y(d.value) - y(0));})
 		        .style('opacity', 1);
 		        
-		        self.values.transition(this.animationDelay).duration(this.animationDelay)
+		        self.values.transition().duration(this.animationDelay)
 		        //.style('opacity', 1)
 		        .attr('x', function(d,i) { return self.x(i) + self.dims.bars.width/2; })
-		        .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;})
+		        .attr('y', function(d) {
+		        	return d.value<0 
+		        		   ? height - y(0) - self.dims.values.margin // data<0 then value over zero line 
+		        		   : height - y(d.value) - self.dims.values.margin;  // data>0 valye on top of the chart
+		        })
 		        .style('opacity', 1);
 
-		        self.labels.transition(this.animationDelay).duration(this.animationDelay)
+		        self.labels.transition().duration(this.animationDelay)
 		        .attr('text-anchor',function(){ 
 		        	return self.dims.labels.angle > 0 ? "left" : "middle";
 		        	
@@ -223,6 +241,13 @@
 			        	}
 			        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
 			    });
+
+			    self.horAxis.transition().duration(self.animationDelay)
+	 		     	.attr('x1', 0)
+	 		     	.attr('y1', self.dims.height - y(0))
+	 		     	.attr('x2', self.dims.width)
+	 		     	.attr('y2', self.dims.height - y(0));
+
 
 		  },
 
