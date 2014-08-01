@@ -146,11 +146,11 @@
                 var progress = self.chartData[0].value;
                 var total = 100;
                 var i = d3.interpolate(self._prevProgress/total, progress/total);//d3.event.loaded / total);
-                d3.transition().duration(1000).tween("progress", function() {
+                self.foreground.transition().duration(1000).tween("progress", function() {
                   return function(t) {
-                    progress = i(t);
-                    self.foreground.attr("d", self.arc.endAngle(self.twoPi * progress));
-                    self.text.text(self.formatPercent(progress));
+                    var progress1 = i(t);
+                    self.foreground.attr("d", self.arc.endAngle(self.twoPi * progress1));
+                    self.text.text(self.formatPercent(progress1));
                   };
                 }).each("end",function() {
                   self.fire('th-animationend',{ element: self});  // is self too much to expose?
