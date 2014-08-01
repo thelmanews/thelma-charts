@@ -23,6 +23,10 @@ the animation, which is provided by the th-countup-num element.
         position: relative;
       }
 
+      #value {
+        font-size: {{numberSize + "px"}};
+      }
+
       .text {
         text-align: center;
         margin: 0 auto;
@@ -32,7 +36,7 @@ the animation, which is provided by the th-countup-num element.
     </style>
       <svg id="chart"></svg>
       <div id="value" class="text"></div>
-      <div id="label" class="text"></div>
+      <div id="label" class="text label"></div>
 
   </template>
   <script>
@@ -98,7 +102,7 @@ the animation, which is provided by the th-countup-num element.
             var self = this;
 
             self.bubbleArea = self.chartSize;
-            self.numberSize = self.chartSize * 0.15;
+            self.numberSize = Math.max((self.chartSize * 0.15), 14);
 
             // Determine bubble start and end radius, given values
             self.bubbleRadiusStart = (self.bubbleArea * (self.data.startValue/100))/2;
