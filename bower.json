@@ -9,6 +9,7 @@
     "topojson": "latest",
     "core-style": "Polymer/core-style#~0.3.2",
     "thelma-core": "https://github.com/thelmanews/thelma-core.git",
-    "thelma-utils": "https://github.com/thelmanews/thelma-utils.git"
+    "thelma-utils": "https://github.com/thelmanews/thelma-utils.git",
+    "google-map": "GoogleWebComponents/google-map#~0.3.1"
   }
 }
