@@ -14,8 +14,7 @@ the animation, which is provided by the th-countup-num element.
 @homepage http://github.com/thelmanews/thelma-charts/blob/master/th-bubble.html
 -->
 
-<polymer-element name="th-bubble" extends="th-d3-chart" attributes="startFrom value 
-  display_value color duration chartSize">
+<polymer-element name="th-bubble" extends="th-d3-chart" attributes="duration chartSize">
   <template>
     <core-style ref="theme"></core-style>
     <style>
@@ -25,15 +24,13 @@ the animation, which is provided by the th-countup-num element.
       }
 
       .text {
-        width: {{chartSize* 0.8}}px;
         text-align: center;
         margin: 0 auto;
+        width: {{chartSize + "px"}};
       }
 
     </style>
-      <svg id="chart">
-          
-      </svg>
+      <svg id="chart"></svg>
       <div id="value" class="text"></div>
       <div id="label" class="text"></div>
 
@@ -55,8 +52,11 @@ the animation, which is provided by the th-countup-num element.
            *
            *  'color' determines the fill color of the bubble and overrides the default
            * @type {String}
+           *
+           *  'label' is displayed beneath the value
+           * @type {String}
            */
-          chartData:[{ value: 65, startValue: 0, color: "", prefix:"", suffix:""}],
+          chartData:[{ value: 65, startValue: 0, color: "", prefix:"", suffix:"", label:""}],
           /**
            * 'duration' determines the animation duration of the bubble, in seconds.
            * @type {Number}
@@ -64,7 +64,7 @@ the animation, which is provided by the th-countup-num element.
           duration: 2,
           chartSize: 125,
           /**
-           * charData observer only shalow observes chartData. this is needed for deep observation 
+           * chartData observer only shallow observes chartData. this is needed for deep observation 
            */
           observe: {
             'chartData[0].value': 'chartDataChanged',
@@ -81,19 +81,14 @@ the animation, which is provided by the th-countup-num element.
             self.chartData[0].label = self.chartData[0].label || "";
 
             // create container and bubble for the first time
-
             self.container = self.svg.append("g").attr('class','container');
 
             self.bubble = self.container.append("circle")
                 .attr("class", "bubble data0");
 
             self._setupElements();
-
-
         
           },
-
-
           /**
            * setting up element properties after each data size change 
            * @return {[type]}
@@ -102,7 +97,7 @@ the animation, which is provided by the th-countup-num element.
 
             var self = this;
 
-            self.bubbleArea = self.chartSize * 0.85;
+            self.bubbleArea = self.chartSize;
             self.numberSize = self.chartSize * 0.15;
 
             // Determine bubble start and end radius, given values
@@ -117,11 +112,10 @@ the animation, which is provided by the th-countup-num element.
                 .attr("transform", "translate(" +(self.bubbleArea / 2 ) + "," + (self.bubbleArea / 2) + ")");
             
             // Append a circle to the g and set starting radius
-            
-              self.bubble
-                .attr("r", self.bubbleRadiusStart)
-                .style("fill", self.data.color)
-                .style("stroke", self.data.color);
+            self.bubble
+              .attr("r", self.bubbleRadiusStart)
+              .style("fill", self.data.color)
+              .style("stroke", self.data.color);
 
             self.value = d3.select(self.$.value)
               .text(self.chartData[0].prefix+self.chartData[0].startValue+self.chartData[0].suffix);
@@ -172,10 +166,6 @@ the animation, which is provided by the th-countup-num element.
             self.animate();
           }
         });
-  
-  // QUESTIONS:
-  // Is this the best way to structure the inputs?
-  // Do we need a scale? What if the number is greater than 100%? Or negative?
 
   </script>
 </polymer-element>
