@@ -102,7 +102,7 @@
               self.meter.selectAll('text.tick')
                 .data(self.scale.ticks(numTicks))
                 .enter().append('text')
-                .attr('class', 'tick label')
+                .attr('class', 'tick label no-stroke')
                 .attr("text-anchor", "middle")
                 .attr('transform', function(d) {
                     return 'rotate(' + self.scale(d) +') translate(0,' +(-width/2-margin.label) +')';
@@ -116,7 +116,7 @@
                   .data(self.data)
                   .enter()
                     .append("text")
-                    .attr("class", "fill-foreground min label")
+                    .attr("class", "fill-foreground min label no-stroke")
                     .attr("text-anchor", "middle")
                     .attr("dy", 18)
                     .attr("dx", -width/2 + meterWidth/2)
@@ -127,7 +127,7 @@
                   .data(self.data)
                   .enter()
                     .append("text")
-                    .attr("class", "fill-foreground max label")
+                    .attr("class", "fill-foreground max label no-stroke")
                     .attr("text-anchor", "middle")
                     .attr("dy", 20)
                     .attr("dx", width/2 - meterWidth/2 )

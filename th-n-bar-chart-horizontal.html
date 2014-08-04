@@ -109,7 +109,7 @@
 		      this.labelContainer = this.container.append('g')
 		      		.attr('class','label_container');
 
-		      this.labels = this.labelContainer.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+		      this.labels = this.labelContainer.selectAll('.label no-stroke').data(this.chartData).enter().append('text').attr('class','label no-stroke');
 
 		      this.valueContainer = this.container.append('g')
 		      		.attr('class','value_container');
@@ -201,7 +201,7 @@
 
 		      
 		      this.labels
-		        .attr("class", function(d,i){return "label data"+i;})
+		        .attr("class", function(d,i){return "label no-stroke data"+i;})
 		        //.style('opacity', 0)
 		        .style('text-anchor','left')
 		        .attr('fill', function(d,i){ return self.colors.accents[i]; })
@@ -343,7 +343,7 @@
 
 
 			      	
-			      self.labels.enter().append('text').attr('class','label');
+			      self.labels.enter().append('text').attr('class','label no-stroke');
 			      self.values.enter().append('text').attr('class','value');//.attr('y', height);
 
 

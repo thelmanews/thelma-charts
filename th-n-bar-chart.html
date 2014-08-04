@@ -41,7 +41,7 @@
  		        .style("stroke", function(d){ return d.color });
 		      
 		      polymerObj.labels
-		        .attr("class", function(d,i){return "label data"+i;})
+		        .attr("class", function(d,i){return "label no-stroke data"+i;})
 		        .attr('fill', function(d,i){ return polymerObj.colors.accents[i]; })
 		        .attr('stroke', function(d,i){ return polymerObj.colors.accents[i]; })
 		        .style("fill", function(d){ return d.color })
@@ -75,7 +75,7 @@
 		      .attr('height', 0)
 		      .attr('y', polymerObj.dims.height);
 
-		      polymerObj.labels = polymerObj.container.selectAll('.label').data(polymerObj.chartData).enter().append('text').attr('class','label')
+		      polymerObj.labels = polymerObj.container.selectAll('.label').data(polymerObj.chartData).enter().append('text').attr('class','label no-stroke')
 		      .attr('text-anchor',function(){ 
 		        	return polymerObj.dims.labels.angle > 0 ? "left" : "middle";
 		        	
@@ -303,7 +303,7 @@
 			      	.attr('x', function(d) {
 			      		return width;
 			      	});
-			      self.labels.enter().append('text').attr('class','label');
+			      self.labels.enter().append('text').attr('class','label no-stroke');
 			      self.values.enter().append('text').attr('class','value').attr('y', height);
 
 

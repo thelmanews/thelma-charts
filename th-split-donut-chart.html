@@ -81,7 +81,7 @@
                 .data(self.data)
                 .enter()
                   .append("text")
-                  .attr("class", function(d,i){ return ("label data"+i); })
+                  .attr("class", function(d,i){ return ("label no-stroke data"+i); })
                   .style('font-size', self.labelSize)
                   .attr("text-anchor", "middle")
                   .attr("dy", function(d,i){

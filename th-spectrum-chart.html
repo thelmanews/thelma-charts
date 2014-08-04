@@ -136,7 +136,7 @@
 
 		      self.labels
 		      	.attr('class','label')
-		        .attr("class", function(d,i){return "label data"+i;})
+		        .attr("class", function(d,i){return "label no-stroke data"+i;})
 		        .style('text-anchor','end')
 		        .text(function(d) {return d.label;})
 	            .style('fill', function(d){ return d.color;})
@@ -144,7 +144,7 @@
 		      
 		      self.values
 		      	.attr('font-weight', 300)
-		      	.attr('class', function(d,i){return "defaultvalue value data"+i;})
+		      	.attr('class', function(d,i){return "defaultvalue value no-stroke data"+i;})
 		        .style('opacity', 0)
 		        .text(function(d) {
 	            return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
@@ -235,8 +235,8 @@
 
 			      	.attr('height', 0);
 
-			      self.labels.enter().append('text').attr('class','label');
-			      self.values.enter().append('text').attr('class','value').attr('y', height);
+			      self.labels.enter().append('text').attr('class','label no-stroke');
+			      self.values.enter().append('text').attr('class','value no-stroke').attr('y', height);
 
 
 			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();

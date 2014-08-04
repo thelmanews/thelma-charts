@@ -117,7 +117,7 @@
               polymerObj.xLabels = g.selectAll(".xLabel")
                 .data(x.ticks(polymerObj.numXticks))
                 .enter().append("text")
-                .attr("class", "xLabel axis")
+                .attr("class", "xLabel label no-stroke axis")
                 .text(function(d){ return d;})
                 .attr("opacity", function(d) { return polymerObj.xAxisLabels ? 1 : 0; })
                 .attr("text-anchor", "middle");
@@ -126,7 +126,7 @@
               polymerObj.yLabels = g.selectAll(".yLabel")
                 .data(y.ticks(polymerObj.numYticks))
                 .enter().append("text")
-                .attr("class", "yLabel axis")
+                .attr("class", "yLabel label no-stroke axis")
                 .text(function(d){ return d;})
                 .attr("dy", 4)
                 .attr("opacity", function(d) { return polymerObj.axisAnimation || !polymerObj.yAxisLabels ? 0 : 1; })
@@ -384,7 +384,7 @@
             // add new data points
             self.xLabels
               .enter().append("text")
-              .attr("class", "xLabel axis")
+              .attr("class", "xLabel label no-stroke axis")
               .text(function(d){ return d;})
               .attr("text-anchor", "middle")
               .attr("x", function(d) { return x(d) })
@@ -392,7 +392,7 @@
              
             self.yLabels  // these new ones are not being positioned correctly..
               .enter().append("text")
-              .attr("class", "yLabel axis")
+              .attr("class", "yLabel label no-stroke axis")
               .text(function(d){ return d;})
               .attr("dy", 4)
               .attr("opacity", function(d) { return self.axisAnimation ? 0 : 1; })
