@@ -95,9 +95,9 @@
 		      self.bars.attr('y', self.dims.height)
 			        .attr('height', 0);
 
-			  self.labels.attr('height', 0);
+			  self.labels.attr('height', 0).style('opacity', 0);
 
-			  self.values.attr('height', 0);
+			  self.values.attr('height', 0).style('opacity', 0);
 	      
 
 		  },
@@ -120,7 +120,6 @@
 		      
 		      self.labels
 		        .attr("class", function(d,i){return "label data"+i;})
-		        .style('opacity', 0)
 		        .style('text-anchor','end')
 		        .text(function(d) {return d.label;})
 		        .style('fill', function(d){ return d.color; })
@@ -129,7 +128,6 @@
 		      
 		      self.values
 		        .attr("class", function(d,i){return "value data"+i;})
-		        .style('opacity', 0)
 		        .attr('font-size', '13px')
 		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
 		        .style('fill', function(d){ return d.color; })
@@ -150,6 +148,8 @@
 
 		  resize: function() {
 
+		  	  console.log('resize');
+
 		      var self = this;
 		      self.dims = self.setupStackedDims(self);
 
@@ -167,6 +167,8 @@
 		          total+=parseInt(d.value);
 		      });
 
+		      console.log(total);
+
 		      self.y.domain([0, total]); 
 
 
@@ -178,6 +180,7 @@
 
 		  updateData: function() {
 
+			    console.log('UUpdate');
 
 		  	  var self = this;
 
@@ -221,9 +224,12 @@
 			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
 			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
 			      
-			     self.resize();
+			     //self.resize();
 
 			    }
+
+			    //resize is needed to recalculate the total and set domain
+			    self.resize();
 
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
