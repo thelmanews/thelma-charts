@@ -348,9 +348,12 @@
 			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
 			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
 			      
-				  self.resize();
+				  //self.resize();
 
 			    }
+
+			    // needed here to recalculate the scale, needed when data scale changes //TODO refactoring?
+			   self.resize();
 
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
