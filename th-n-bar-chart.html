@@ -198,6 +198,9 @@
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
 		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+		      console.log("(!(!(!");
+		      	console.log(self.getMetaData());
 		        
 		  },
 		  reset: function(hard) {
@@ -392,7 +395,8 @@
 	       },
 
 	        getMetaData: function() {
-                return {
+                
+	        	var metadata = {
                   "name": "th-n-bar-chart",
                   "description": "Thelma n bar chart",
                   "category":"chart",
@@ -400,24 +404,26 @@
                   "thumbnail":"nbar.jpg", 
                   "tags":["chart", "bar"],
                   "inputAttr": {
-                    "chartWidth":{"friendly":"Width", "type":"int", "default":200},
-                    "chartHeight":{"friendly":"Height", "type":"int", "default":300},
+                    "chartWidth":{"friendly":"Width", "type":"int"},
+                    "chartHeight":{"friendly":"Height", "type":"int"},
                     "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
                       "fields":{
-                        "label":{"friendly":"Label", "type":"string", "default":"Player"},
-                        "value":{"friendly":"Value", "type":"int", "default":15},
-                        "display_value":{"friendly":"Display Value", "type":"string", "default":""}
-                      },
-                      "default":[
-                        {"label": "Player", "value": 15, "display_value": "$15"},
-                        {"label": "Vendor", "value": 20, "display_value": "$20"},
-                        {"label": "Mascot", "value": 45, "display_value": "$45"}
-                      ]
+                        "label":{"friendly":"Label", "type":"string"},
+                        "value":{"friendly":"Value", "type":"int"},
+                        "display_value":{"friendly":"Display Value", "type":"string"}
+                      }
                     }
                   }
-                }
-           	}
-		  
+                };
+           
+          	var currentState = JSON.parse(this.getState());
+
+	          for (key in metadata["inputAttr"]){
+	          	metadata["inputAttr"][key]["default"] = currentState[key];
+	          }
+
+	          return metadata;
+		  	}
 		});
 
 	})();
