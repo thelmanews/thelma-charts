@@ -1,0 +1,188 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-timeline" extends="th-d3-chart">
+  <template>   
+    <core-style ref="theme"> </core-style>
+    <style>
+      .current {
+
+      }
+
+      .headline-text {
+
+      }
+
+      .body-text {
+
+      }
+
+      .detail-text {
+
+      }
+
+      .label-text {
+        font-size: 0.8em;
+      }
+
+    </style>
+    
+    <svg id="chart"></svg> 
+  </template> 
+  
+  <script>
+
+    Polymer('th-timeline', {
+      chartData: [
+        {date: '1', headline: 'July 15th', body:'', detail: '', image: '', fill:'', startHere: true},
+        {date: '2', headline: 'July 17th', body:'', detail: '', image: '', fill:'', startHere: false},
+        {date: '3', headline: 'July 20th', body:'', detail: '', image: '', fill:'', startHere: false},
+        {date: '4', headline: 'July 25th', body:'', detail: '', image: '', fill:'', startHere: false},
+        {date: '5', headline: 'July 26-28th', body:'', detail: '', image: '', fill:'', startHere: false},
+        {date: '6', headline: 'August 4th', body:'', detail: 'Morning', image: '', fill:'', startHere: false},
+        {date: '7', headline: 'August 4th', body:'', detail: 'Evening', image: '', fill:'', startHere: false}
+      ],
+      scale: "time", // or 'linear' if no dates
+      startDate: '0',
+      endDate: '10',
+      theme: 'light',
+      init: function() {
+        var self = this,
+            data = self.chartData;
+
+        // setup dimensions
+        self.dims = self.setupDimensions(self);
+        
+         
+        // setup scale
+        self.scale = d3.time.scale()
+          .domain([self.startDate, self.endDate])
+          .range([0, self.chartHeight]);
+
+        // set starting point
+        self.current = 0; // refers to the index value of the event in chartData
+        for (var i=0; i<data.length; i++){
+          self.current = data[i].startHere ? i : self.current;
+        }
+        // setup elements
+        self._setupElements();
+        
+        // setup elementSizes
+
+
+            
+      },
+   
+      _setupElements: function(){
+        var self = this,
+            width = self.dims.width,
+            height = self.dims.height, 
+            scale = self.scale,
+            data = self.chartData;
+
+        // set dims             
+        self.svg = d3.select(self.$.chart)
+          .attr('height', height)
+          .attr('width', width);
+
+        // create container
+        var g = self.svg.append('g')
+          .attr('class','container');
+
+        // append timeline
+        self.timeline = g.append('line')
+          .attr('class', 'axis')
+          .attr('stroke-width', 2)
+          .attr('y1', scale(self.startDate))
+          .attr('y2', scale(self.endDate))
+          .attr('x1', width/2)
+          .attr('x2', width/2);
+
+
+        // append endpoints
+        // TODO
+
+        // append group for each event
+        self.events = g.selectAll('g.event')
+          .data(data)
+          .enter().append('g')
+          .attr('class', 'event');
+
+        // append circles for events
+        self.dots = self.events
+          .append('circle')
+          .attr('class', 'dot stroke-foreground fill-foreground')
+          .attr('stroke-width', 2)
+          .attr('cx', width/2)
+          .attr('cy', function(d){
+            return scale(d.date);
+          })
+          .attr('r', 3);
+
+        // append labels
+        self.labels = self.events
+          .append('text')
+          .text(function(d){ return d.headline; })
+          .attr('x', width/2)
+          .attr('y', function(d){ return scale(d.date); })
+          .attr('text-anchor', 'right')
+          .attr('transform', 'translate('+self.dims.margin.label+', 5)')
+          .attr('class', 'label-text fill-foreground');
+
+        // append content circles
+        self.circles = self.events
+          .append('circle')
+          .
+
+
+      },
+      _setElementSizes: function(){
+
+
+
+      },
+
+      reset: function(hard) {
+
+          
+     
+      },
+      
+      animate: function() {
+        var self = this;
+
+        // zoom in on the current point
+        // transform the content circle to enlarge
+        // swipe events to navigate events
+        // click events to zoom on a specific event
+        // ability to zoom in out
+
+
+
+
+      },
+
+      resize: function() {
+          
+          var self = this;
+          
+      
+
+      },
+
+      updateData: function() {
+
+
+          var self = this;
+
+   
+      }
+
+      
+    });
+
+
+
+
+  </script>
+</polymer-element>
