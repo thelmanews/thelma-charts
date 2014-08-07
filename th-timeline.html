@@ -55,18 +55,18 @@
         
          
         // setup scale
-        self.scale = d3.time.scale()
+        self.yScale = d3.time.scale()
           .domain([self.startDate, self.endDate])
           .range([0, self.chartHeight]);
 
         // set starting point
-        self.current = 0; // refers to the index value of the event in chartData
+        self.current = {}; // refers to the index value of the event in chartData
         for (var i=0; i<data.length; i++){
-          self.current = data[i].startHere ? i : self.current;
+          self.current.index = data[i].startHere ? i : self.current.index;
         }
+        self.previous = {};
         // setup elements
         self._setupElements();
-        
         // setup elementSizes
 
 
@@ -77,13 +77,43 @@
         var self = this,
             width = self.dims.width,
             height = self.dims.height, 
-            scale = self.scale,
-            data = self.chartData;
+            yScale = self.yScale,
+            data = self.chartData,
+            circleRadius = width/5;
+
+        // define zoom function
+        var zoom = d3.behavior.zoom()
+          .y(yScale)
+          .size([width, height])
+          .scaleExtent([1, 8]) // maximum of 8x original scale
+          .on("zoom", zoomed); // should this be disabled? how to call it on another event?
+        self.zoom = zoom;
+
+        function zoomed() {
+          
+          self.events.selectAll('.circle')
+            .classed('current', false)
+            .attr('r', 0);
+
+          var selected = d3.select(this);
+
+          selected
+            .classed('current', true);
+
+          self.events
+             .attr('transform', function(d){ return "translate(0," + yScale(d.date) + ")"});
+
+          selected.select('.circle')
+            .transition().duration(100)
+            .attr('r', circleRadius);
+        }
+
 
         // set dims             
         self.svg = d3.select(self.$.chart)
           .attr('height', height)
-          .attr('width', width);
+          .attr('width', width)
+          .call(zoom); // need this to be able to scroll through timeline
 
         // create container
         var g = self.svg.append('g')
@@ -93,20 +123,48 @@
         self.timeline = g.append('line')
           .attr('class', 'axis')
           .attr('stroke-width', 2)
-          .attr('y1', scale(self.startDate))
-          .attr('y2', scale(self.endDate))
+          .attr('y1', yScale(self.startDate))
+          .attr('y2', yScale(self.endDate))
           .attr('x1', width/2)
           .attr('x2', width/2);
 
 
-        // append endpoints
-        // TODO
+        // TODO: append endpoints
 
         // append group for each event
         self.events = g.selectAll('g.event')
           .data(data)
           .enter().append('g')
-          .attr('class', 'event');
+          .attr('class', 'event')
+          .classed('current', function(d,i){ return i == 0 ? true : false; })
+          // .on('click', function(d,i){
+            
+          //   for (var prop in self.current){
+          //     self.previous[prop] = self.current[prop];
+          //   }
+          //   // self.previous.yPos = self.current.yPos;
+
+          //   self.current.g = d3.select(this);
+          //   self.current.circle = self.current.g.select('.circle');
+          //   self.current.yPos = self.current.circle.attr('cy');
+          //   self.current.index = i;
+          //   self.events
+          //     .classed('current', false);
+          //   self.current.g
+          //     .classed('current', true);
+
+
+          //   console.log(self.previous);
+          //   console.log(self.current);
+          //   self._jumpToCurrent();
+          // });
+
+        
+        
+        function showCurrent(g){
+
+        }
+
 
         // append circles for events
         self.dots = self.events
@@ -115,7 +173,7 @@
           .attr('stroke-width', 2)
           .attr('cx', width/2)
           .attr('cy', function(d){
-            return scale(d.date);
+            return yScale(d.date);
           })
           .attr('r', 3);
 
@@ -124,22 +182,56 @@
           .append('text')
           .text(function(d){ return d.headline; })
           .attr('x', width/2)
-          .attr('y', function(d){ return scale(d.date); })
-          .attr('text-anchor', 'right')
+          .attr('y', function(d){ return yScale(d.date); })
           .attr('transform', 'translate('+self.dims.margin.label+', 5)')
+          .attr('text-anchor', function(d,i){ return i % 2 == 0 ? "left" : "right";}) // not working?
           .attr('class', 'label-text fill-foreground');
+        // TODO: add detail line below label and position them properly
+
+
 
         // append content circles
         self.circles = self.events
           .append('circle')
-          .
+          .attr('class', 'circle stroke-foreground fill-background')
+          // .classed('current', function(d,i){ console.log(i == self.current.index ? true : false); return i == self.current.index ? true : false;})
+          .attr('stroke-width', 2)
+          .attr('cx', width/2)
+          .attr('cy', function(d){
+            return yScale(d.date) + circleRadius;
+          })
+          .attr('r', 0);
+
+
 
 
       },
       _setElementSizes: function(){
+        var self = this;
 
+      // function(d,i){return i==self.current ? circleRadius : 0
 
+      },
+      
+      _jumpToCurrent: function(){
+        var self = this,
+            zoom = self.zoom,
+            width = self.dims.width,
+            yScale = self.yScale,
+            circleRadius = width/5;
 
+        var yTrans;
+        if(self.previous.yPos){
+           yTrans =  self.current.yPos - self.previous.yPos;
+        } else {
+           yTrans = 0;
+        }
+
+        self.svg.transition().duration(1000)
+            .call(zoom
+              .scale(3)
+              .translate([width/2, yTrans]) // this is a relative translate, not absolute
+              .event);
       },
 
       reset: function(hard) {
@@ -152,6 +244,12 @@
         var self = this;
 
         // zoom in on the current point
+        // console.log(self.current);
+        
+        // self._jumpToCurrent(); // start at the first event
+
+
+        
         // transform the content circle to enlarge
         // swipe events to navigate events
         // click events to zoom on a specific event
@@ -161,6 +259,7 @@
 
 
       },
+
 
       resize: function() {
           
@@ -181,6 +280,14 @@
       
     });
 
+// on click, set new point to current and old to previous
+// calculate translate distance from previous point
+// translate to new point 
+// enlarge circle 
+
+// on scroll 
+// determine direction? 
+// determine next point and distance to point 
 
 
 
