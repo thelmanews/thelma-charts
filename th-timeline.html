@@ -25,6 +25,14 @@
         font-size: 0.8em;
       }
 
+      .event-info {
+        background-color: red;
+        position: absolute;
+        z-index: 20;
+        font-size: 20px;
+        color: yellow;
+      }
+
     </style>
     
     <svg id="chart"></svg> 
@@ -106,6 +114,15 @@
           selected.select('.circle')
             .transition().duration(100)
             .attr('r', circleRadius);
+
+          selected.select('.label-text')
+            .transition().duration(100)
+            .attr('opacity', 0);
+
+          selected.select('.headline-text')
+            .transition().duration(100)
+            .attr('font-size', '1em')
+            .attr('opacity', 1);
         }
 
 
@@ -136,7 +153,7 @@
           .data(data)
           .enter().append('g')
           .attr('class', 'event')
-          .classed('current', function(d,i){ return i == 0 ? true : false; })
+          .classed('current', function(d,i){ return i == 0 ? true : false; });
           // .on('click', function(d,i){
             
           //   for (var prop in self.current){
@@ -158,12 +175,6 @@
           //   console.log(self.current);
           //   self._jumpToCurrent();
           // });
-
-        
-        
-        function showCurrent(g){
-
-        }
 
 
         // append circles for events
@@ -188,8 +199,6 @@
           .attr('class', 'label-text fill-foreground');
         // TODO: add detail line below label and position them properly
 
-
-
         // append content circles
         self.circles = self.events
           .append('circle')
@@ -202,7 +211,19 @@
           })
           .attr('r', 0);
 
-
+        // WHY DOESNT THIS SHOW UP?
+        self.eventInfo = self.events
+          .append('div')
+          .attr('class', 'event-info fi')
+          .style('width', circleRadius*2)
+          .style('height', circleRadius*2)
+          .style('background-color', 'red')
+          .attr('x', width/2)
+          .attr('y', function(d){ return yScale(d.date); })
+          .html(function(d){return d.headline;});
+          
+          
+          
 
 
       },
@@ -246,7 +267,7 @@
         // zoom in on the current point
         // console.log(self.current);
         
-        // self._jumpToCurrent(); // start at the first event
+        self._jumpToCurrent(); // start at the first event
 
 
         
