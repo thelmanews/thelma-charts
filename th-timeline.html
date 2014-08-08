@@ -25,6 +25,9 @@
         font-size: 0.8em;
       }
 
+      .label-details {
+        font-size: 0.6em;
+      }
       .event-info {
         background-color: red;
         position: absolute;
@@ -42,13 +45,14 @@
 
     Polymer('th-timeline', {
       chartData: [
-        {date: '1', headline: 'July 15th', body:"UN asked for a five-hour ceasefire for humanitarian reasons.  Fighting resumed soon afterwards.", detail: '', image: '', fill:'', startHere: true},
-        {date: '2', headline: 'July 17th', body:'', detail: '', image: '', fill:'', startHere: false},
-        {date: '3', headline: 'July 20th', body:'', detail: '', image: '', fill:'', startHere: false},
-        {date: '4', headline: 'July 25th', body:'', detail: '', image: '', fill:'', startHere: false},
-        {date: '5', headline: 'July 26-28th', body:'', detail: '', image: '', fill:'', startHere: false},
-        {date: '6', headline: 'August 4th', body:'', detail: 'Morning', image: '', fill:'', startHere: false},
-        {date: '7', headline: 'August 4th', body:'', detail: 'Evening', image: '', fill:'', startHere: false}
+        {date: '1', headline: 'July 15', body:"Egypt proposed a ceasefire. Israel accepted, Hamas hadn't been part of discussions and continued fighting.", detail: '', image: '', fill:'', startHere: true},
+        {date: '2', headline: 'July 17', body:"UN asked for a five-hour ceasefire for humanitarian reasons.  Fighting resumed soon afterwards.", detail: '', image: '', fill:'', startHere: false},
+        {date: '3', headline: 'July 20', body:"Red Cross tried a two-hour ceasefire in one area of Gaza. It didn't hold.", detail: '', image: '', fill:'', startHere: false},
+        {date: '4', headline: 'July 25', body:"John Kerry calls for a week-long truce for talks to be held. Israel refuses.", detail: '', image: '', fill:'', startHere: false},
+        {date: '5', headline: 'July 26 - 28', body:"A 12-hour humanitarian ceasefire is extended during the Muslim festival of Eid.", detail: '', image: '', fill:'', startHere: false},
+        {date: '6', headline: 'July 31', body:"A three-day ceasefire announced by the UN and John Kerry lasts only a few hours.", detail: '', image: '', fill:'', startHere: false},
+        {date: '7', headline: 'August 4', body:"Israel declares a seven-hour humanitarian ceasefire. It doesn't last.", detail: 'Morning', image: '', fill:'', startHere: false},
+        {date: '8', headline: 'August 4', body:"Israel and Hamas agree to a 72-hour ceasefire. It is currently holding.", detail: 'Evening', image: '', fill:'', startHere: false}
       ],
       scale: "time", // or 'linear' if no dates
       startDate: '0',
@@ -67,16 +71,19 @@
           .domain([self.startDate, self.endDate])
           .range([0, self.chartHeight]);
 
+
         // set starting point
         self.current = {}; // refers to the index value of the event in chartData
         for (var i=0; i<data.length; i++){
           self.current.index = data[i].startHere ? i : self.current.index;
         }
-        self.previous = {};
+        self.previous = {}; // not being used right now
+
         // setup elements
         self._setupElements();
+        
         // setup elementSizes
-
+        self._setElementSizes();
 
             
       },
@@ -89,63 +96,90 @@
             data = self.chartData,
             circleRadius = width/3.5;
 
+        self.circleRadius = circleRadius
+
         // define zoom function
-        var zoom = d3.behavior.zoom()
-          .y(yScale)
+        self.zoom = d3.behavior.zoom()
+          .y(self.yScale)
           .size([width, height])
           .scaleExtent([1, 8]) // maximum of 8x original scale
           .on("zoom", zoomed); // should this be disabled? how to call it on another event?
-        self.zoom = zoom;
+        
 
+        // set dims             
+        self.svg = d3.select(self.$.chart)
+          .call(self.zoom); // allows scrolling through timeline
+
+        // defines what happens when zoomed 
         function zoomed() {
           console.log("***");
           console.log(d3.event);
           console.log("---");
           // console.log(d3.event.scale);
           // console.log(this);
+          
+          // zooms in on line and spreads the events out vertically
+          self.events
+             .attr('transform', function(d){ 
+              return "translate(0," + yScale(d.date) + ")"});
+          
+        
+          var selected = d3.select(this); // this is the SVG
+
           self.events.selectAll('.circle')
             .classed('current', false)
             .attr('r', 0);
 
-          
-          
+          // selected
+          //   .classed('current', true);
 
-          
-          var selected = d3.select(this);
+          // enlarge only the circle marked current
+          // selected.select('.circle')
+          //   .transition().duration(100)
+          //   .attr('r', circleRadius);
 
-          selected
-            .classed('current', true);
+          // selected.select('.label-text')
+          //   .transition().duration(100)
+          //   .attr('opacity', 0);
 
-          self.events
-             .attr('transform', function(d){ 
-              console.log(yScale(d.date));
-              return "translate(0," + yScale(d.date) + ")"});
+          // selected.select('.headline-text')
+          //   .transition().duration(100)
+          //   .attr('font-size', '1.2em')
+          //   .attr('opacity', 1);
 
-          selected.select('.circle')
-            .transition().duration(100)
-            .attr('r', circleRadius);
+          // selected.select('.body-text')
+          //   .transition().duration(100)
+          //   .attr('font-size', '0.7em')
+          //   .attr('opacity', 1);
 
-          selected.select('.label-text')
-            .transition().duration(100)
-            .attr('opacity', 0);
 
-          selected.select('.headline-text')
-            .transition().duration(100)
-            .attr('font-size', '1.2em')
-            .attr('opacity', 1);
 
-          selected.select('.body-text')
-            .transition().duration(100)
-            .attr('font-size', '0.7em')
-            .attr('opacity', 1);
+
+          // Rather than this, we can call zoom on the circles themselves.
+          // enlarge all circles
+          // self.events.select('.circle')
+          //   .transition().duration(100)
+          //   .attr('r', circleRadius);
+
+          // self.events.select('.label-text')
+          //   .transition().duration(100)
+          //   .attr('opacity', 0);
+
+          // self.events.select('.headline-text')
+          //   .transition().duration(100)
+          //   .attr('font-size', '1.3em')
+          //   .attr('opacity', 1);
+
+          // self.events.select('.body-text')
+          //   .transition().duration(100)
+          //   // .attr('font-size', '0.7em')
+          //   .attr('opacity', 1);
+
+          // self.events.select('.detail-text')
+          //   .transition().duration(100)
+          //   .attr('opacity', 1);
         }
 
-
-        // set dims             
-        self.svg = d3.select(self.$.chart)
-          .attr('height', height)
-          .attr('width', width)
-          .call(zoom); // need this to be able to scroll through timeline
 
         // create container
         var g = self.svg.append('g')
@@ -154,13 +188,8 @@
         // append timeline
         self.timeline = g.append('line')
           .attr('class', 'axis')
-          .attr('stroke-width', 1.5)
-          .attr('y1', yScale(self.startDate))
-          .attr('y2', yScale(self.endDate))
-          .attr('x1', width/2)
-          .attr('x2', width/2);
-
-
+          .attr('stroke-width', 1.5);
+        
         // TODO: append endpoints
 
         // append group for each event
@@ -169,6 +198,7 @@
           .enter().append('g')
           .attr('class', 'event')
           .classed('current', function(d,i){ return i == 0 ? true : false; });
+          
           // .on('click', function(d,i){
             
           //   for (var prop in self.current){
@@ -191,87 +221,139 @@
           //   self._jumpToCurrent();
           // });
 
-
-
         // append labels
         self.labels = self.events
           .append('text')
           .text(function(d){ return d.headline; })
+          .attr('class', 'label-text fill-foreground')
+          .attr('dx', 0)
+          .attr('dy', 0);
+
+        self.labelDetails = self.events
+          .append('text')
+          .text(function(d){ return d.detail; })
+          .attr('class', 'label-details fill-foreground')
           .attr('dx', 0)
           .attr('dy', 0)
-          .attr('text-anchor', function(d,i){ return i % 2 == 0 ? "start" : "end";}) 
-          .attr('x', function(d,i){return i % 2 == 0 ? width/2 + self.dims.margin.label : width/2 - self.dims.margin.label ;})
-          .attr('y', function(d){ return yScale(d.date); })
-          .attr('transform', 'translate(0, 5)')
+          .attr('font-variant', 'small-caps');
           
-          .attr('class', 'label-text fill-foreground')
-          .call(wrap, width/2);
-        // TODO: add detail line below label and position them properly
-
         // append content circles
         self.circles = self.events
           .append('circle')
           .attr('class', 'circle stroke-foreground fill-background')
           // .classed('current', function(d,i){ console.log(i == self.current.index ? true : false); return i == self.current.index ? true : false;})
-          .attr('stroke-width', 1.5)
-          .attr('cx', width/2)
-          .attr('cy', function(d){
-            return yScale(d.date) + circleRadius;
-          })
-          .attr('r', 0);
+          .attr('stroke-width', 1.5);
+          
 
         // append dots for events
         self.dots = self.events
           .append('circle')
           .attr('class', 'dot stroke-foreground fill-foreground')
-          .attr('stroke-width', 1.5)
-          .attr('cx', width/2)
-          .attr('cy', function(d){
-            return yScale(d.date);
-          })
-          .attr('r', 3);
-
-        // // WHY DOESNT THIS SHOW UP?
-        // self.eventInfo = self.events
-        //   .append('div')
-        //   .attr('class', 'event-info fi')
-        //   .style('width', circleRadius*2)
-        //   .style('height', circleRadius*2)
-        //   .style('background-color', 'red')
-        //   .attr('x', width/2)
-        //   .attr('y', function(d){ return yScale(d.date); })
-        //   .html(function(d){return d.headline;});
+          .attr('stroke-width', 1.5);
+          
         
         self.headlines = self.events
           .append('text')
           .attr('class', 'headline-text fill-foreground')
           .attr('dx', 0)
           .attr('dy', 0)
-          .attr('x', width/2)
-          .attr('text-anchor', 'middle')
-          .attr('y', function(d){ return yScale(d.date) + circleRadius/2; })
-          // .attr('font-size', '1.2em')
-          .attr('font-size', '0em')
-          .attr('opacity', 0)
-          .text(function(d){return d.headline});
-
+          .attr('text-anchor', 'middle');
+          
         self.bodytexts = self.events  
           .append('text')
           .attr('class', 'body-text fill-foreground')
           .attr('dx', 0)
           .attr('dy', 0)
-          .attr('x', width/2)
+          .attr('text-anchor', 'middle');
+          
+        
+        self.details = self.events  
+          .append('text')
+          .attr('class', 'detail-text fill-foreground')
+          .attr('dx', 0)
+          .attr('dy', 0)
           .attr('text-anchor', 'middle')
-          .attr('y', function(d){ return yScale(d.date) + circleRadius/1.25; })
+          .attr('font-variant', 'small-caps');
+          
+
+      },
+
+      _setElementSizes: function(){
+        var self = this,
+            yScale = self.yScale,
+            width = self.dims.width,
+            height = self.dims.height,
+            circleRadius = self.circleRadius;
+
+        self.svg
+          .attr('height', height)
+          .attr('width', width);
+
+        self.timeline
+          .attr('y1', self.yScale(self.startDate))
+          .attr('y2', self.yScale(self.endDate))
+          .attr('x1', width/2)
+          .attr('x2', width/2);
+
+        self.labels
+          .attr('text-anchor', function(d,i){ return i % 2 == 0 ? "start" : "end";}) 
+          .attr('x', function(d,i){return i % 2 == 0 ? width/2 + self.dims.margin.label : width/2 - self.dims.margin.label ;})
+          .attr('y', function(d){ return yScale(d.date) + 5; })
+          .call(self._wrapText, width/2);
+
+        self.labelDetails
+          .attr('text-anchor', function(d,i){ return i % 2 == 0 ? "start" : "end";}) 
+          .attr('x', function(d,i){return i % 2 == 0 ? width/2 + self.dims.margin.label : width/2 - self.dims.margin.label ;})
+          .attr('y', function(d){ return yScale(d.date) + 18; })
+          .attr('font-weight', '100')
+          .call(self._wrapText, width/2);
+
+        self.circles
+          .attr('cx', width/2)
+          .attr('cy', function(d){
+            return yScale(d.date) + self.circleRadius;
+          })
+          .attr('r', 0);
+
+        self.dots
+          .attr('cx', width/2)
+          .attr('cy', function(d){
+            return yScale(d.date);
+          })
+          .attr('r', 3);
+
+        self.headlines
+          .attr('x', width/2)
+          .attr('y', function(d){ return yScale(d.date) + circleRadius/1.75; })
+          // .attr('font-size', '1.2em')
+          .attr('font-size', '0em')
+          .attr('opacity', 0)
+          .text(function(d){return d.headline});
+
+        self.bodytexts
+          .attr('x', width/2)
+          .attr('y', function(d){ return yScale(d.date) + circleRadius/1.2; })
           .text(function(d){return d.body})
           // .attr('font-size', '0.7em')
           .attr('font-size', '0.7em')
+          .attr('font-weight', 100)
           .attr('opacity', 0)
-          .call(wrap, circleRadius*1.75);
-        
+          .call(self._wrapText, circleRadius*1.75);
 
+        self.details
+          .attr('x', width/2)          
+          .attr('y', function(d){ return yScale(d.date) + circleRadius*1.7; })
+          .text(function(d){return d.detail})
+          // .attr('font-size', '0.7em')
+          .attr('font-size', '0.75em')
+          .attr('opacity', 0)
+          .call(self._wrapText, circleRadius*1.75);
 
-        function wrap(text, width) {
+      // function(d,i){return i==self.current ? circleRadius : 0
+
+      },
+      _wrapText: function (text, width) {
+          console.log("wrap");
           text.each(function() {
             var text = d3.select(this),
                 words = text.text().split(/\s+/).reverse(),
@@ -295,21 +377,9 @@
               }
             }
           });
-        }
-          
-
-
-      },
-      _setElementSizes: function(){
-        var self = this;
-
-      // function(d,i){return i==self.current ? circleRadius : 0
-
-      },
-      
+        },
       _jumpToCurrent: function(){
         var self = this,
-            zoom = self.zoom,
             width = self.dims.width,
             yScale = self.yScale,
             circleRadius = width/5;
@@ -321,12 +391,15 @@
            yTrans = 0;
         }
 
-        self.svg.transition().duration(1000)
-            .call(zoom
-              .scale(4)
-              .translate([width/2, yTrans ]) // this is a relative translate, not absolute
+        self.svg.transition().delay(2000).duration(1000)
+            .call(self.zoom
+              .scale(5)
+              .translate([width/2, -300 ]) // this is a relative translate, not absolute
               .event);
+
+
       },
+
 
       reset: function(hard) {
 
@@ -335,7 +408,15 @@
       },
       
       animate: function() {
-        var self = this;
+        var self = this,
+            yScale = self.yScale,
+            width = self.width, 
+            height = self.height;
+
+        
+
+
+
 
         // zoom in on the current point
         // console.log(self.current);
