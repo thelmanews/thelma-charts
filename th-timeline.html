@@ -98,18 +98,28 @@
         self.zoom = zoom;
 
         function zoomed() {
-          
+          console.log("***");
+          console.log(d3.event);
+          console.log("---");
+          // console.log(d3.event.scale);
+          // console.log(this);
           self.events.selectAll('.circle')
             .classed('current', false)
             .attr('r', 0);
 
+          
+          
+
+          
           var selected = d3.select(this);
 
           selected
             .classed('current', true);
 
           self.events
-             .attr('transform', function(d){ return "translate(0," + yScale(d.date) + ")"});
+             .attr('transform', function(d){ 
+              console.log(yScale(d.date));
+              return "translate(0," + yScale(d.date) + ")"});
 
           selected.select('.circle')
             .transition().duration(100)
@@ -313,8 +323,8 @@
 
         self.svg.transition().duration(1000)
             .call(zoom
-              .scale(3)
-              .translate([width/2, yTrans]) // this is a relative translate, not absolute
+              .scale(4)
+              .translate([width/2, yTrans ]) // this is a relative translate, not absolute
               .event);
       },
 
