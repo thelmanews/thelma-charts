@@ -42,7 +42,7 @@
 
     Polymer('th-timeline', {
       chartData: [
-        {date: '1', headline: 'July 15th', body:'', detail: '', image: '', fill:'', startHere: true},
+        {date: '1', headline: 'July 15th', body:"UN asked for a five-hour ceasefire for humanitarian reasons.  Fighting resumed soon afterwards.", detail: '', image: '', fill:'', startHere: true},
         {date: '2', headline: 'July 17th', body:'', detail: '', image: '', fill:'', startHere: false},
         {date: '3', headline: 'July 20th', body:'', detail: '', image: '', fill:'', startHere: false},
         {date: '4', headline: 'July 25th', body:'', detail: '', image: '', fill:'', startHere: false},
@@ -87,7 +87,7 @@
             height = self.dims.height, 
             yScale = self.yScale,
             data = self.chartData,
-            circleRadius = width/5;
+            circleRadius = width/3.5;
 
         // define zoom function
         var zoom = d3.behavior.zoom()
@@ -121,7 +121,12 @@
 
           selected.select('.headline-text')
             .transition().duration(100)
-            .attr('font-size', '1em')
+            .attr('font-size', '1.2em')
+            .attr('opacity', 1);
+
+          selected.select('.body-text')
+            .transition().duration(100)
+            .attr('font-size', '0.7em')
             .attr('opacity', 1);
         }
 
@@ -139,7 +144,7 @@
         // append timeline
         self.timeline = g.append('line')
           .attr('class', 'axis')
-          .attr('stroke-width', 2)
+          .attr('stroke-width', 1.5)
           .attr('y1', yScale(self.startDate))
           .attr('y2', yScale(self.endDate))
           .attr('x1', width/2)
@@ -177,26 +182,20 @@
           // });
 
 
-        // append circles for events
-        self.dots = self.events
-          .append('circle')
-          .attr('class', 'dot stroke-foreground fill-foreground')
-          .attr('stroke-width', 2)
-          .attr('cx', width/2)
-          .attr('cy', function(d){
-            return yScale(d.date);
-          })
-          .attr('r', 3);
 
         // append labels
         self.labels = self.events
           .append('text')
           .text(function(d){ return d.headline; })
-          .attr('x', width/2)
+          .attr('dx', 0)
+          .attr('dy', 0)
+          .attr('text-anchor', function(d,i){ return i % 2 == 0 ? "start" : "end";}) 
+          .attr('x', function(d,i){return i % 2 == 0 ? width/2 + self.dims.margin.label : width/2 - self.dims.margin.label ;})
           .attr('y', function(d){ return yScale(d.date); })
-          .attr('transform', 'translate('+self.dims.margin.label+', 5)')
-          .attr('text-anchor', function(d,i){ return i % 2 == 0 ? "left" : "right";}) // not working?
-          .attr('class', 'label-text fill-foreground');
+          .attr('transform', 'translate(0, 5)')
+          
+          .attr('class', 'label-text fill-foreground')
+          .call(wrap, width/2);
         // TODO: add detail line below label and position them properly
 
         // append content circles
@@ -204,25 +203,89 @@
           .append('circle')
           .attr('class', 'circle stroke-foreground fill-background')
           // .classed('current', function(d,i){ console.log(i == self.current.index ? true : false); return i == self.current.index ? true : false;})
-          .attr('stroke-width', 2)
+          .attr('stroke-width', 1.5)
           .attr('cx', width/2)
           .attr('cy', function(d){
             return yScale(d.date) + circleRadius;
           })
           .attr('r', 0);
 
-        // WHY DOESNT THIS SHOW UP?
-        self.eventInfo = self.events
-          .append('div')
-          .attr('class', 'event-info fi')
-          .style('width', circleRadius*2)
-          .style('height', circleRadius*2)
-          .style('background-color', 'red')
+        // append dots for events
+        self.dots = self.events
+          .append('circle')
+          .attr('class', 'dot stroke-foreground fill-foreground')
+          .attr('stroke-width', 1.5)
+          .attr('cx', width/2)
+          .attr('cy', function(d){
+            return yScale(d.date);
+          })
+          .attr('r', 3);
+
+        // // WHY DOESNT THIS SHOW UP?
+        // self.eventInfo = self.events
+        //   .append('div')
+        //   .attr('class', 'event-info fi')
+        //   .style('width', circleRadius*2)
+        //   .style('height', circleRadius*2)
+        //   .style('background-color', 'red')
+        //   .attr('x', width/2)
+        //   .attr('y', function(d){ return yScale(d.date); })
+        //   .html(function(d){return d.headline;});
+        
+        self.headlines = self.events
+          .append('text')
+          .attr('class', 'headline-text fill-foreground')
+          .attr('dx', 0)
+          .attr('dy', 0)
           .attr('x', width/2)
-          .attr('y', function(d){ return yScale(d.date); })
-          .html(function(d){return d.headline;});
-          
-          
+          .attr('text-anchor', 'middle')
+          .attr('y', function(d){ return yScale(d.date) + circleRadius/2; })
+          // .attr('font-size', '1.2em')
+          .attr('font-size', '0em')
+          .attr('opacity', 0)
+          .text(function(d){return d.headline});
+
+        self.bodytexts = self.events  
+          .append('text')
+          .attr('class', 'body-text fill-foreground')
+          .attr('dx', 0)
+          .attr('dy', 0)
+          .attr('x', width/2)
+          .attr('text-anchor', 'middle')
+          .attr('y', function(d){ return yScale(d.date) + circleRadius/1.25; })
+          .text(function(d){return d.body})
+          // .attr('font-size', '0.7em')
+          .attr('font-size', '0.7em')
+          .attr('opacity', 0)
+          .call(wrap, circleRadius*1.75);
+        
+
+
+        function wrap(text, width) {
+          text.each(function() {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, // ems
+                y = text.attr("y"),
+                x = text.attr("x"),
+                dy = parseFloat(text.attr("dy")),
+                tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+ 
+            while (word = words.pop()) {
+              line.push(word);
+              tspan.text(line.join(" "));
+              if (tspan.node().getComputedTextLength() > width) {
+                line.pop();
+                tspan.text(line.join(" "));
+                line = [word];
+                tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+              }
+            }
+          });
+        }
           
 
 
