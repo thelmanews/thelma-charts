@@ -3,6 +3,43 @@
 
 <polymer-element name="th-compare-grid-chart" extends="th-d3-chart">
 
+	<template>
+	    <core-style ref="theme"></core-style>
+	    <style>
+
+	      :host {
+	        display: inline-block;
+	        position: relative;
+	      }
+	      #chart {
+
+	      }
+	      #chart text.label {
+	        /*font-size: 13px;*/
+	        /*font-weight: 300;*/
+	      }
+
+	      #data_errors {  
+	        display: none;
+	        font-size: 14px;
+	        color: red;
+	        position: absolute;
+	        top: 0;
+	        left: 0;
+	      }
+
+	    </style>
+
+	    <svg id="chart"></svg>
+
+	    <ul id="data_errors">
+	    </ul>  
+	    
+	    <!-- to allow embeded th-editor component -->
+	    <content select="th-editor"></content> 
+
+	</template>
+
 	<script>
 
 
@@ -12,20 +49,37 @@
 		    {label: 'Smoker', value: 1, image: 'images/kid-smoker.png'}
 		  ],
 		  chartHeight: 150,
+		  /**
+		   * Transition type for images values: random or drop
+		   * @type {String}
+		   */
+		  iconTransition: 'random',
+		  /**
+		   * Duration of each icon animation for the first set. 
+		   * animations are 5 times longer for the second set. 
+		   * @type {Number}
+		   */
+		  animationDuration: 100,
 		  init: function() {
+		    
+		    var self = this;
+
 		    var margin = {
 		          top : 0,
 		          right : 0,
 		          bottom : 0,
 		          left : 0,
 		          label: 3
-		      };
+		     };
+
+
 
 		      var width = this.chartWidth-margin.left - margin.right, 
 		      		height = this.chartHeight - margin.top - margin.bottom;
 		         
 
 		      this.height = height;
+		      this.width = width;
 		   
 
 		      var chart_svg = this.$.chart;
@@ -51,12 +105,6 @@
 		          height : Math.floor(height / rowNum)
 		      };
 
-		      _data.set1_count = this.chartData[0].value;
-		      _data.set1_image = this.chartData[0].image;
-
-		      _data.set2_count = this.chartData[1].value;
-		      _data.set2_image = this.chartData[1].image;
-
 
 		      this.data = _data;
 		      
@@ -73,21 +121,15 @@
 
 		       this.icons = this.container.selectAll('.icon').data(_data.count).enter().append('image')
 		          .attr('xlink:href',function(d, i) { 
-		              return (i<_data.set1_count) ? _data.set1_image : _data.set2_image;
+		              return (i<self.chartData[0].value) ? self.chartData[0].image : self.chartData[1].image;
 		           })
 		          .attr('class', 'icon')
-		          .attr('x', function(d, i) {
-		               var rand =   Math.random()*100; 
-		               return  Math.random()>0.5 ? rand+width : - rand - _data.dim.width;
-		          })
-		         .attr('y', function(d, i) {
-		               var rand =   Math.random()*100; 
-		               return  Math.random()>0.5 ? rand+height : - rand - _data.dim.height;
-		          })
 		          .attr('width', function(d, i) {
-		              return (i<_data.set1_count) ? _data.dim.width : _data.dim.width+10; 
+		              return (i<self.chartData[0].value) ? _data.dim.width : _data.dim.width+10; 
 		           })
 		          .attr('height', _data.dim.height);
+
+		        this.icons.call(self._setInitialIconPos.bind(self));
 
 
 
@@ -95,24 +137,20 @@
 		  reset: function() {
 		      
 		        var self = this;
-		        self.icons.attr('x', function(d, i) {
-		             return (Math.random() < 0.5 ? -1 : 1) * (self.chartWidth + Math.random()*100) ;
-		        })
-		       .attr('y', function(d, i) {
-		             return (Math.random() < 0.5 ? -1 : 1) * (self.chartHeight + Math.random()*100) ;
-		        });    
+		        self.icons.call(self._setInitialIconPos.bind(self));
 		  },
 		  
 		  animate: function() {
 
-		       var delay = 40;
+		  	   var self = this;	
+
 		       var _data = this.data;
 		        
 		        this.icons.transition().duration(function(d, i) {
-		            return (i<_data.set1_count) ? delay*3 : delay*15;
+		            return (i<self.chartData[0].value) ? self.animationDuration : self.animationDuration*5;
 		         })
 		         .delay(function(d, i) {
-		            return i * delay;
+		            return i * self.animationDuration;
 		        })
 		        .attr('x', function(d, i) {
 		             return  (i % _data.elementsPerRow) * (_data.dim.width);
@@ -122,6 +160,36 @@
 		        })
 
 		},
+		_setInitialIconPos: function(selection) {
+			var self = this;
+				_data = self.data;
+			selection.attr('x', function(d, i) {
+	               var rand =   Math.random()*100;
+	               var xPos;
+	               switch(self.iconTransition) {
+	               	case 'random':
+	               		xPos = Math.random()>0.5 ? rand+self.width : - rand - _data.dim.width;
+	               		break;
+	               	case 'drop':
+	               		xPos = (i % _data.elementsPerRow) * (_data.dim.width);
+	               }
+	               return xPos;
+	          })
+	         .attr('y', function(d, i) {
+	               var rand =   Math.random()*100; 
+	               var yPos;
+	               switch(self.iconTransition) {
+	               	case 'random':
+	               		yPos = Math.random()>0.5 ? rand+self.height : - rand - _data.dim.height;
+	               		break;
+	               	case 'drop':
+	               		yPos = -100;
+	               }
+	               return yPos;
+
+	          });
+		},
+
 		chartSpecificDataValidate: function() {
           
           var errors = [],
