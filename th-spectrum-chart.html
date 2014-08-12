@@ -3,6 +3,43 @@
 
 <polymer-element name="th-spectrum-chart" extends="th-d3-chart">
 
+	<template>
+	    <core-style ref="theme"></core-style>
+	    <style>
+
+	      :host {
+	        display: inline-block;
+	        position: relative;
+	      }
+	      #chart {
+
+	      }
+	      #chart text.label {
+	        /*font-size: 13px;*/
+	        /*font-weight: 300;*/
+	      }
+
+	      #data_errors {  
+	        display: none;
+	        font-size: 14px;
+	        color: red;
+	        position: absolute;
+	        top: 0;
+	        left: 0;
+	      }
+
+	    </style>
+
+	    <svg id="chart"></svg>
+
+	    <ul id="data_errors">
+	    </ul>  
+
+	    <!-- to allow embeded th-editor component -->
+	    <content select="th-editor"></content> 
+	    
+	</template>
+
 	<script>
 		Polymer('th-spectrum-chart', {
 		  chartData: [
@@ -201,7 +238,11 @@
 	        	.attr('x', self.dims.labels.width + self.dims.margin.label )
 		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value)})
 		        .attr('width',self.dims.bar.width)
-	        	.attr('height', function(d) {return y(d.range_max_value - d.range_min_value)});
+	        	.attr('height', function(d) {
+	        		//to avoid negative heights
+	        		var h = Math.max( self.y(d.range_max_value - d.range_min_value), 0); 
+	        		return h;
+	        	});
 
 	        self.labels.transition(delay).duration(delay)//.delay(function(d,i) { return i*delay;})
 		        .attr('x', self.dims.labels.width)
@@ -231,15 +272,13 @@
 
 
 
-			      self.bars.enter().append('rect').attr('class','bar')
-
-			      	.attr('height', 0);
+			      self.bars.enter().append('rect').attr('class','bar').attr('height', 0);
 
 			      self.labels.enter().append('text').attr('class','label');
-			      self.values.enter().append('text').attr('class','value').attr('y', height);
+			      self.values.enter().append('text').attr('class','value').attr('y', self.dims.height);
 
 
-			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();
+			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', self.dims.height).style('opacity', 0).remove();
 			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
 			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
 			      
@@ -282,7 +321,38 @@
         	}
         
           return errors;
-        }
+          },
+
+          getMetaData: function() {
+          	return {
+			  "name": "th-spectrum-chart",
+			  "description": "Thelma spectrum chart",
+			  "category":"chart",
+			  "version": "0.0.1",
+			  "thumbnail":"spectrum.jpg", 
+			  "tags":["chart", "column", "animated"],
+			  "content":false,
+			  "inputAttr": {
+			    "chartWidth":{"friendly":"Width", "type":"int", "default":275},
+			    "chartHeight":{"friendly":"Height", "type":"int", "default":250},
+			    "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
+			      "fields":{
+			        "label":{"friendly":"Label", "type":"string", "default":"Medicaid"},
+			        "range_min_value":{"friendly":"Min Val", "type":"int", "default":10},
+			        "range_min_display_value":{"friendly":"Min Disp", "type":"string", "default":"$10"},
+			        "range_max_value":{"friendly":"Value", "Max Val":"int", "default":50},
+			        "range_max_display_value":{"friendly":"Max Disp", "type":"string", "default":"$50"},
+			        "color":{"friendly":"Color", "type":"colorPicker", "default":"", "optional":true},
+			        "pattern":{"friendly":"Pattern", "type":"string", "default":"stripe", "optional":true}
+			      },
+			      "default":[
+			        {"label": "Medicaid", "color": "", "pattern": "",  "range_min_value": 10, "range_max_value": 50},
+			        {"label": "Federal", "color": "", "pattern": "",  "range_min_value": 40, "range_max_value": 60},
+			        {"label": "Medicare",  "color": "", "pattern": "stripe", "range_min_value": 70, "range_max_value": 100}]
+			    }
+			  }
+			}
+          }
 		  
 		});
 	</script>
