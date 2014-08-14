@@ -29,7 +29,7 @@
 		      var total = 0;
 		      self.chartData.forEach(function(d) {
 		          d.total = total;
-		          total+=parseInt(d.value);
+		          total+=parseFloat(d.value);
 		      });
 
 		      self.y.domain([0, total]); 
@@ -126,7 +126,7 @@
 		      var total = 0;
 		      self.chartData.forEach(function(d) {
 		          d.total = total;
-		          total+=parseInt(d.value);
+		          total+=parseFloat(d.value);
 		      });
 
 		      self.y.domain([0, total]); 
