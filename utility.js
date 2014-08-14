@@ -316,6 +316,17 @@ Thelma.chartUtils = {
       polymerObj.colors.count = polymerObj.colors.accents.length; 
       
       return polymerObj.colors.accents;
+    },
+    setDisplayVals: function(polymerObj){
+      var data = polymerObj.chartData;
+
+      if (data){
+        for (var i=0; i<data.length; i++){
+          data[i]["display_value"] = data[i]["value"];
+        } 
+      }
+
+      return data;
     }
 
 }
