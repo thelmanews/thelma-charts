@@ -2,7 +2,7 @@
 <link rel="import" href="th-d3-chart.html">
 
 <polymer-element name="th-line-graph-single" extends="th-d3-chart" attributes="lineStyle animateStyle fillArea xAxisLine 
-  xAxisLabels yAxisLabels yAxisLine axisAnimation dataPosition joyStick color">
+  xAxisLabels yAxisLabels yAxisLine axisAnimation dataPosition joyStick yAxisMin yAxisMax">
   <template>
     <core-style ref="theme"> </core-style>
     <style>
@@ -62,11 +62,10 @@
 
         var staticObj = {
            _scaleBuilder: function(polymerObj) {
-
               polymerObj.maxLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.max);
               polymerObj.minLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.min);
-              polymerObj.maxValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
-              polymerObj.minValue = polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
+              polymerObj.maxValue = typeof(polymerObj.yAxisMax) == "number" ? polymerObj.yAxisMax : polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
+              polymerObj.minValue = typeof(polymerObj.yAxisMin) == "number" ? polymerObj.yAxisMin : polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
               
               polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([15, 
                       (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom + polymerObj.dims.joystick.d))]), 
@@ -189,7 +188,6 @@
               // if this option is true, set all display_values equal to values, otherwise leave them as is    
               data = polymerObj.defaultDisplayValues ? polymerObj.setDisplayVals(polymerObj) : data;
                 
-              console.log(data);
               staticObj._setupContainerSize(polymerObj);
               
               polymerObj.xAxis
@@ -310,6 +308,8 @@
             xAxisLabels: true,
             yAxisLine: false, // doesnt do anything, there is never a line
             yAxisLabels: false,
+            yAxisMin: null, // unless a value is specified, axis will scale according to data
+            yAxisMax: null, // unless a value is specified, axis will scale according to data
             axisAnimation: false, // not currently working
             dataPosition: "left",  // options: left, right
             joyStick: false,
