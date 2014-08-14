@@ -64,9 +64,9 @@
            _scaleBuilder: function(polymerObj) {
               polymerObj.maxLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.max);
               polymerObj.minLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.min);
-              polymerObj.maxValue = typeof(parseInt(polymerObj.yAxisMax)) == "number" ? polymerObj.yAxisMax : polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
-              polymerObj.minValue = typeof(parseInt(polymerObj.yAxisMin)) == "number" ? polymerObj.yAxisMin : polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
-              
+              polymerObj.maxValue = polymerObj.yAxisMax != "" && (polymerObj.yAxisMax != NaN) ? polymerObj.yAxisMax : polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
+              polymerObj.minValue = polymerObj.yAxisMin != "" && polymerObj.yAxisMin != NaN ? polymerObj.yAxisMin : polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
+
               polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([15, 
                       (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom + polymerObj.dims.joystick.d))]), 
 
@@ -308,8 +308,8 @@
             xAxisLabels: true,
             yAxisLine: false, // doesnt do anything, there is never a line
             yAxisLabels: false,
-            yAxisMin: null, // unless a value is specified, axis will scale according to data
-            yAxisMax: null, // unless a value is specified, axis will scale according to data
+            yAxisMin: '', // unless a value is specified, axis will scale according to data
+            yAxisMax: '', // unless a value is specified, axis will scale according to data
             axisAnimation: false, // not currently working
             dataPosition: "left",  // options: left, right
             joyStick: true,
