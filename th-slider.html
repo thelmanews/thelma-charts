@@ -42,7 +42,7 @@
    </style>
 
 
-    <div id="slider"></div>
+    <div id="slider" style="width: {{width}}px"></div>
     
   </template>
 
@@ -50,7 +50,7 @@
 
       (function() {
 
-        var slider = {};
+        //var slider = {};
 
         Polymer('th-slider', {
 
@@ -59,26 +59,35 @@
           step: 10,
           labels: true,
           value: 0,
+          width: 200,
+          height: 100,
+          observe: {
+            min: 'dataChanged',
+            max: 'dataChanged',
+            step: 'dataChanged'
+          },
 
 
-          ready: function() {
+          domReady: function() {
 
             var self = this;
             var sliderel = this.$.slider;
+            //sliderel.style.width = self.width+"px";
+            //console.log(sliderel.style);
 
             var axis = d3.svg.axis().orient('bottom').ticks(10);
 
-            slider = d3.slider().value(self.value).min(self.min).max(self.max).step(self.step); //.margin(100);
+            self.slider = d3.slider().value(self.value).min(self.min).max(self.max).step(self.step); //.margin(100);
 
             if(self.labels) {
-              slider.axis(axis);
+              self.slider.axis(axis);
             }
 
             //slider.value(self.value);
 
-             d3.select(sliderel).call(slider);
+             d3.select(sliderel).call(self.slider);
 
-             slider.on("slide", function(e, value) {
+             self.slider.on("slide", function(e, value) {
                 self.value = value;
                 self.fire('th-slide', {event: e, value: value});
 
@@ -90,8 +99,14 @@
 
             var self = this;
             // NOT WORKING. d3.slider doesnt update slider...
-            slider.value(self.value);
+            self.slider.value(self.value);
 
+
+          },
+          dataChanged: function() {
+            console.log('datachanged');
+                       this. slider = d3.slider().value(self.value).min(self.min).max(self.max).step(self.step); //.margin(100);
+                       d3.select(this.$.slider).call(self.slider);
 
           }
 
