@@ -64,8 +64,8 @@
            _scaleBuilder: function(polymerObj) {
               polymerObj.maxLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.max);
               polymerObj.minLabel = polymerObj.getBoundaryValue(polymerObj, "label", d3.min);
-              polymerObj.maxValue = typeof(polymerObj.yAxisMax) == "number" ? polymerObj.yAxisMax : polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
-              polymerObj.minValue = typeof(polymerObj.yAxisMin) == "number" ? polymerObj.yAxisMin : polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
+              polymerObj.maxValue = typeof(parseInt(polymerObj.yAxisMax)) == "number" ? polymerObj.yAxisMax : polymerObj.getBoundaryValue(polymerObj, "value", d3.max);
+              polymerObj.minValue = typeof(parseInt(polymerObj.yAxisMin)) == "number" ? polymerObj.yAxisMin : polymerObj.getBoundaryValue(polymerObj, "value", d3.min);
               
               polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([15, 
                       (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom + polymerObj.dims.joystick.d))]), 
