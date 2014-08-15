@@ -14,7 +14,7 @@ the animation, which is provided by the th-countup-num element.
 @homepage http://github.com/thelmanews/thelma-charts/blob/master/th-bubble.html
 -->
 
-<polymer-element name="th-bubble" extends="th-d3-chart" attributes="duration chartSize">
+<polymer-element name="th-bubble" extends="th-d3-chart" attributes="duration chartSize image">
   <template>
     <core-style ref="theme"></core-style>
     <style>
@@ -87,9 +87,15 @@ the animation, which is provided by the th-countup-num element.
             // create container and bubble for the first time
             self.container = self.svg.append("g").attr('class','container');
 
-            self.bubble = self.container.append("circle")
+            if (self.image){
+              self.image = self.container.append("image")
+                .attr('xlink:href', self.image);
+              
+            } else {
+              self.bubble = self.container.append("circle")
                 .attr("class", "bubble data0");
-
+            }
+              
             self._setupElements();
         
           },
@@ -116,10 +122,20 @@ the animation, which is provided by the th-countup-num element.
                 .attr("transform", "translate(" +(self.bubbleArea / 2 ) + "," + (self.bubbleArea / 2) + ")");
             
             // Append a circle to the g and set starting radius
-            self.bubble
-              .attr("r", self.bubbleRadiusStart)
-              .style("fill", self.data.color)
-              .style("stroke", self.data.color);
+            if(self.image){
+              self.image
+                .attr('x', -self.bubbleRadiusStart)
+                .attr('y', -self.bubbleRadiusStart)
+                .attr('width', self.bubbleRadiusStart*2)
+                .attr('height', self.bubbleRadiusStart*2);
+
+            } else {
+              self.bubble
+                .attr("r", self.bubbleRadiusStart)
+                .style("fill", self.data.color)
+                .style("stroke", self.data.color);
+            }
+            
 
             self.value = d3.select(self.$.value)
               .text(self.chartData[0].prefix+self.chartData[0].startValue+self.chartData[0].suffix);
@@ -141,10 +157,20 @@ the animation, which is provided by the th-countup-num element.
           animate: function() {
             var self = this;
 
-            self.bubble
-              .transition()
-              .duration(self.duration*1000)
-              .attr("r",  self.bubbleRadiusEnd); 
+            if (self.image){
+              self.image
+                .transition()
+                  .duration(self.duration*1000)
+                  .attr('x', -self.bubbleRadiusEnd)
+                  .attr('y', -self.bubbleRadiusEnd)
+                  .attr('width', self.bubbleRadiusEnd*2)
+                  .attr('height', self.bubbleRadiusEnd*2);
+            } else {
+              self.bubble
+                .transition()
+                .duration(self.duration*1000)
+                .attr("r",  self.bubbleRadiusEnd); 
+            }
 
             var i = d3.interpolate(self.chartData[0].startValue, self.chartData[0].value);
             //var formatPercent = d3.format(".0");
