@@ -1,0 +1,24 @@
+{
+  "name": "countUp.js",
+  "version": "1.2.0",
+  "main": "countUp.js",
+  "author": "Jamie Perkins",
+  "ignore": [
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "README.md",
+    "countUp.coffee",
+    "component.json",
+    "index.html"
+  ],
+  "homepage": "https://github.com/inorganik/countUp.js",
+  "_release": "1.2.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.2.0",
+    "commit": "afd9f131f57650a6b8f104ae85ed1c884847cef5"
+  },
+  "_source": "git://github.com/inorganik/countUp.js.git",
+  "_target": "*",
+  "_originalSource": "countUp.js"
+}

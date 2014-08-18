@@ -1,0 +1,17 @@
+{
+  "name": "thelma-components",
+  "version": "0.0.0",
+  "keywords": "seed, polymer, web-components",
+  "main": "thelma-components.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.3.1",
+    "d3": "latest",
+    "topojson": "latest",
+    "countUp.js": "latest",
+    "core-style": "Polymer/core-style#~0.3.2",
+    "marked": "~0.3.2",
+    "core-ajax": "Polymer/core-ajax#~0.3.3",
+    "modernizr": "~2.8.3",
+    "firebase": "~1.0.17"
+  }
+}

@@ -1,0 +1,327 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+
+<polymer-element name="th-stacked-chart" extends="th-d3-chart">
+
+	<template>
+	    <core-style ref="theme"></core-style>
+	    <style>
+
+	      :host {
+	        display: inline-block;
+	        position: relative;
+	      }
+	      #chart {
+
+	      }
+	      #chart text.label {
+	        /*font-size: 13px;*/
+	        /*font-weight: 300;*/
+	      }
+
+	      #data_errors {  
+	        display: none;
+	        font-size: 14px;
+	        color: red;
+	        position: absolute;
+	        top: 0;
+	        left: 0;
+	      }
+
+	    </style>
+
+	    <svg id="chart"></svg>
+
+	    <ul id="data_errors">
+	    </ul>  
+
+	    <!-- to allow embeded th-editor component -->
+	    <content select="th-editor"></content> 
+	    
+	</template>
+
+	<script>
+
+		Polymer('th-stacked-chart', {
+
+		  init: function() {
+		      var self = this;
+		      
+		      // setup dimensions
+		      // self.dims = self.setupDimensions(self);
+		      self.dims = self.setupStackedDims(self);
+
+		      var margin = self.dims.margin,
+		          width = self.dims.width,
+		          height = self.dims.height,
+		          barWidth = self.dims.bar.width;
+
+		      // setup scales
+		      var scales = self.simpleScaleBuilder(width, height, self.chartData),
+		      x = scales.x,
+		      y = scales.y;
+		      self.y = y;
+		      self.x = x;
+
+		      var total = 0;
+		      self.chartData.forEach(function(d) {
+		          d.total = total;
+		          total+=parseInt(d.value);
+		      });
+
+		      self.y.domain([0, total]); 
+			      
+		      // setup chart area
+		      var chart_svg = this.$.chart;
+		      self.svg = d3.select(chart_svg);
+
+
+		      self.container = self.svg.append('g');
+
+      
+
+	      // set up initial state of data
+
+		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
+
+		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+
+		      self._setElementSizes();
+
+		      // first time size settings
+		      self.bars.attr('y', self.dims.height)
+			        .attr('height', 0);
+
+			  self.labels.attr('height', 0).style('opacity', 0);
+
+			  self.values.attr('height', 0).style('opacity', 0);
+	      
+
+		  },
+
+		  _setElementSizes: function() {
+
+		  	  var self = this;
+
+		      self.svg.attr('width', self.dims.width + self.dims.margin.left + self.dims.margin.right)
+		          .attr('height', self.dims.height + self.dims.margin.top + self.dims.margin.bottom);
+
+
+	          self.container.attr('transform', 'translate(' + self.dims.margin.left + ',' + self.dims.margin.top + ')');
+
+		  	  self.bars
+		        .attr("class", function(d,i){ return "bar data"+i; })
+		        .style('fill', function(d){ return d.color; })
+		        .style('stroke', function(d){ return d.color; });
+
+		      
+		      self.labels
+		        .attr("class", function(d,i){return "label data"+i;})
+		        .style('text-anchor','end')
+		        .text(function(d) {return d.label;})
+		        .style('fill', function(d){ return d.color; })
+		        .style('stroke', function(d){ return d.color; });
+		      
+		      
+		      self.values
+		        .attr("class", function(d,i){return "value data"+i;})
+		        .attr('font-size', '13px')
+		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
+		        .style('fill', function(d){ return d.color; })
+		        .style('stroke', function(d){ return d.color; })
+		        .text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+
+		  },
+
+		  reset: function() {
+		      var self = this;
+		      var height= this.height;
+		      self.bars.transition().duration(self.animationDelay).attr('y', height).attr('height', 0);
+		      self.labels.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+		      self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+		      
+		  },
+
+		  resize: function() {
+
+		  	  console.log('resize');
+
+		      var self = this;
+		      self.dims = self.setupStackedDims(self);
+
+		      console.log(self.dims);
+
+		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData),
+		      x = scales.x,
+		      y = scales.y;
+		      self.y = y;
+		      self.x = x;
+
+		      var total = 0;
+		      self.chartData.forEach(function(d) {
+		          d.total = total;
+		          total+=parseInt(d.value);
+		      });
+
+		      console.log(total);
+
+		      self.y.domain([0, total]); 
+
+
+		      self._setElementSizes();
+
+		      self.animate();
+
+		  },
+
+		  updateData: function() {
+
+			    console.log('UUpdate');
+
+		  	  var self = this;
+
+		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData);
+
+		      var x = scales.x;
+		      var y = scales.y;
+
+		      // is there a better way than exposing these?!
+		      self.y = y;
+		      self.x = x;
+
+		      var width = self.dims.width,
+		      	 height = self.dims.height;	  	  
+
+			  self.bars = self.container.selectAll('.bar').data(self.chartData);
+			  self.labels = self.container.selectAll('.label').data(self.chartData);
+			  self.values=self.container.selectAll('.value').data(self.chartData);
+
+		  	  if(self.dataLength!=self.chartData.length)
+		  	  {
+
+
+		  	  	  self.dataLength = self.chartData.length;
+
+				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
+
+				  // self.setupExtraDimensions();
+
+
+				 // staticObj._setupContainerSize(self); // correct size if margins are changed (by setting the label diagonal)
+
+			      self.bars.enter().append('rect').attr('class','bar')
+			      	.attr('height', 0);
+
+			      self.labels.enter().append('text').attr('class','label');
+			      self.values.enter().append('text').attr('class','value').attr('y', height);
+
+
+			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();
+			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
+			      
+			     //self.resize();
+
+			    }
+
+			    //resize is needed to recalculate the total and set domain
+			    self.resize();
+
+		      // this is independent of size but dependent on data
+		      self.labels.text(function(d) {return d.label;});
+		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+
+		      self.animate();
+
+		  },
+		  
+		  animate: function() {
+            var self = this;
+		        var y = self.y;
+		        
+		        self.bars.transition().duration(self.animationDelay)
+			        .attr('x', self.dims.labels.width + self.dims.margin.label)
+			        .attr('width', self.dims.bar.width)
+			        .attr('y', function(d) {return y(d.total)})
+			        .attr('height', function(d) {return y(d.value)});
+
+		        self.labels.transition(self.animationDelay).duration(self.animationDelay)
+		        .style('opacity', 1)
+		        .attr('x', self.dims.labels.width)
+		        .attr('y', function(d) {return y(d.total + d.value/2) + 6; }); //12: font size
+		        
+		        self.values.transition(self.animationDelay).duration(self.animationDelay)
+		        .style('opacity', 1)
+		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
+		        .attr('y', function(d) {return y(d.total + d.value/2) + 6 }); //12: font size
+
+		  },
+		  chartSpecificDataValidate: function() {
+
+          var errors = [],
+              numOfSets = this.chartData.length;
+
+          // There should be at least one set.
+          if(numOfSets === 0) {
+            errors.push({input: numOfSets, msg: 'Please include at least one value and label.'});
+          } else {
+            for (var i=0; i < numOfSets; i++){
+          		
+              // Each set should have a value.
+              if (!this.chartData[i].value){ 
+            		errors.push({ input: this.chartData, msg: 'You must include a value for each set.'});
+          		} 
+
+              // There cannot be negative numbers.
+              if (this.chartData[i].value < 0){
+                errors.push({ input: this.chartData, msg: 'You cannot have any negative values.'}); 
+              }
+          		
+              // Each set should have a label.
+              if (!this.chartData[i].label){ 
+          			errors.push({ input: this.chartData, msg: 'You must include an label for each value.'});	
+          		}
+          		
+            }
+        	}
+        
+          return errors;
+          },
+
+          getMetaData: function() {
+          	return {
+				  "name": "th-stacked-chart",
+				  "description": "Thelma stacked chart",
+				  "category":"chart",
+				  "version": "0.0.1",
+				  "thumbnail":"stacked.jpg", 
+				  "tags":["chart", "column", "animated"],
+				  "inputAttr": {
+				    "chartWidth":{"friendly":"Width", "type":"int", "default":200},
+				    "chartHeight":{"friendly":"Height", "type":"int", "default":250},
+				    "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
+				      "fields":{
+				        "label":{"friendly":"Label", "type":"string", "default":"Player"},
+				        "value":{"friendly":"Value", "type":"int", "default":15},
+				        "display_value":{"friendly":"Display Value", "type":"string", "default":"$15"},
+				        "color":{"friendly":"Color", "type":"colorPicker", "default":"", "optional":true}
+				      },
+				      "default":[
+				      {"label": "medicaid", "value": 20, "color":""},
+				      {"label": "gap", "value": 40, "color":""},
+				      {"label": "sub", "value": 10, "color":""}]
+				    }
+				  }
+				};
+          }
+		  
+		  
+		});
+
+	</script>
+</polymer-element>

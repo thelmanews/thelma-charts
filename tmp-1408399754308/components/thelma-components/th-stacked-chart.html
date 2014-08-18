@@ -1,0 +1,148 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+
+<polymer-element name="th-stacked-chart" extends="th-d3-chart">
+	<script>
+
+		Polymer('th-stacked-chart', {
+
+		  init: function() {
+          var self = this;
+          
+          // setup dimensions
+          // self.dims = self.setupDimensions(self);
+          self.dims = self.setupStackedDims(self);
+
+          var margin = self.dims.margin,
+              width = self.dims.width,
+              height = self.dims.height,
+              barWidth = self.dims.bar.width;
+
+          // setup scales
+          var scales = self.simpleScaleBuilder(width, height, self.chartData),
+              x = scales.x,
+              y = scales.y;
+          self.y = y;
+          self.x = x;
+		      
+          // setup chart area
+          var chart_svg = this.$.chart;
+          self.svg = d3.select(chart_svg);
+
+		      self.container = self.svg.attr('width', width + margin.left + margin.right)
+		          .attr('height', height + margin.top + margin.bottom)
+		          .append('g')
+		          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          
+		      var total = 0;
+		      self.chartData.forEach(function(d) {
+		          d.total = total;
+		          total+=parseInt(d.value);
+		      });
+
+		      y.domain([0, total]); 
+
+          // set up initial state of data
+		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
+		      
+		      self.bars
+		        .attr("class", function(d,i){ return "bar data"+i; })
+		        .attr('x', self.dims.labels.width + self.dims.margin.label)
+		        //.attr('y', 0)
+		        .attr('y', height)
+		        .attr('width',barWidth)
+		        .attr('height', 0)
+            .style('fill', function(d){ return d.color; })
+            .style('stroke', function(d){ return d.color; });
+
+		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+		      
+		      self.labels
+		        .attr("class", function(d,i){return "label data"+i;})
+		        .style('opacity', 0)
+		        .style('text-anchor','end')
+		        .attr('x', self.dims.labels.width)
+		        .attr('y', height) 
+		        .text(function(d) {return d.label;})
+            .style('fill', function(d){ return d.color; })
+            .style('stroke', function(d){ return d.color; });
+		      
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value')
+            .style('fill', function(d){ return d.color; })
+            .style('stroke', function(d){ return d.color; });
+		      
+		      self.values
+		        .attr("class", function(d,i){return "value data"+i;})
+		        .style('opacity', 0)
+            .attr('font-size', '13px')
+            .attr('font-weight', '300')
+		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + barWidth)
+		        .attr('y', height) 
+		        .text(function(d) {return d.display_value ? d.display_value : d.value ;});
+
+
+		  },
+		  reset: function() {
+		      var self = this;
+		      var height= this.height;
+		      self.bars.transition().duration(self.animationDelay).attr('y', height).attr('height', 0);
+		      self.labels.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+		      self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+		      
+		  },
+		  
+		  animate: function() {
+            var self = this;
+		        var y = self.y;
+		        
+		        self.bars.transition().duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        .attr('y', function(d) {return y(d.total)})
+		        .attr('height', function(d) {return y(d.value)});
+
+		        self.labels.transition(self.animationDelay).duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        .style('opacity', 1)
+		        .attr('y', function(d) {return y(d.total + d.value/2) + 6; }); //12: font size
+		        
+		        self.values.transition(self.animationDelay).duration(self.animationDelay)//.delay(function(d,i) { return i*this.animationDelay;})
+		        .style('opacity', 1)
+		        .attr('y', function(d) {return y(d.total + d.value/2) + 6 }); //12: font size
+
+		  },
+		  chartSpecificDataValidate: function() {
+
+          var errors = [],
+              numOfSets = this.chartData.length;
+
+          // There should be at least one set.
+          if(numOfSets === 0) {
+            errors.push({input: numOfSets, msg: 'Please include at least one value and label.'});
+          } else {
+            for (var i=0; i < numOfSets; i++){
+          		
+              // Each set should have a value.
+              if (!this.chartData[i].value){ 
+            		errors.push({ input: this.chartData, msg: 'You must include a value for each set.'});
+          		} 
+
+              // There cannot be negative numbers.
+              if (this.chartData[i].value < 0){
+                errors.push({ input: this.chartData, msg: 'You cannot have any negative values.'}); 
+              }
+          		
+              // Each set should have a label.
+              if (!this.chartData[i].label){ 
+          			errors.push({ input: this.chartData, msg: 'You must include an label for each value.'});	
+          		}
+          		
+            }
+        	}
+        
+          return errors;
+        }
+		  
+		  
+		});
+
+	</script>
+</polymer-element>

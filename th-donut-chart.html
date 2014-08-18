@@ -1,0 +1,223 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-style/core-style.html">
+<link rel="import" href="th-d3-chart.html">
+<link rel="import" href="../thelma-utils/th-theme.html">
+
+<polymer-element name="th-donut-chart" extends="th-d3-chart" attributes="chartSize">
+  <template>
+    <core-style ref="theme"></core-style>
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+      #chart {
+
+      }
+      #chart text {
+        font-size: 14px;
+      }
+
+      #data_errors {
+        font-size: 14px;
+        color: red;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+    </style>
+
+      <svg id="chart"></svg>
+
+      <ul id="data_errors">
+      </ul>
+
+      <!-- to allow embeded th-editor component -->
+      <content select="th-editor"></content> 
+      
+  </template>
+  <script>
+
+
+        Polymer('th-donut-chart', {
+          chartData: [{value: 65, color:""}],
+          chartSize: "200",
+          init: function() {
+
+            var self = this;
+            var margin = {
+                  right : 0,
+                  left : 0,
+                  label: 3
+                }, 
+                width = self.chartSize*0.95 - margin.left - margin.right, 
+                height = width,
+                twoPi = 2 * Math.PI,
+                progress = 0,
+                total = 100,
+                formatPercent = d3.format(".0%"),
+                outerRadius = height*0.49,
+                innerRadius = height*0.32;
+                self._prevProgress = 0;
+
+                self.height = height;
+
+            var foreground, text, arc;
+
+            self.inTransition = false;
+
+
+            arc = d3.svg.arc()
+              .startAngle(0)
+              .innerRadius(innerRadius)
+              .outerRadius(outerRadius);
+
+
+            var chart_svg = self.$.chart;
+
+            var svg = d3.select(chart_svg);
+
+            //adding shadow 
+
+            // var defs = svg.append("defs");
+
+            // var filter = defs.append("filter")
+            //     .attr("id", "dropshadow")
+
+            // filter.append("feGaussianBlur")
+            //     .attr("in", "SourceAlpha")
+            //     .attr("stdDeviation", 2)
+            //     .attr("result", "blur");
+            // filter.append("feOffset")
+            //     .attr("in", "blur")
+            //     .attr("dx", 1)
+            //     .attr("dy", 1)
+            //     .attr("result", "offsetBlur");
+
+            // var feMerge = filter.append("feMerge");
+
+            // feMerge.append("feMergeNode")
+            //     .attr("in", "offsetBlur")
+            // feMerge.append("feMergeNode")
+            //     .attr("in", "SourceGraphic");
+
+
+
+            var container = svg.attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" +(width / 2 ) + "," + (height * 0.49) + ")");
+            
+            var meter = container.append("g")
+                .attr("class", "progress-meter");
+            
+            meter.append("path")
+                .attr("class", "fill-foreground2")
+                .attr("d", arc.endAngle(twoPi));
+            
+            foreground = meter.append("path")
+                .attr("class", "data0")
+                .style("fill", self.chartData[0].color)
+                .style("stroke", self.chartData[0].color);
+                // .attr("filter", "url(#dropshadow)");
+            
+            text = meter.append("text")
+                .attr('class','percent data0')
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em") 
+                .style("fill", self.chartData[0].color)
+                .style("stroke", self.chartData[0].color);
+
+            self.foreground = foreground;
+            self.formatPercent = formatPercent;
+            self.arc = arc;
+            self.twoPi = twoPi;
+            self.text = text;
+
+
+          },
+          reset: function() {
+             var self = this;
+
+              
+          },
+          
+          animate: function() {
+
+                var self = this;
+                var progress = self.chartData[0].value;
+                var total = 100;
+                var i = d3.interpolate(self._prevProgress/total, progress/total);//d3.event.loaded / total);
+                d3.transition().duration(1000).tween("progress", function() {
+                  return function(t) {
+                    progress = i(t);
+                    self.foreground.attr("d", self.arc.endAngle(self.twoPi * progress));
+                    self.text.text(self.formatPercent(progress));
+                  };
+                }).each("end",function() {
+                  self.fire('th-animationend',{ element: self});  // is self too much to expose?
+
+                })
+
+                self._prevProgress = progress; 
+          },
+          chartSpecificDataValidate: function() {
+            
+            // There should be a value specified.
+            // The value should be between 1 and 100.
+
+            var self = this;
+
+            if(!chartData.length || chartData.length<1) {
+              errors.push({input: currentVal, msg: 'Chart data needs to be an array with one data element.'});
+            }
+
+            var errors = [],
+                currentVal = self.chartData[0].value;
+
+            if(currentVal === undefined) {
+              errors.push({input: currentVal, msg: 'Please provide a value for the chart.'});
+            } else if (currentVal > 100 || currentVal < 0){
+              errors.push({ input: currentVal, 
+                            msg: currentVal + ' is invalid. You must enter a number from 1 to 100.', 
+                            corrected: (function(){ return currentVal > 100 ? 100 : 1; })()});
+            }
+            
+            return errors;
+          },
+          updateData: function() {
+              var self = this;
+              self.animate();
+          },
+
+          getMetaData: function() {
+
+            return  {
+                      "name": "th-donut-chart",
+                      "description": "Thelma donut chart",
+                      "category":"graph",
+                      "version": "0.0.1",
+                      "thumbnail":"single-donut.jpg",
+                      "tags":["graph", "pie", "data", "animated"],
+                      "inputAttr": {
+                        "chartWidth":{"friendly":"Width", "type":"int", "default":260},
+                        "chartHeight":{"friendly":"Height", "type":"int", "default":300},
+                        "chartData":{"friendly":"Data", "type":"flat-object",
+                          "fields":{
+                            "value":{"friendly":"Value", "type":"int", "default":65}
+                          },
+                          "default":{"value": 65}
+                        }
+                      }
+                    };
+          }
+
+
+          
+        });
+
+
+  </script>
+</polymer-element>

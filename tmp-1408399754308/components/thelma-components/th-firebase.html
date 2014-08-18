@@ -1,0 +1,43 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="thelma_core.html">
+
+<polymer-element name="th-firebase" attributes="firebase directory">
+   <link rel="import" href="dependencies/firebase_dep.html">
+
+  <script>
+    Polymer('th-firebase', {
+      data: null,
+      firebase: 'https://shining-fire-6376.firebaseio.com/',
+      directory: "",
+      ready: function(){
+        var self = this;
+        self.dataRef = new Firebase(self.firebase+self.directory);
+      },
+      save: function(data, subdirectory){
+        var self = this;
+        if (subdirectory){  
+          self.dataRef = new Firebase(self.firebase + self.directory + subdirectory);
+          self.dataRef.set(data);
+        } else {
+          self.dataRef.push(data);
+        }
+      },
+      load: function(subdirectory){
+        var self = this;
+        self.dataRef = new Firebase(self.firebase + self.directory + subdirectory);
+        
+        self.dataRef.on('value', function(snapshot){
+          self.data = snapshot.val();
+          if (self.data){
+            self.asyncFire('th-data-ready', self.data);
+          } else {
+            self.asyncFire('th-data-error', "No such data.");
+          }
+        }); 
+
+      }
+      
+    });
+  </script>
+</polymer-element>
+

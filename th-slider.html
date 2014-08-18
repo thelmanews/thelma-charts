@@ -1,0 +1,104 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../thelma-core/thelma_core.html">
+<link href="th-slider-import.html" rel="import">
+
+
+<polymer-element name="th-slider" extends="th-animated" attributes="width height min max steps labels value">
+  <template>
+
+     <core-style ref="theme"></core-style>
+
+    <!-- d3.slider is not on bower yet-->
+
+    <core-style ref="theme"></core-style>
+
+    <link href="lib/d3.slider/d3.slider.css" rel="stylesheet">
+
+
+     <style>
+
+/*      :host {
+        display: inline-block;
+        position: relative;
+      }
+*/ 
+
+      #slider {
+        margin: 20px 5px 10px 5px;
+        border: 0;
+        border-top: 1px solid;
+      }
+
+      .d3-slider-handle {
+        border-radius: 50%;
+        opacity: 0.95;
+      }
+      .d3-slider-horizontal .d3-slider-handle {
+        top: -0.5em;
+      }
+      .d3-slider-axis-bottom {
+        top: 0;
+      }
+   </style>
+
+
+    <div id="slider"></div>
+    
+  </template>
+
+  <script>
+
+      (function() {
+
+        var slider = {};
+
+        Polymer('th-slider', {
+
+          min: 0,
+          max: 100,
+          step: 10,
+          labels: true,
+          value: 0,
+
+
+          ready: function() {
+
+            var self = this;
+            var sliderel = this.$.slider;
+
+            var axis = d3.svg.axis().orient('bottom').ticks(10);
+
+            slider = d3.slider().value(self.value).min(self.min).max(self.max).step(self.step); //.margin(100);
+
+            if(self.labels) {
+              slider.axis(axis);
+            }
+
+            //slider.value(self.value);
+
+             d3.select(sliderel).call(slider);
+
+             slider.on("slide", function(e, value) {
+                self.value = value;
+                self.fire('th-slide', {event: e, value: value});
+
+            });
+
+            
+          },
+          valueChanged: function() {
+
+            var self = this;
+            // NOT WORKING. d3.slider doesnt update slider...
+            slider.value(self.value);
+
+
+          }
+
+          
+        });
+
+    })();
+
+  </script>
+</polymer-element>
