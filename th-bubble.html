@@ -42,10 +42,10 @@ the animation, which is provided by the th-countup-num element.
   <script>
         Polymer('th-bubble', {
           /** CHARTDATA:
-           ** 'startFrom' determines the starting size of the bubble and number for countup
+           ** 'startValue' determines the starting size of the bubble and number for countup
            * @type {Number}
            * 
-           ** 'value' determines the final size of the bubble and the ending number
+           ** 'endValue' determines the final size of the bubble and the ending number
            * @type {Number}
            *
            *  'prefix' marks such as '$' to be put before value
@@ -60,7 +60,7 @@ the animation, which is provided by the th-countup-num element.
            *  'label' is displayed beneath the value
            * @type {String}
            */
-          chartData:[{ value: 65, startValue: 0, color: "", prefix:"", suffix:"", label:""}],
+          chartData:[{ endValue: 75, startValue: 0, color: "", prefix:"-", image: "", suffix:"", label:""}],
           /**
            * 'duration' determines the animation duration of the bubble, in seconds.
            * @type {Number}
@@ -71,7 +71,7 @@ the animation, which is provided by the th-countup-num element.
            * chartData observer only shallow observes chartData. this is needed for deep observation 
            */
           observe: {
-            'chartData[0].value': 'chartDataChanged',
+            'chartData[0].endValue': 'chartDataChanged',
           },
           init: function() {
             
@@ -79,17 +79,31 @@ the animation, which is provided by the th-countup-num element.
             self.svg = d3.select(self.$.chart);
             self.data = self.chartData[0];
 
-            self.chartData[0].startValue = self.chartData[0].startValue || 0;
-            self.chartData[0].prefix = self.chartData[0].prefix || "";
-            self.chartData[0].suffix = self.chartData[0].suffix || "";
-            self.chartData[0].label = self.chartData[0].label || "";
+            self.data.startValue = self.data.startValue || 0;
+            self.data.prefix = self.data.prefix || "";
+            self.data.suffix = self.data.suffix || "";
+            self.data.label = self.data.label || "";
+            self.image = self.data.image || "";
+
+            if (self.data.prefix == "-"){
+              self._bubbleStart = 100 - self.data.startValue;
+              self._bubbleEnd = 100 - self.data.endValue;
+            } else {
+              self._bubbleStart = self.data.startValue;
+              self._bubbleEnd = self.data.endValue;
+            }
 
             // create container and bubble for the first time
             self.container = self.svg.append("g").attr('class','container');
 
-            self.bubble = self.container.append("circle")
+            if (self.image){
+              self.image = self.container.append("image")
+                .attr('xlink:href', self.image);
+            } else {
+              self.bubble = self.container.append("circle")
                 .attr("class", "bubble data0");
-
+            }
+              
             self._setupElements();
         
           },
@@ -105,27 +119,35 @@ the animation, which is provided by the th-countup-num element.
             self.numberSize = Math.max((self.chartSize * 0.15), 14);
 
             // Determine bubble start and end radius, given values
-            self.bubbleRadiusStart = (self.bubbleArea * (self.data.startValue/100))/2;
-            self.bubbleRadiusEnd = (self.bubbleArea * (self.data.value/100))/2;
+            self.bubbleRadiusStart = (self.bubbleArea * (self._bubbleStart/100))/2;
+            self.bubbleRadiusEnd = (self.bubbleArea * (self._bubbleEnd/100))/2;
 
             self.svg.attr("width", self.bubbleArea)
                 .attr("height", self.bubbleArea);
 
-            
             self.container
                 .attr("transform", "translate(" +(self.bubbleArea / 2 ) + "," + (self.bubbleArea / 2) + ")");
             
             // Append a circle to the g and set starting radius
-            self.bubble
-              .attr("r", self.bubbleRadiusStart)
-              .style("fill", self.data.color)
-              .style("stroke", self.data.color);
+            if(self.image){
+              self.image
+                .attr('x', -self.bubbleRadiusStart)
+                .attr('y', -self.bubbleRadiusStart)
+                .attr('width', self.bubbleRadiusStart*2)
+                .attr('height', self.bubbleRadiusStart*2);
 
+            } else {
+              self.bubble
+                .attr("r", self.bubbleRadiusStart)
+                .style("fill", self.data.color)
+                .style("stroke", self.data.color);
+            }
+            
             self.value = d3.select(self.$.value)
-              .text(self.chartData[0].prefix+self.chartData[0].startValue+self.chartData[0].suffix);
+              .text(self.data.prefix+self.data.startValue+self.data.suffix);
 
             self.label = d3.select(self.$.label)
-              .text(self.chartData[0].label);
+              .text(self.data.label);
 
           },
           // Reset bubble and number back to starting state.
@@ -141,17 +163,27 @@ the animation, which is provided by the th-countup-num element.
           animate: function() {
             var self = this;
 
-            self.bubble
-              .transition()
-              .duration(self.duration*1000)
-              .attr("r",  self.bubbleRadiusEnd); 
+            if (self.image){
+              self.image
+                .transition()
+                  .duration(self.duration*1000)
+                  .attr('x', -self.bubbleRadiusEnd)
+                  .attr('y', -self.bubbleRadiusEnd)
+                  .attr('width', self.bubbleRadiusEnd*2)
+                  .attr('height', self.bubbleRadiusEnd*2);
+            } else {
+              self.bubble
+                .transition()
+                .duration(self.duration*1000)
+                .attr("r",  self.bubbleRadiusEnd); 
+            }
 
-            var i = d3.interpolate(self.chartData[0].startValue, self.chartData[0].value);
+            var i = d3.interpolate(self.data.startValue, self.data.endValue);
             //var formatPercent = d3.format(".0");
             self.value.transition().duration(self.duration*1000).tween("countup", function() {
                   return function(t) {
                     var num = i(t);
-                    self.value.text(self.chartData[0].prefix+Math.round(num)+self.chartData[0].suffix);
+                    self.value.text(self.data.prefix+Math.round(num)+self.data.suffix);
                   };
             });
 

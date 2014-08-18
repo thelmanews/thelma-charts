@@ -9,7 +9,7 @@ console.log(bubble);
 setTimeout(function() {
 	console.log('timeoit');
 	bubble.chartData[0].startValue = 65;
-	bubble.chartData[0].value = 40;
+	bubble.chartData[0].endValue = 40;
 },8000);
 
 
