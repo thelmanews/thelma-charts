@@ -42,7 +42,8 @@
 
   <script>
       Polymer('th-gauge-chart', {
-        chartData: [{value: 65, min: 0, max: 100, ticks: 5}], 
+        chartWidth: 260,
+        chartData: [{"value": 65, "min":0, "max":100, "ticks":5}], 
         animationSpeed : 3, // in seconds
         init: function() {
           var self = this,

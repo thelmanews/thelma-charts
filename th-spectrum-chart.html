@@ -42,10 +42,12 @@
 
 	<script>
 		Polymer('th-spectrum-chart', {
+		  chartWidth: 280,
+		  chartHeight: 250, 
 		  chartData: [
-		  		{label: 'Medicaid', range_min_value: 10, range_min_display_value: '$10', range_max_value: 50, range_max_display_value: '$50', color:''},
-		        {label: 'Federal',  pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60', color: ''},
-		        {label: 'Medicare', range_min_value: 70, range_min_display_value: '$70', range_max_value: 100, range_max_display_value: '$100', color:''}],
+		  	 {"label": "Medicaid", "color": "", "pattern": "",  "range_min_value": 10, "range_min_display_value": "$10", "range_max_value": 50, "range_max_display_value": "$50"},
+        {"label": "Federal", "color": "", "pattern": "",  "range_min_value": 40, "range_min_display_value": "$40", "range_max_value": 60, "range_max_display_value": "$60"},
+        {"label": "Medicare",  "color": "", "pattern": "stripe", "range_min_value": 70, "range_min_display_value": "$70", "range_max_value": 100, "range_max_display_value": "$100"}],
 		  orientation: 'vertical',
 		  //animationDelay: 500,
 		  init: function() {

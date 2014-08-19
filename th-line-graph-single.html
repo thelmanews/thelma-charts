@@ -304,7 +304,8 @@
 
 
         Polymer('th-line-graph-single', {
-          
+            chartWidth: 200,
+            chartHeight: 250,
             lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
             animateStyle: "draw", // options: raise, draw
             fillArea: false, 
@@ -312,19 +313,19 @@
             xAxisLabels: true,
             yAxisLine: false, // doesnt do anything, there is never a line
             yAxisLabels: false,
-            yAxisMin: '', // unless a value is specified, axis will scale according to data
-            yAxisMax: '', // unless a value is specified, axis will scale according to data
+            yAxisMin: "", // unless a value is specified, axis will scale according to data
+            yAxisMax: "", // unless a value is specified, axis will scale according to data
             axisAnimation: false, // not currently working
             dataPosition: "left",  // options: left, right
             joyStick: true,
             color: "",
-            defaultDisplayValues: false,
+            defaultDisplayValues: true,
           chartData: [
-            {'label': 2010, 'value': 104, 'display_value': '$104', 'note': ''},
-            {'label': 2011, 'value': 108, 'display_value': '$108', 'note': ''},
-            {'label': 2012, 'value': 107, 'display_value': '$107', 'note': ''},
-            {'label': 2013, 'value': 110, 'display_value': '$110', 'note': ''},
-            {'label': 2014, 'value': 112, 'display_value': '$112', 'note': ''}
+            {"label": 2010, "value": 104, "display_value": "", "note": ""},
+            {"label": 2011, "value": 108, "display_value": "", "note": ""},
+            {"label": 2012, "value": 107, "display_value": "", "note": ""},
+            {"label": 2013, "value": 110, "display_value": "", "note": ""},
+            {"label": 2014, "value": 112, "display_value": "", "note": ""}
           ],
           init: function() {
             var self = this;

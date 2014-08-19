@@ -44,7 +44,13 @@
 	<script>
 
 		Polymer('th-stacked-chart', {
-
+			chartWidth: 200,
+			chartHeight: 250,
+			chartData: [
+	      {"label": "Medicaid", "value": 20, "display_value": "$20", "color":""},
+	      {"label": "Gap", "value": 40, "display_value": "$40", "color":""},
+	      {"label": "Sub", "value": 10, "display_value": "$10", "color":""}
+      ],
 		  init: function() {
 		      var self = this;
 		      

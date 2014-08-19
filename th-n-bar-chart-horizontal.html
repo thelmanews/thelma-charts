@@ -49,11 +49,13 @@
 	       * @type {boolean}
 		   */
 		  chartData: [
-		    {label: 'Player of the day', value: 15, display_value: '$15', color:""},
-		    {label: 'Vendor', value: 20, display_value: '$20', color:"", color:""},
-		    {label: 'Cheerleader', value: 40, display_value: '$40', color:""},
-		    {label: 'Designer', value: 70, display_value: '$70', color:""}
-		  ],
+        {"label": "Player", "value": 15, "display_value": "$15", "color":""},
+        {"label": "Vendor", "value": 20, "display_value": "$20", "color":""},
+        {"label": "Cheerleader", "value": 40, "display_value": "$40", "color":""},
+        {"label": "Designer", "value": 70, "display_value": "$70", "color":""}
+      ],
+		  chartWidth: 200,
+		  chartHeight: 250,
 		  /**
 		   * Initializes the component. Called by th-animated component (thelma-core/thelma_core.html)
 		   * 
@@ -303,7 +305,7 @@
 		        
 		  },
 		  /**
-		   * called by chartWith and chartHeight observer methods when either got changed (In th-d3-charts.html) 
+		   * called by chartWidth and chartHeight observer methods when either got changed (In th-d3-charts.html) 
 		   * calling it directly doesn't have any effect  
 		   * @return {undefined}
 		   */

@@ -82,10 +82,11 @@
 
 		Polymer('th-compare-grid-chart', {
 		  chartData: [
-		    {label: 'Non-Smoker', value: 21, image: 'images/kid.png'},
-		    {label: 'Smoker', value: 1, image: 'images/kid-smoker.png'}
-		  ],
-		  chartHeight: 150,
+        {"label": "Non-Smoker", "value": 33, "image": "/bower_components/thelma-components/images/kid.png"},
+        {"label": "Smoker", "value": 1, "image": "/bower_components/thelma-components/images/kid-smoker.png"}
+      ],
+		  chartWidth: 200,
+		  chartHeight: 250,
 		  /**
 		   * Transition type for images values: random or drop
 		   * @type {String}
@@ -96,7 +97,7 @@
 		   * animations are 5 times longer for the second set. 
 		   * @type {Number}
 		   */
-		  animationDuration: 100,
+		  animationDuration: 200,
 		  init: function() {
 		    
 		    var self = this;
