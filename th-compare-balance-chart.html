@@ -36,9 +36,11 @@
 
 		Polymer('th-compare-balance-chart', {
 		  chartData: [
-		    {label: 'Smoker', count: 3, image: 'images/kid.png', weight: 1},
-		    {label: 'Non-Smoker', count: 20, image: 'images/kid-smoker.png', weight: 1}
-		  ],
+        {"label": "Smoker", "count": 3, "weight": 1, "image": "/bower_components/thelma-components/images/kid-smoker.png"},
+        {"label": "Non-Smoker", "count": 50, "weight": 1, "image": "/bower_components/thelma-components/images/kid.png"}
+      ],
+		  chartWidth: 200,
+		  chartHeight: 250,
 		  init: function() {
 
 		    var self = this;
