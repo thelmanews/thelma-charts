@@ -33,6 +33,10 @@
 
       <ul id="data_errors">
       </ul>
+
+      <!-- to allow embeded th-editor component -->
+      <content select="th-editor"></content> 
+      
   </template>
   <script>
 
@@ -186,7 +190,30 @@
           updateData: function() {
               var self = this;
               self.animate();
+          },
+
+          getMetaData: function() {
+
+            return  {
+                      "name": "th-donut-chart",
+                      "description": "Thelma donut chart",
+                      "category":"graph",
+                      "version": "0.0.1",
+                      "thumbnail":"single-donut.jpg",
+                      "tags":["graph", "pie", "data", "animated"],
+                      "inputAttr": {
+                        "chartWidth":{"friendly":"Width", "type":"int", "default":260},
+                        "chartHeight":{"friendly":"Height", "type":"int", "default":300},
+                        "chartData":{"friendly":"Data", "type":"flat-object",
+                          "fields":{
+                            "value":{"friendly":"Value", "type":"int", "default":65}
+                          },
+                          "default":{"value": 65}
+                        }
+                      }
+                    };
           }
+
 
           
         });

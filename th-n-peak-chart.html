@@ -3,6 +3,43 @@
 
 <polymer-element name="th-n-peak-chart" extends="th-d3-chart">
 
+  <template>
+      <core-style ref="theme"></core-style>
+      <style>
+
+        :host {
+          display: inline-block;
+          position: relative;
+        }
+        #chart {
+
+        }
+        #chart text.label {
+          /*font-size: 13px;*/
+          /*font-weight: 300;*/
+        }
+
+        #data_errors {  
+          display: none;
+          font-size: 14px;
+          color: red;
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+
+      </style>
+
+      <svg id="chart"></svg>
+
+      <ul id="data_errors">
+      </ul>  
+
+      <!-- to allow embeded th-editor component -->
+      <content select="th-editor"></content> 
+      
+  </template>
+
   <script>
 
 
@@ -329,7 +366,35 @@
             }
 
             return errors;
+          },
+
+          getMetaData: function() {
+            return {
+            "name": "th-n-peak-chart",
+            "description": "Thelma n peak chart",
+            "category":"chart",
+            "version": "0.0.1",
+            "thumbnail":"nbar.jpg", 
+            "tags":["chart", "bar"],
+            "inputAttr": {
+              "chartWidth":{"friendly":"Width", "type":"int", "default":200},
+              "chartHeight":{"friendly":"Height", "type":"int", "default":300},
+              "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
+                "fields":{
+                  "label":{"friendly":"Label", "type":"string", "default":"Player"},
+                  "value":{"friendly":"Value", "type":"int", "default":15},
+                  "display_value":{"friendly":"Display Value", "type":"string", "default":""}
+                },
+                "default":[
+                  {"label": "Player", "value": 15, "display_value": "$15"},
+                  {"label": "Vendor", "value": 20, "display_value": "$20"},
+                  {"label": "Mascot", "value": 45, "display_value": "$45"}
+                ]
+              }
+            }
           }
+         }
+
         
       });
   
