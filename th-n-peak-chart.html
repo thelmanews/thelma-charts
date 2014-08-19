@@ -184,12 +184,14 @@
       // Adding private static methods.
 
       Polymer('th-n-peak-chart', {
+        chartWidth: 200,
+        chartHeight: 250,
         chartData: [
-          {label: 'Platinum', value: 50, display_value: '$50', color:''},
-          {label: 'Gold', value: 45, display_value: '$45', color:''},
-          {label: 'Silver', value: 30, display_value: '$30', color:''},
-          {label: 'Bronze', value: 25, display_value: '$25', color:''}
-        ],
+        {"label": "Platinum", "value": 50, "display_value": "$50", "color":""},
+        {"label": "Gold", "value": 45, "display_value": "$40", "color":""},
+        {"label": "Silver", "value": 30, "display_value": "$30", "color":""},
+        {"label": "Bronze", "value": 25, "display_value": "$25", "color":""}
+      ],
         init: function() {
           var self = this;
 

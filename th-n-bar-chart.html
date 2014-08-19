@@ -169,11 +169,13 @@
 
 
 		Polymer('th-n-bar-chart', {
+		  chartWidth: 200,
+		  chartHeight: 250,
 		  chartData: [
-		    {label: 'Player', value: 15, color:''},
-		    {label: 'Vendor', value: -20, color:''},
-		    {label: 'Mascot', value: -35, color:''}
-		  ],
+        {"label": "Player", "value": 15, "display_value": "$15", "color":""},
+        {"label": "Vendor", "value": 20, "display_value": "$20", "color":""},
+        {"label": "Mascot", "value": 45, "display_value": "$45", "color":""}
+      ],
 		  /**
 		   * show horizontal line from zero point when dealing with negative values
 		   * @type {Boolean}
