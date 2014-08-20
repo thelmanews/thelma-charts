@@ -142,13 +142,14 @@
 			      	.enter().append("foreignObject")
 			      		.attr('class','label')
 			      		.attr('width', polymerObj.dims.bars.width)
-			      		.attr('height', '100px')
+			      		.attr('height', '100px') //TODO figure out the correct height
 			      		.attr('transform', function(d,i){
 			      			var xPos = polymerObj.x(i)  ;
 				        	var yPos = polymerObj.dims.height + 3;
 				        	return "translate("+xPos+","+yPos+")";
 			      		})
 			      		.append("xhtml:div")
+			      			.attr('id', 'test')
 			      			.attr("class", function(d,i){ return "wrapped-labels data"+i;});
 						    
 					} else {
@@ -209,7 +210,7 @@
 		  chartData: [
 		    {label: 'Player', value: 15, color:''},
 		    {label: 'Vendor', value: -20, color:''},
-		    {label: 'Mascot', value: -35, color:''}
+		    {label: 'Mascot ad asd ad a da sd', value: -35, color:''}
 		  ],
 		  /**
 		   * show horizontal line from zero point when dealing with negative values
@@ -220,7 +221,7 @@
 		   * 'wrapLabels' if true will wrap labels on multiple lines. If false, it will angle them.
 		   * @type {Boolean}
 		   */
-		  wrapLabels: false, 
+		  wrapLabels: true, 
 		  init: function() {
 		    
 		  	  var self = this;
@@ -308,7 +309,12 @@
 		        .style('opacity', 1);
 
 		        if (self.wrapLabels){
-
+		        	self.labels.transition().duration(this.animationDelay)
+		        		.attr('transform', function(d,i){
+				        	var xPos = self.x(i);
+				        	var yPos = height + 3;
+				        	return "translate("+xPos+","+yPos+")";
+				   		});
 		        } else {
 			        self.labels.transition().duration(this.animationDelay)
 			        .attr('text-anchor',function(){ 
@@ -335,7 +341,8 @@
 	 		     	.attr('x2', self.dims.width)
 	 		     	.attr('y2', self.dims.height - y(0));
 
-
+	 		     	console.log("&&&&");
+	 		     	console.log(self.shadowRoot.querySelector('#test').offsetHeight);
 		  },
 
 		  resize: function() {
@@ -429,7 +436,7 @@
 			      	});
 			      
 			      if (self.wrapLabels){
-
+			      	// TODO: enter and append foreign object w/div
 			      } else {
 			      	self.labels.enter().append('text').attr('class','label');	
 			      }
