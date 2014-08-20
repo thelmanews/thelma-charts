@@ -55,7 +55,6 @@
 
     (function() {
 
-
       //  static private methods and private attributes ...
       var staticObj = {};
 
@@ -66,7 +65,6 @@
       // Adding private static methods.
 
       staticObj._setElementSizes = function(polymerObj) {
-
 
 	    	  var margin = polymerObj.dims.margin,
 		    	  width = polymerObj.dims.width,
@@ -91,6 +89,10 @@
 
  		     	if(polymerObj.wrapLabels){
 
+			      polymerObj.labels
+			      	.attr("class", function(d,i){ return "wrapped-labels data"+i;})
+	      			.attr('width', polymerObj.dims.bars.width)
+	      			.attr('height', polymerObj.dims.labels.height);  
  		     	} else {
  		     		polymerObj.labels
 		        .attr("class", function(d,i){return "label data"+i;})
@@ -142,15 +144,15 @@
 			      	.enter().append("foreignObject")
 			      		.attr('class','label')
 			      		.attr('width', polymerObj.dims.bars.width)
-			      		.attr('height', '100px') //TODO figure out the correct height
+			      		.attr('height', polymerObj.dims.labels.height) 
 			      		.attr('transform', function(d,i){
 			      			var xPos = polymerObj.x(i)  ;
-				        	var yPos = polymerObj.dims.height + 3;
+				        	var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
 				        	return "translate("+xPos+","+yPos+")";
 			      		})
-			      		.append("xhtml:div")
-			      			.attr('id', 'test')
-			      			.attr("class", function(d,i){ return "wrapped-labels data"+i;});
+			      		.append("xhtml:div");
+			      			
+			      			
 						    
 					} else {
 						// ANGLED LABELS WITH SVG TEXT
@@ -182,8 +184,6 @@
 
 		      polymerObj.horAxis = polymerObj.container.selectAll('.horAxis').data([1]).enter().append('line').attr('class', horClass);
 
-
-
 		  };
 
 
@@ -210,7 +210,7 @@
 		  chartData: [
 		    {label: 'Player', value: 15, color:''},
 		    {label: 'Vendor', value: -20, color:''},
-		    {label: 'Mascot ad asd ad a da sd', value: -35, color:''}
+		    {label: 'Mascot', value: -35, color:''}
 		  ],
 		  /**
 		   * show horizontal line from zero point when dealing with negative values
@@ -228,7 +228,7 @@
 		  	   
 		  	  self.dims = self.setupDimensions(self);
 
-		      self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1, 1.3);
+		      self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1, 1.3, self.wrapLabels);
 
 		      self.colors = self.getColors();
 
@@ -312,7 +312,7 @@
 		        	self.labels.transition().duration(this.animationDelay)
 		        		.attr('transform', function(d,i){
 				        	var xPos = self.x(i);
-				        	var yPos = height + 3;
+				        	var yPos = height + self.dims.margin.label;
 				        	return "translate("+xPos+","+yPos+")";
 				   		});
 		        } else {
@@ -341,8 +341,6 @@
 	 		     	.attr('x2', self.dims.width)
 	 		     	.attr('y2', self.dims.height - y(0));
 
-	 		     	console.log("&&&&");
-	 		     	console.log(self.shadowRoot.querySelector('#test').offsetHeight);
 		  },
 
 		  resize: function() {
@@ -353,10 +351,7 @@
 
 		  	  // self.setupExtraDimensions();
 
-
 		  	  staticObj._setupContainerSize(self); // correct size if margins are changed (by setting the label diagonal)
-
-
 
 	    	  var margin = self.dims.margin,
 	    	  	  width = self.dims.width,
@@ -378,11 +373,9 @@
 
 		      self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1, 1.3);
 
-
 		      staticObj._setElementSizes(self);
 
 		      self.animate();
-
 
 		  },
 
@@ -409,22 +402,18 @@
 			  self.values=self.container.selectAll('.value').data(self.chartData);
 			  
 			  // Adjust margins for changes in labels and values
-			  self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1, 1.3);
+			  self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1, 1.3, self.wrapLabels);
+
+
 			  // Resize container based on new margins
 			  staticObj._setupContainerSize(self); 
 			  
-		  	  if(self.dataLength!=self.chartData.length)
-		  	  {
+		  	  if(self.dataLength!=self.chartData.length) {
 
-
-		  	  	  self.dataLength = self.chartData.length;
-
-				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
+		  	  	self.dataLength = self.chartData.length;
+				  	self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
 
 				  // self.setupExtraDimensions();
-
-
-				  
 
 			      self.bars.enter().append('rect').attr('class','bar')
 			      	.attr('height', 0)
@@ -436,7 +425,17 @@
 			      	});
 			      
 			      if (self.wrapLabels){
-			      	// TODO: enter and append foreign object w/div
+			      	self.labels.enter().append("foreignObject")
+			      		.attr('class','label')
+			      		.attr('width', self.dims.bars.width)
+			      		.attr('height', self.dims.labels.height) 
+			      		.attr('transform', function(d,i){
+			      			var xPos = self.x(i)  ;
+				        	var yPos = self.dims.height + self.dims.margin.label;
+				        	return "translate("+xPos+","+yPos+")";
+			      		})
+			      		.append("xhtml:div")
+			      			.attr("class", function(d,i){ return "wrapped-labels data"+i;});
 			      } else {
 			      	self.labels.enter().append('text').attr('class','label');	
 			      }
@@ -447,21 +446,16 @@
 			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).attr('x', width).style('opacity', 0).remove();
 			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
 			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
-			      
-				  //self.resize();
 
 			    }
 
 			    // needed here to recalculate the scale, needed when data scale changes //TODO refactoring?
-			   self.resize();
+			   	self.resize();
 
 		      // this is independent of size but dependent on data
 		      self.labels.text(function(d) {return d.label;});
 		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
-
-
 		      self.animate();
-		      
 
 		  },
 

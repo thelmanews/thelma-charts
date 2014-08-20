@@ -41,7 +41,7 @@ Thelma.chartValidation = {
 
 Thelma.BarFamilyPrivateStaticMethods = function() {
 
-	  this.setupBarLabelDims = function(dims, chartData, overlap, gap) {
+	  this.setupBarLabelDims = function(dims, chartData, overlap, gap, wrap) {
         
         // bars margin and dims
 
@@ -77,13 +77,19 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
 
         dims.labels = {};
         dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
-	    dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
+	      dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
+        dims.labels.lines = Math.ceil(dims.labels.maxLength * 8.25 / dims.bars.width); // Estimates the number of lines for wrapped labels
+        dims.labels.height = dims.labels.lines * 16; // Estimates the size of the div to hold labels
 
 	      // If labels are long, angle them and adjust margins 
 	      // 1.1 worked with well with different labels but it might be a little bit too aggressive. (larger->more conservative)
 	    if (dims.labels.width > dims.bars.width/dims.bars.overlap/1.3) { 
 	        dims.labels.angle = 25;
-	        dims.margin.bottom = dims.labels.width/1.5 + dims.margin.label;
+          if (wrap){
+             dims.margin.bottom = dims.labels.height + dims.margin.label;
+          } else {
+            dims.margin.bottom = dims.labels.width/1.5 + dims.margin.label;  
+          }
 
           // increase right margin by width of last label
           dims.margin.right = dims.margin.right + chartData[chartData.length-1].label.length*5; 
@@ -117,6 +123,7 @@ Thelma.chartUtils = {
 	    dims.width = Math.max(100,(polymerObj.chartWidth*0.95 - dims.margin.left - dims.margin.right)), 
 	    dims.height = Math.max(150,(polymerObj.chartHeight*0.95 - dims.margin.top - dims.margin.bottom)),
 	    dims.textLabelMargin = dims.height*0.05;
+      dims.margin.label = polymerObj.wrapLabels ? 3 : 16; // If wrapLabels, margin is less for HTML text
 
 	    // Bar dimensions 
 	    // dims.barGap = 0.3;
