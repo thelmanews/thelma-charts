@@ -162,15 +162,14 @@
 		      
 		      self.labels
 		      	.attr('class', function(d,i){return 'label wrapped-labels data' + i;})
-		      	.attr('width', self.dims.labels.containerWidth) // TODO
-		      	.attr('height', self.dims.labels.containerHeight) // TODO
+		      	.attr('width', self.dims.labels.containerWidth) 
+		      	.attr('height', self.dims.labels.containerHeight) 
 		      	.html(function(d) {return d.label;})
 		      	.style('color', function(d){ return d.color;});
 
 		     	self.values
-		      	// .attr('font-weight', 300)
-		      	.attr('width', self.dims.values.containerWidth) // TODO
-		      	.attr('height',self.dims.values.containerHeight) // TODO
+		      	.attr('width', self.dims.values.containerWidth) 
+		      	.attr('height',self.dims.values.containerHeight)
 		      	.attr('class', function(d,i){return "defaultvalue wrapped-values value data"+i;})
 		        //.style('opacity', 0)
 		        .html(function(d) {

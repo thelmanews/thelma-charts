@@ -259,7 +259,7 @@ Thelma.chartUtils = {
         // Estimate length of labels and calculate width/height of container given word wrap
         dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); // in number of characters
         dims.labels.width = dims.labels.maxLength * 8.25; // in estimated pixels 
-        dims.labels.containerWidth = Math.min(dims.labels.width, remainingWidth/2);  
+        dims.labels.containerWidth = remainingWidth/2;  
         dims.labels.lines = Math.ceil(dims.labels.width / dims.labels.containerWidth); // estimate # of lines given container width
         dims.labels.containerHeight = dims.labels.lines * 16; // estimate height given number of lines
         remainingWidth -= dims.labels.containerWidth;

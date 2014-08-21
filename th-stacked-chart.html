@@ -15,10 +15,6 @@
 	      #chart {
 
 	      }
-	      #chart text.label {
-	        /*font-size: 13px;*/
-	        /*font-weight: 300;*/
-	      }
 
 	      #data_errors {  
 	        display: none;
@@ -27,6 +23,14 @@
 	        position: absolute;
 	        top: 0;
 	        left: 0;
+	      }
+
+	      .wrapped-labels {
+	      	text-align: right;
+	      }
+
+	      .wrapped-values {
+	      	text-align: left;
 	      }
 
 	    </style>
@@ -44,7 +48,7 @@
 	<script>
 
 		Polymer('th-stacked-chart', {
-
+			chartData: [{label: 'medicaid', value: 20, display_value: '', color:''},{label: 'gap', value: 40, display_value: '', color:''},{label: 'sub', value: 10, display_value: '', color:''}], 
 		  init: function() {
 		      var self = this;
 		      
@@ -85,9 +89,9 @@
 
 		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
 
-		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text').attr('class','label');
+		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('foreignObject').attr('class','label');
 
-		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text').attr('class','value');
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('foreignObject').attr('class','value');
 
 		      self._setElementSizes();
 
@@ -95,9 +99,9 @@
 		      self.bars.attr('y', self.dims.height)
 			        .attr('height', 0);
 
-			  self.labels.attr('height', 0).style('opacity', 0);
+			  self.labels.style('opacity', 0);
 
-			  self.values.attr('height', 0).style('opacity', 0);
+			  self.values.style('opacity', 0);
 	      
 
 		  },
@@ -119,20 +123,22 @@
 
 		      
 		      self.labels
-		        .attr("class", function(d,i){return "label data"+i;})
-		        .style('text-anchor','end')
-		        .text(function(d) {return d.label;})
-		        .style('fill', function(d){ return d.color; })
-		        .style('stroke', function(d){ return d.color; });
+		        .attr("class", function(d,i){return "label wrapped-labels data"+i;})
+		        .attr('width', self.dims.labels.containerWidth)
+		      	.attr('height', self.dims.labels.containerHeight)
+		      	.html(function(d) {return d.label;})
+		        .style('color', function(d){ return d.color; });
+		        
 		      
 		      
 		      self.values
-		        .attr("class", function(d,i){return "value data"+i;})
-		        .attr('font-size', '13px')
-		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
-		        .style('fill', function(d){ return d.color; })
-		        .style('stroke', function(d){ return d.color; })
-		        .text(function(d) {return d.display_value ? d.display_value : d.value ;});
+		        .attr("class", function(d,i){return "value wrapped-values data"+i;})
+		        .attr('width', self.dims.values.containerWidth) 
+		      	.attr('height',self.dims.values.containerHeight)
+		        .attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
+		        .html(function(d){return d.display_value ? d.display_value : d.value ;})
+		        .style('color', function(d){ return d.color; });
+		       
 
 
 		  },
@@ -153,8 +159,6 @@
 		      var self = this;
 		      self.dims = self.setupStackedDims(self);
 
-		      console.log(self.dims);
-
 		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData),
 		      x = scales.x,
 		      y = scales.y;
@@ -167,10 +171,7 @@
 		          total+=parseFloat(d.value);
 		      });
 
-		      console.log(total);
-
 		      self.y.domain([0, total]); 
-
 
 		      self._setElementSizes();
 
@@ -208,16 +209,11 @@
 
 				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
 
-				  // self.setupExtraDimensions();
-
-
-				 // staticObj._setupContainerSize(self); // correct size if margins are changed (by setting the label diagonal)
-
 			      self.bars.enter().append('rect').attr('class','bar')
 			      	.attr('height', 0);
 
-			      self.labels.enter().append('text').attr('class','label');
-			      self.values.enter().append('text').attr('class','value').attr('y', height);
+			      self.labels.enter().append('foreignObject').attr('class','label');
+			      self.values.enter().append('foreignObject').attr('class','value').attr('y', height);
 
 
 			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();
@@ -232,8 +228,8 @@
 			    self.resize();
 
 		      // this is independent of size but dependent on data
-		      self.labels.text(function(d) {return d.label;});
-		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+		      self.labels.html(function(d) {return d.label;});
+		      self.values.html(function(d) {return d.display_value ? d.display_value : d.value ;});
 
 
 		      self.animate();
@@ -245,20 +241,20 @@
 		        var y = self.y;
 		        
 		        self.bars.transition().duration(self.animationDelay)
-			        .attr('x', self.dims.labels.width + self.dims.margin.label)
+			        .attr('x', self.dims.width/2 - self.dims.bar.width/2)
 			        .attr('width', self.dims.bar.width)
 			        .attr('y', function(d) {return y(d.total)})
 			        .attr('height', function(d) {return y(d.value)});
 
 		        self.labels.transition(self.animationDelay).duration(self.animationDelay)
 		        .style('opacity', 1)
-		        .attr('x', self.dims.labels.width)
-		        .attr('y', function(d) {return y(d.total + d.value/2) + 6; }); //12: font size
+		        .attr('x', 0)
+		        .attr('y', function(d) {return y(d.total); }); //12: font size
 		        
 		        self.values.transition(self.animationDelay).duration(self.animationDelay)
 		        .style('opacity', 1)
-		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
-		        .attr('y', function(d) {return y(d.total + d.value/2) + 6 }); //12: font size
+		        .attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
+		        .attr('y', function(d) {return y(d.total); }); //12: font size
 
 		  },
 		  chartSpecificDataValidate: function() {
