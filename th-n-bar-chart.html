@@ -30,13 +30,6 @@
 
 	      .wrapped-labels {
 	      	text-align: center;
-	      	word-break: normal;
-	      	-ms-word-break: normal;
-     			word-break: normal;
-     			-webkit-hyphens: auto;
-   				-moz-hyphens: auto;
-        	hyphens: auto;
-
 	      }
 
 	    </style>
@@ -64,7 +57,69 @@
       
       // Adding private static methods.
 
-      staticObj._setElementSizes = function(polymerObj) {
+
+
+		 staticObj._setupElements = function(polymerObj) {
+		      
+		      // Create a container for chart
+		      polymerObj.svg = d3.select(polymerObj.$.chart);
+		      polymerObj.container = polymerObj.svg
+		          .selectAll('.container')
+		          .data([1])
+		          .enter()
+		          .append('g')
+		          .attr('class','container');
+
+		      // Append bars for each data point, initial state of 0 height
+		      polymerObj.bars = polymerObj.container.selectAll('.bar').data(polymerObj.chartData).enter().append('rect').attr('class','bar')
+		      .attr('height', 0)
+		      .attr('y', function(d){ return polymerObj.y(0);});
+
+		      // Append labels using HTML or SVG, depending on if they should wrap or angle
+		      if (polymerObj.wrapLabels){
+			      
+			      // Wrapped HTML
+			      polymerObj.labels = polymerObj.container.selectAll('.label')
+			      	.data(polymerObj.chartData)
+			      	.enter().append("foreignObject")
+			      		.attr('class', function(d,i){ return 'label wrapped-labels data'+i })
+			      		.attr('transform', function(d,i){
+			      			var xPos = polymerObj.x(i)  ;
+				        	var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
+				        	return "translate("+xPos+","+yPos+")";
+			      		})
+						    
+					} else {
+						// Angled labels with SVG text
+			      polymerObj.labels = polymerObj.container.selectAll('.label').data(polymerObj.chartData).enter().append('text').attr('class','label')
+			      	.attr('text-anchor',function(){ return polymerObj.dims.labels.angle > 0 ? "left" : "middle";})
+			        .attr('transform', function(d,i){
+				        	var xPos = polymerObj.x(i) + polymerObj.dims.bars.width/2 ;
+				        	var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
+				        	var rotation = polymerObj.dims.labels.angle;
+
+				        	//if there is an angle, move labels slightly to top left
+				        	if(rotation> 0) {
+				        		xPos = xPos -7;
+				        		yPos = yPos -3;
+				        	}
+				        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
+				    });
+
+		      }
+
+		      // Append values, initial state of no opacity
+		      polymerObj.values = polymerObj.container.selectAll('.value').data(polymerObj.chartData).enter().append('text').attr('class','value')
+		      .attr('y', polymerObj.dims.height)
+		      .style('opacity', 0);
+
+		      // Append a horizontal x-axis 
+		      var horClass = 'horAxis'+(polymerObj.showHorizontalAxis ? ' stroke-foreground' : '');
+		      polymerObj.horAxis = polymerObj.container.selectAll('.horAxis').data([1]).enter().append('line').attr('class', horClass);
+
+		  };
+
+		  staticObj._setElementSizes = function(polymerObj) {
 
 	    	  var margin = polymerObj.dims.margin,
 		    	  width = polymerObj.dims.width,
@@ -118,69 +173,7 @@
 	 		     	.attr('x2', polymerObj.dims.width)
 	 		     	.attr('y2', polymerObj.dims.height - y(0));
 
-		};
-
-		 staticObj._setupElements = function(polymerObj) {
-		      
-		      polymerObj.svg = d3.select(polymerObj.$.chart);
-
-		      polymerObj.container = polymerObj.svg
-		          .selectAll('.container')
-		          .data([1])
-		          .enter()
-		          .append('g')
-		          .attr('class','container');
-
-		      polymerObj.bars = polymerObj.container.selectAll('.bar').data(polymerObj.chartData).enter().append('rect').attr('class','bar')
-		      .attr('height', 0)
-		      .attr('y', function(d){ return polymerObj.y(0);});
-
-		      if (polymerObj.wrapLabels){
-			      // WRAPPED LABELS WITH HTML
-			      polymerObj.labels = polymerObj.container.selectAll('.label')
-			      	.data(polymerObj.chartData)
-			      	.enter().append("foreignObject")
-			      		.attr('class', function(d,i){ return 'label wrapped-labels data'+i })
-			      		.attr('transform', function(d,i){
-			      			var xPos = polymerObj.x(i)  ;
-				        	var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
-				        	return "translate("+xPos+","+yPos+")";
-			      		})
-			      			
-						    
-					} else {
-						// ANGLED LABELS WITH SVG TEXT
-			      polymerObj.labels = polymerObj.container.selectAll('.label').data(polymerObj.chartData).enter().append('text').attr('class','label')
-			      .attr('text-anchor',function(){ 
-			        	return polymerObj.dims.labels.angle > 0 ? "left" : "middle";
-			        	
-			        })
-			        .attr('transform', function(d,i){
-				        	var xPos = polymerObj.x(i) + polymerObj.dims.bars.width/2 ;
-				        	var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
-				        	var rotation = polymerObj.dims.labels.angle;
-
-				        	//if there is an angle, move labels slightly to top left
-				        	if(rotation> 0) {
-				        		xPos = xPos -7;
-				        		yPos = yPos -3;
-				        	}
-				        	return "translate("+xPos+","+yPos+") rotate("+ rotation +")"
-				    });
-
-		      }
-
-		      polymerObj.values = polymerObj.container.selectAll('.value').data(polymerObj.chartData).enter().append('text').attr('class','value')
-		      .attr('y', polymerObj.dims.height)
-		      .style('opacity', 0);
-
-		      var horClass = 'horAxis'+(polymerObj.showHorizontalAxis ? ' stroke-foreground' : '');
-
-		      polymerObj.horAxis = polymerObj.container.selectAll('.horAxis').data([1]).enter().append('line').attr('class', horClass);
-
-		  };
-
-
+			};
 
 		  staticObj._setupContainerSize = function(polymerObj) {
 		  	  var margin = polymerObj.dims.margin,

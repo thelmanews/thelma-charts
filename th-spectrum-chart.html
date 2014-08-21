@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-spectrum-chart" extends="th-d3-chart">
+<polymer-element name="th-spectrum-chart" extends="th-d3-chart" attributes="wrapLabels">
 
 	<template>
 	    <core-style ref="theme"></core-style>
@@ -14,10 +14,7 @@
 	      #chart {
 
 	      }
-	      #chart text.label {
-	        /*font-size: 13px;*/
-	        /*font-weight: 300;*/
-	      }
+
 
 	      #data_errors {  
 	        display: none;
@@ -26,6 +23,14 @@
 	        position: absolute;
 	        top: 0;
 	        left: 0;
+	      }
+
+	      .wrapped-labels {
+	      	text-align: right;
+	      }
+
+	      .wrapped-values {
+	      	text-align: left;
 	      }
 
 	    </style>
@@ -42,6 +47,7 @@
 
 	<script>
 		Polymer('th-spectrum-chart', {
+		  wrapLabels: true,
 		  chartData: [
 		  		{label: 'Medicaid', range_min_value: 10, range_min_display_value: '$10', range_max_value: 50, range_max_display_value: '$50', color:''},
 		        {label: 'Federal',  pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60', color: ''},
@@ -51,22 +57,12 @@
 		  init: function() {
 		    var self = this;
           
-        // setup dimensions
-        // self.dims = self.setupDimensions(self);
-
         self._setAllDims();
 
-        
-
-        // setup scales
-
-	      
-          // setup chart area
-	      var chart_svg = this.$.chart;
-          self.svg = d3.select(chart_svg);
+        // setup chart area
+	      self.svg = d3.select(this.$.chart);
 
 	      /* adding stripe pattern and mask */
-
 	      var defs = self.svg.append("defs");
 	      defs.append("pattern")
 	        .attr("id","pattern-stripe")
@@ -89,41 +85,33 @@
 	        .attr("y", 0)
 	        .attr("fill", "url(#pattern-stripe)");
           
-
 		      self.container =  self.svg.append('g');
-
-
 
 		      self.spectrum = self.container.selectAll('.spectrum').data([self._wholeRange]).enter().append('rect')
 		      	
 		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
 
-		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('text');
+		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('foreignObject');
 
 		      self.spectrum.attr('class','spectrum')
 		      	.style('fill', function(d,i) {return '#FFF';});
 
-		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('text')
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('foreignObject');
 
 		      self._setElementSizes();	
 
 		      self.bars.attr('height', 0)
 		      		   .attr('width',self.dims.bar.width);
 
-
 		      self.labels.style('opacity', 0);
 
 		      self.values.style('opacity', 0);
 
 		      self.spectrum
-		        .attr('x', self.dims.labels.width + self.dims.margin.label )
+		        .attr('x', self.dims.width/2 - self.dims.bar.width/2 )
 		        .attr('y', function(d) {return self.y(self._wholeRange.min)})
 		        .attr('width',self.dims.bar.width)
 		        .attr('height', function(d) {return self.y(self._wholeRange.max)});
-
-
-	      
-
 
 		  },
 
@@ -131,7 +119,7 @@
 
 		  	  var self = this;
 
-	          self.dims = self.setupStackedDims(self);
+	        self.dims = self.setupStackedDims(self);
 
 		      var dataMargin = 0.1;  // 10% extra space     
 
@@ -171,24 +159,24 @@
 		        .style('fill', function(d){ return d.color;})
 		        .style('stroke', function(d){ return d.color;});
 
-		      self.labels
-		      	.attr('class','label')
-		        .attr("class", function(d,i){return "label data"+i;})
-		        .style('text-anchor','end')
-		        .text(function(d) {return d.label;})
-	            .style('fill', function(d){ return d.color;})
-	            .style('stroke', function(d){ return d.color;});
 		      
-		      self.values
-		      	.attr('font-weight', 300)
-		      	.attr('class', function(d,i){return "defaultvalue value data"+i;})
-		        .style('opacity', 0)
-		        .text(function(d) {
+		      self.labels
+		      	.attr('class', function(d,i){return 'label wrapped-labels data' + i;})
+		      	.attr('width', self.dims.labels.containerWidth) // TODO
+		      	.attr('height', self.dims.labels.containerHeight) // TODO
+		      	.html(function(d) {return d.label;})
+		      	.style('color', function(d){ return d.color;});
+
+		     	self.values
+		      	// .attr('font-weight', 300)
+		      	.attr('width', self.dims.values.containerWidth) // TODO
+		      	.attr('height',self.dims.values.containerHeight) // TODO
+		      	.attr('class', function(d,i){return "defaultvalue wrapped-values value data"+i;})
+		        //.style('opacity', 0)
+		        .html(function(d) {
 	            return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
 	          	})
-	            .style('fill', function(d){ return d.color;})
-	            .style('stroke', function(d){ return d.color;});
-
+	            .style('color', function(d){ return d.color;});
 
 		  },
 
@@ -229,13 +217,13 @@
 	        var delay = self.animationDelay;
 
 	        self.spectrum.transition().duration(delay)
-		        .attr('x', self.dims.labels.width + self.dims.margin.label )
+		        .attr('x', self.dims.width/2 - self.dims.bar.width/2 )
 		        .attr('y', function(d) {return self.y(self._wholeRange.min)})
 		        .attr('width',self.dims.bar.width)
 		        .attr('height', function(d) {return self.y(self._wholeRange.max)});
 
 	        self.bars.transition().duration(delay)
-	        	.attr('x', self.dims.labels.width + self.dims.margin.label )
+	        	.attr('x', self.dims.width/2 - self.dims.bar.width/2)
 		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value)})
 		        .attr('width',self.dims.bar.width)
 	        	.attr('height', function(d) {
@@ -245,13 +233,13 @@
 	        	});
 
 	        self.labels.transition(delay).duration(delay)//.delay(function(d,i) { return i*delay;})
-		        .attr('x', self.dims.labels.width)
-		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
+		        .attr('x', 0)
+		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value );}) 
 		        .style('opacity', 1);
 	        
 	        self.values.transition(delay).duration(delay)//.delay(function(d,i) { return i*delay;})
-		        .attr('x', self.dims.labels.width + self.dims.margin.label*2 + self.dims.bar.width)
-		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value - ((d.range_max_value - d.range_min_value)/2));}) 
+		        .attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
+		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value );}) 
 		        .style('opacity', 1);
 
 		  },
@@ -270,13 +258,9 @@
 		  	  if(self.dataLength!=self.chartData.length)
 		  	  {
 
-
-
 			      self.bars.enter().append('rect').attr('class','bar').attr('height', 0);
-
-			      self.labels.enter().append('text').attr('class','label');
-			      self.values.enter().append('text').attr('class','value').attr('y', self.dims.height);
-
+			      self.labels.enter().append('foreignObject').attr('class', 'label wrapped-labels');
+			      self.values.enter().append('foreignObject').attr('class', 'value wrapped-values');
 
 			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', self.dims.height).style('opacity', 0).remove();
 			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
@@ -288,8 +272,10 @@
 			    }
 
 		      // this is independent of size but dependent on data
-		      self.labels.text(function(d) {return d.label;});
-		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
+		      self.labels.html(function(d) {return d.label;});
+		      self.values.html(function(d) {
+		      		return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
+		      	});
 
 
 		      self.animate();

@@ -232,47 +232,63 @@ Thelma.chartUtils = {
     setupStackedDims: function(polymerObj){
 
       var dims = {},
-          chartData = polymerObj.chartData;
-      dims.margin = {
-              top : 0,
-              right : 0,
-              bottom : 0,
-              left : 0,
-              label: 10,
-          }, 
-
-      dims.width = Math.max(100,(polymerObj.chartWidth - dims.margin.left - dims.margin.right)), 
-      dims.height = Math.max(150,(polymerObj.chartHeight - dims.margin.top - dims.margin.bottom)),
+          chartData = polymerObj.chartData,
+          minWidth = 100,
+          minHeight = 150,
+          barMinWidth = 20,
+          remainingWidth;
       
-      dims.labels = {};
-      dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
-      dims.labels.width = dims.labels.maxLength * 8; // This calc usually works?  Might need more sophistication
-      
-      dims.values = {};
-      dims.values.maxLength = d3.max(chartData, function(d){ 
-        if (d.range_min_display_value && d.range_max_display_value){ // for spectrum
-          return  d.range_min_display_value.length + d.range_max_display_value.length + 3;
-        } else if (d.range_min_value && d.range_max_value){ // for spectrum
-          return  d.range_min_value.toString().length + d.range_max_value.toString().length + 3; // 3 is for the characters separating min and max " - "
-        } else { // for stacked
-          return d.display_value ? d.display_value.length : d.value.toString().length;
-        }
-      }); 
-      dims.values.width = dims.values.maxLength * 8; // This calc usually works? Might need more sophistication
-      
-      
+      dims.margin = { top : 0, right : 0, bottom : 0, left : 0, label: 10, };
+      dims.width = Math.max(minWidth,(polymerObj.chartWidth - dims.margin.left - dims.margin.right));
+      dims.height = Math.max(minHeight,(polymerObj.chartHeight - dims.margin.top - dims.margin.bottom));
       dims.bar = {};
-      dims.bar.minWidth = 10;
-      dims.bar.maxWidth = 125;
-      dims.bar.width = Math.min(dims.bar.maxWidth, (dims.width - dims.values.width - dims.labels.width -dims.margin.label*2)); 
-      dims.bar.width = dims.bar.width < dims.bar.minWidth ? dims.bar.minWidth : dims.bar.width; 
-      
-      dims.minWidth = dims.bar.minWidth + dims.values.width + dims.labels.width + dims.margin.label*2;
-      dims.width = dims.width < dims.minWidth ? dims.minWidth : dims.width;  // cannot resize to smaller than this;
+      dims.labels = {};
+      dims.values = {};
 
-      // dims.labels.charLimit - calculate the character limit for labels, given the min width of the bar and the width of the component
-      // dims.minHeight - need to set this also
+      optimizeSizes();
 
+      // This function attempts to maximize the width of the bar,
+      // while reducing the number of lines labels and values wrap
+      function optimizeSizes(barWidth){
+        // Set bar width in proportion to total width
+        remainingWidth = dims.width;
+        dims.bar.width = barWidth || dims.width / 3.25;
+        remainingWidth -= dims.margin.label*2 + dims.bar.width;
+        console.log(remainingWidth);
+
+        // Estimate length of labels and calculate width/height of container given word wrap
+        dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); // in number of characters
+        dims.labels.width = dims.labels.maxLength * 8.25; // in estimated pixels 
+        dims.labels.containerWidth = Math.min(dims.labels.width, remainingWidth/2);  
+        dims.labels.lines = Math.ceil(dims.labels.width / dims.labels.containerWidth); // estimate # of lines given container width
+        dims.labels.containerHeight = dims.labels.lines * 16; // estimate height given number of lines
+        remainingWidth -= dims.labels.containerWidth;
+
+
+        // Estimate length of values and calculate width/height of container given word wrap
+        dims.values.maxLength = d3.max(chartData, function(d){ 
+          if (d.range_min_display_value && d.range_max_display_value){ // for spectrum
+            return  d.range_min_display_value.length + d.range_max_display_value.length + 3;
+          } else if (d.range_min_value && d.range_max_value){ // for spectrum
+            return  d.range_min_value.toString().length + d.range_max_value.toString().length + 3; // 3 is for the characters separating min and max " - "
+          } else { // for stacked
+            return d.display_value ? d.display_value.length : d.value.toString().length;
+          }
+        });
+        dims.values.width = dims.values.maxLength * 8.25; // in estimated pixels 
+        dims.values.containerWidth = Math.min(dims.values.width, remainingWidth);  
+        dims.values.lines = Math.ceil(dims.values.width / dims.values.containerWidth);  // estimate # of lines given container width
+        dims.values.containerHeight = dims.values.lines * 16; // estimate height given number of lines
+        
+      }
+
+      // If both values and labels are wrapping to more than 1 line, attempt to shrink the bar until one side does not have to wrap
+      while ((dims.values.lines > 1 && dims.labels.lines > 1 || dims.labels.lines > 3) && dims.bar.width > barMinWidth) {
+        var newBarWidth = dims.bar.width * 0.95;
+        optimizeSizes(newBarWidth);
+      }
+
+      // TODO: add logic to allocation remainingWidth to labels if they are wrapping or to bar
 
       return dims;
 
