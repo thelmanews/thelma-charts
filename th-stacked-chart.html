@@ -129,8 +129,6 @@
 		      	.html(function(d) {return d.label;})
 		        .style('color', function(d){ return d.color; });
 		        
-		      
-		      
 		      self.values
 		        .attr("class", function(d,i){return "value wrapped-values data"+i;})
 		        .attr('width', self.dims.values.containerWidth) 
@@ -138,9 +136,7 @@
 		        .attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
 		        .html(function(d){return d.display_value ? d.display_value : d.value ;})
 		        .style('color', function(d){ return d.color; });
-		       
-
-
+		   
 		  },
 
 		  reset: function() {

@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-n-peak-chart" extends="th-d3-chart">
+<polymer-element name="th-n-peak-chart" extends="th-d3-chart" attributes="wrapLabels">
 
   <template>
       <core-style ref="theme"></core-style>
@@ -26,6 +26,12 @@
           position: absolute;
           top: 0;
           left: 0;
+        }
+
+        .wrapped-labels {
+          text-align: center;
+          padding: 0px 4px;
+          box-sizing: border-box;
         }
 
       </style>
@@ -110,20 +116,34 @@
               .style('fill', function(d,i){ return polymerObj.chartData[i].color })
               .style('stroke', function(d,i){ return polymerObj.chartData[i].color });
 
-          polymerObj.labels = polymerObj.container.selectAll('.label')
-            .data(polymerObj.chartData)
-            .enter().append('text')
-              .attr('class', function(d,i){return "label data"+i;})
-              .attr('fill', function(d,i){ return polymerObj.colors.accents[i]; })
-              .attr('stroke', function(d,i){ return polymerObj.colors.accents[i]; })
-              .style('fill', function(d){ return d.color })
-              .style('stroke', function(d){ return d.color })
-              .attr('transform', function(d,i){
-                var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
-                var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
-                var rotation = labelDims.angle;
-                return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
-              });              
+          if (polymerObj.wrapLabels){
+            polymerObj.labels = polymerObj.container.selectAll('.label')
+              .data(polymerObj.chartData)
+              .enter().append('foreignObject')
+                .attr('class', function(d,i){return "label wrapped-labels data"+i;})
+                .attr('color', function(d,i){ return polymerObj.colors.accents[i]; })
+                .attr('transform', function(d,i){
+                  var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
+                  var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
+                  return "translate("+xPos+","+yPos+")";
+                });     
+          } else {
+            polymerObj.labels = polymerObj.container.selectAll('.label')
+              .data(polymerObj.chartData)
+              .enter().append('text')
+                .attr('class', function(d,i){return "label data"+i;})
+                .attr('fill', function(d,i){ return polymerObj.colors.accents[i]; })
+                .attr('stroke', function(d,i){ return polymerObj.colors.accents[i]; })
+                .style('fill', function(d){ return d.color })
+                .style('stroke', function(d){ return d.color })
+                .attr('transform', function(d,i){
+                  var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
+                  var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
+                  var rotation = labelDims.angle;
+                  return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
+                });      
+          }
+                 
               
           polymerObj.values = polymerObj.container.selectAll('.value')
             .data(polymerObj.chartData)
@@ -151,8 +171,7 @@
         },
 
         staticObj._setupElementSizes = function(polymerObj){
-          var barDims = polymerObj.barDims,
-              labelDims = polymerObj.dims.labels,//polymerObj.labelDims,
+          var labelDims = polymerObj.dims.labels,//polymerObj.labelDims,
               barDims = polymerObj.dims.bars,//polymerObj.barDims;
               valueDims = polymerObj.dims.values,//polymerObj.barDims;
               peakData = polymerObj.peakData
@@ -167,13 +186,27 @@
               .y(function(d) { return -d.y; });    
 
           polymerObj.peaks
+            .style('fill', function(d,i){ return polymerObj.chartData[i].color })
+            .style('stroke', function(d,i){ return polymerObj.chartData[i].color })
             .data(peakData);
 
-          polymerObj.labels
-              .attr('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
-              .text(function(d) {return d.label;});
-
+          if (polymerObj.wrapLabels){
+            polymerObj.labels
+              .style('color', function(d){ return d.color })
+              .attr('width', barDims.width) 
+              .attr('height', polymerObj.dims.labels.height) 
+              .html(function(d) {return d.label;});
+          } else {
+            polymerObj.labels
+                .style('fill', function(d){ return d.color })
+                .style('stroke', function(d){ return d.color })
+                .attr('text-anchor', function(){ return labelDims.angle > 0 ? "left" : "middle"})
+                .text(function(d) {return d.label;});
+          }
+           
           polymerObj.values
+              .style('fill', function(d,i){ return polymerObj.chartData[i].color })
+              .style('stroke', function(d,i){ return polymerObj.chartData[i].color })
               .attr('text-anchor','middle')
               .attr('font-size', valueDims.size)
               .text(function(d) {return d.display_value ? d.display_value : d.value ;});
@@ -185,11 +218,12 @@
 
       Polymer('th-n-peak-chart', {
         chartData: [
-          {label: 'Platinum', value: 50, display_value: '$50', color:''},
-          {label: 'Gold', value: 45, display_value: '$45', color:''},
-          {label: 'Silver', value: 30, display_value: '$30', color:''},
-          {label: 'Bronze', value: 25, display_value: '$25', color:''}
+          {label: 'Platinum', value: 50, display_value: '', color:''},
+          {label: 'Gold', value: 45, display_value: '', color:''},
+          {label: 'Silver', value: 30, display_value: '', color:''},
+          {label: 'Bronze', value: 25, display_value: '', color:''}
         ],
+        wrapLabels: false,
         init: function() {
           var self = this;
 
@@ -198,7 +232,7 @@
           self.width = self.dims.width;   //TODO needed?
           self.height = self.dims.height;
 
-          self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25);
+          self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25, 1, self.wrapLabels);
 
           self.colors = self.getColors();
           // format chart elements based on chartData
@@ -253,7 +287,19 @@
             .attr('x', function(d,i) { return ((barDims.width/2) + ((barDims.width - barDims.widthOverlap)*i)); })
             .style('opacity', 1);
 
-          self.labels.transition(self.animationDelay)
+          
+          if (self.wrapLabels){
+            self.labels.transition(self.animationDelay)
+              .duration(self.animationDelay)
+              .attr('transform', function(d,i){
+                  var xPos = (barDims.width - barDims.widthOverlap)*i;
+                  var yPos = height + self.dims.margin.label;
+                 
+                  return "translate("+xPos+","+yPos+")";
+                })
+              .style('opacity', 1);
+          } else {
+            self.labels.transition(self.animationDelay)
             .duration(self.animationDelay)
             .attr('transform', function(d,i){
                 var xPos =  (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
@@ -267,6 +313,8 @@
                 return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
               })
             .style('opacity', 1);
+          }
+          
 
         },
         resize: function(){
@@ -282,7 +330,7 @@
           // self.labelDims = self.setupLabelDims(self);
           // self.valueDims = self.setupValueDims(self);
 
-          self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25);
+          self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25, 1, self.wrapLabels);
 
           // create scales
           self.scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
@@ -316,15 +364,26 @@
               .style('fill', function(d,i){ return polymerObj.chartData[i].color })
               .style('stroke', function(d,i){ return polymerObj.chartData[i].color });
 
-            self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;})
-              .style('fill', function(d){ return d.color })
-              .style('stroke', function(d){ return d.color })
-              .attr('transform', function(d,i){
-                var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
-                var yPos = height + self.dims.margin.label;
-                var rotation = labelDims.angle;
-                return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
-              });
+            if (self.wrapLabels){
+              self.labels.enter().append('foreignObject').attr('class',function(d,i){return "label wrapped-labels data"+i;})
+                .style('color', function(d){ return d.color })
+                .attr('transform', function(d,i){
+                  var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
+                  var yPos = height + self.dims.margin.label;
+                  return "translate("+xPos+","+yPos+")";
+                });
+            } else {
+              self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;})
+                .style('fill', function(d){ return d.color })
+                .style('stroke', function(d){ return d.color })
+                .attr('transform', function(d,i){
+                  var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
+                  var yPos = height + self.dims.margin.label;
+                  var rotation = labelDims.angle;
+                  return "translate("+xPos+","+yPos+") rotate("+ rotation +")";
+                });
+            }
+
             self.values.enter().append('text')
               .attr('class', function(d,i){return "value data"+i;})
               .attr('y', height)
@@ -337,7 +396,12 @@
             self.resize();
           }
             // this is independent of size but dependent on data
-            self.labels.text(function(d) {return d.label;});
+            if (self.wrapLabels){
+              self.labels.html(function(d) {return d.label;});
+            } else {
+              self.labels.text(function(d) {return d.label;});
+            }
+
             self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
             self.animate();
           

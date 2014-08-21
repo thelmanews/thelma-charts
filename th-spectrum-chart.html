@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="th-d3-chart.html">
 
-<polymer-element name="th-spectrum-chart" extends="th-d3-chart" attributes="wrapLabels">
+<polymer-element name="th-spectrum-chart" extends="th-d3-chart">
 
 	<template>
 	    <core-style ref="theme"></core-style>
@@ -47,7 +47,6 @@
 
 	<script>
 		Polymer('th-spectrum-chart', {
-		  wrapLabels: true,
 		  chartData: [
 		  		{label: 'Medicaid', range_min_value: 10, range_min_display_value: '$10', range_max_value: 50, range_max_display_value: '$50', color:''},
 		        {label: 'Federal',  pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60', color: ''},
