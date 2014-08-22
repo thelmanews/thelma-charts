@@ -144,6 +144,7 @@
 
  		     	if(polymerObj.wrapLabels){
 			      polymerObj.labels
+			      	.style('color', function(d){ return d.color })
 	      			.attr('width', polymerObj.dims.bars.width)
 	      			.attr('height', polymerObj.dims.labels.height);  
  		     	} else {
