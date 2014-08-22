@@ -89,9 +89,24 @@
 
 		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
 
-		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('foreignObject').attr('class','label');
+		      self.labels = this.container.selectAll('.label').data(this.chartData).enter()
+		      				.append('g')
+		      				//.attr('class','label')
+		      				.append('foreignObject')
+		      				.append('xhtml:div');
+		      				//.attr('class','label');
 
-		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('foreignObject').attr('class','value');
+		      self.labels.select(function() {return this.parentNode.parentNode; }).attr('class','labelg');
+
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter()
+		      				.append('g')
+		      				//.attr('class','value')
+		      				.append('foreignObject')
+		      				.append('xhtml:div');
+		      				//.attr('class','value');
+
+		      //self.values.append('xhtml:div').attr('class','label');
+
 
 		      self._setElementSizes();
 
@@ -124,20 +139,25 @@
 		      
 		      self.labels
 		        .attr("class", function(d,i){return "label wrapped-labels data"+i;})
-		        .attr('width', self.dims.labels.containerWidth)
-		      	.attr('height', self.dims.labels.containerHeight)
 		      	.html(function(d) {return d.label;})
-		        .style('color', function(d){ return d.color; })
-		        .style('opacity', 0);
+		        .style('color', function(d){ return d.color; });
+
+			 // for foreignObject
+			 self.labels.select(function() {return this.parentNode; })
+		        .attr('width', self.dims.labels.containerWidth)
+		      	.attr('height', self.dims.labels.containerHeight);
+
 		        
 		      self.values
 		        .attr("class", function(d,i){return "value wrapped-values data"+i;})
+		        .html(function(d) {return d.display_value ? d.display_value : d.value ;})
+		        .style('color', function(d){ return d.color; });
+
+		      self.values.select(function() {return this.parentNode; })  
 		        .attr('width', self.dims.values.containerWidth) 
-		      	.attr('height',self.dims.values.containerHeight)
-		        .attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
-		        .html(function(d){return d.display_value ? d.display_value : d.value ;})
-		        .style('color', function(d){ return d.color; })
-		        .style('opacity', 0);
+		      	.attr('height',self.dims.values.containerHeight);
+		        //.attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
+		        //.html(function(d){return d.display_value ? d.display_value : d.value ;})
 		   
 		  },
 
@@ -179,7 +199,9 @@
 
 		  updateData: function() {
 
-			    console.log('UUpdate');
+
+
+			  console.log('UUpdate');
 
 		  	  var self = this;
 
@@ -210,8 +232,21 @@
 			      self.bars.enter().append('rect').attr('class','bar')
 			      	.attr('height', 0);
 
-			      self.labels.enter().append('foreignObject').attr('class','label');
-			      self.values.enter().append('foreignObject').attr('class','value').attr('y', height);
+			      self.labels.enter()
+		      				.append('g')
+		      				.append('foreignObject')
+		      				.append('xhtml:div');
+		      				//.attr('class','label');
+
+		      				//.append('foreignObject').attr('class','label').style('opacity', 0);
+			      self.values.enter()
+			      		    .append('g')
+		      				.append('foreignObject')
+		      				.append('xhtml:div');
+		      				//.attr('class','value');
+
+
+			      //.append('foreignObject').attr('class','value').attr('y', height).style('opacity', 0);;
 
 
 			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();
@@ -245,16 +280,28 @@
 			        .attr('height', function(d) {return y(d.value)});
 			        console.log(self.labels);
 
-		        self.labels.transition().delay(self.animationDelay)
+		        self.labels.transition()//.duration(self.animationDelay)
 		        .style('opacity', 1)
-		        .attr('x', 0)
-		        .attr('y', function(d) {return y(d.total); }) //12: font size;
+
+		        self.labels.select(function() {return this.parentNode.parentNode; })
+		        .transition().duration(self.animationDelay)
+		        .attr('transform',function(d) {return 'translate(0,'+y(d.total)+')'; } )
+		        //.attr('x', 0)
+		        //.attr('y', function(d) {return y(d.total); }) //12: font size;
 		        
-		        
-		        self.values.transition().delay(self.animationDelay)
+		        self.values.transition()//.duration(self.animationDelay)
 		        .style('opacity', 1)
-		        .attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
-		        .attr('y', function(d) {return y(d.total); }); //12: font size
+		        
+		        self.values.select(function() {return this.parentNode.parentNode; })
+		        .transition().duration(self.animationDelay)
+		        .attr('transform',function(d) {
+		        	var xx = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width;
+		        	//var xx = 0;
+		        	return 'translate('+xx+','+y(d.total)+')'; 
+		        });
+		        //.style('opacity', 1)
+		        //.attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
+		        //.attr('y', function(d) {return y(d.total); }); //12: font size
 
 		  },
 		  chartSpecificDataValidate: function() {
@@ -304,7 +351,7 @@
 				      "fields":{
 				        "label":{"friendly":"Label", "type":"string", "default":"Player"},
 				        "value":{"friendly":"Value", "type":"int", "default":15},
-				        "display_value":{"friendly":"Display Value", "type":"string", "default":"$15"},
+				        "display_value":{"friendly":"Display Value", "type":"string", "default":""},
 				        "color":{"friendly":"Color", "type":"colorPicker", "default":"", "optional":true}
 				      },
 				      "default":[
