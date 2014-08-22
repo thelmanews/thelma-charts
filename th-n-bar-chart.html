@@ -148,7 +148,7 @@
 	      			.attr('height', polymerObj.dims.labels.height);  
  		     	} else {
  		     		polymerObj.labels
-		        .attr("class", function(d,i){return "label data"+i;})
+		        .attr("class", function(d,i){return "label no-stroke data"+i;})
 		        .attr('fill', function(d,i){ return polymerObj.colors.accents[i]; })
 		        .attr('stroke', function(d,i){ return polymerObj.colors.accents[i]; })
 		        .style("fill", function(d){ return d.color })
@@ -208,7 +208,7 @@
 		   * 'wrapLabels' if true will wrap labels on multiple lines. If false, it will angle them.
 		   * @type {Boolean}
 		   */
-		  wrapLabels: true, 
+		  wrapLabels: false, 
 		  init: function() {
 		    
 		  	  var self = this;

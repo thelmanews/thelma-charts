@@ -14,10 +14,6 @@
         #chart {
 
         }
-        #chart text.label {
-          /*font-size: 13px;*/
-          /*font-weight: 300;*/
-        }
 
         #data_errors {  
           display: none;
@@ -131,7 +127,7 @@
             polymerObj.labels = polymerObj.container.selectAll('.label')
               .data(polymerObj.chartData)
               .enter().append('text')
-                .attr('class', function(d,i){return "label data"+i;})
+                .attr('class', function(d,i){return "label no-stroke data"+i;})
                 .attr('fill', function(d,i){ return polymerObj.colors.accents[i]; })
                 .attr('stroke', function(d,i){ return polymerObj.colors.accents[i]; })
                 .style('fill', function(d){ return d.color })
@@ -373,7 +369,7 @@
                   return "translate("+xPos+","+yPos+")";
                 });
             } else {
-              self.labels.enter().append('text').attr('class',function(d,i){return "label data"+i;})
+              self.labels.enter().append('text').attr('class',function(d,i){return "label no-stroke data"+i;})
                 .style('fill', function(d){ return d.color })
                 .style('stroke', function(d){ return d.color })
                 .attr('transform', function(d,i){

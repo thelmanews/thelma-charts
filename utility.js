@@ -89,11 +89,9 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
              dims.margin.bottom = dims.labels.height + dims.margin.label;
           } else {
             dims.margin.bottom = dims.labels.width/1.5 + dims.margin.label;  
+            // increase right margin by width of last label
+            dims.margin.right = dims.margin.right + chartData[chartData.length-1].label.length*5; 
           }
-
-          // increase right margin by width of last label
-          dims.margin.right = dims.margin.right + chartData[chartData.length-1].label.length*5; 
-	        
 	    } else {
 	        dims.labels.angle = 0;
 	    }
