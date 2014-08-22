@@ -231,28 +231,33 @@ Thelma.chartUtils = {
 
       var dims = {},
           chartData = polymerObj.chartData,
-          minWidth = 100,
-          minHeight = 150,
-          barMinWidth = 20,
+          MIN_WIDTH = 100,
+          MIN_HEIGHT = 150,
+          BAR_MIN_WIDTH = 20,
           remainingWidth;
       
       dims.margin = { top : 0, right : 0, bottom : 0, left : 0, label: 10, };
-      dims.width = Math.max(minWidth,(polymerObj.chartWidth - dims.margin.left - dims.margin.right));
-      dims.height = Math.max(minHeight,(polymerObj.chartHeight - dims.margin.top - dims.margin.bottom));
+      dims.width = Math.max(MIN_WIDTH,(polymerObj.chartWidth - dims.margin.left - dims.margin.right));
+      dims.height = Math.max(MIN_HEIGHT,(polymerObj.chartHeight - dims.margin.top - dims.margin.bottom));
       dims.bar = {};
       dims.labels = {};
       dims.values = {};
 
-      optimizeSizes();
+      do  {
+        //for the first time dims.bar.width is undefined but optimizeSizes takes care of that.
+        var newBarWidth = dims.bar.width * 0.8;
+        optimizeSizes(newBarWidth);
+      } while (((dims.values.lines > 1 && dims.labels.lines > 1) || dims.labels.lines > 3) && dims.bar.width > BAR_MIN_WIDTH)
+      // If both values and labels are wrapping to more than 1 line, attempt to shrink the bar until one side does not have to wrap
 
       // This function attempts to maximize the width of the bar,
       // while reducing the number of lines labels and values wrap
       function optimizeSizes(barWidth){
+
         // Set bar width in proportion to total width
         remainingWidth = dims.width;
         dims.bar.width = barWidth || dims.width / 3.25;
         remainingWidth -= dims.margin.label*2 + dims.bar.width;
-        console.log(remainingWidth);
 
         // Estimate length of labels and calculate width/height of container given word wrap
         dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); // in number of characters
@@ -278,12 +283,6 @@ Thelma.chartUtils = {
         dims.values.lines = Math.ceil(dims.values.width / dims.values.containerWidth);  // estimate # of lines given container width
         dims.values.containerHeight = dims.values.lines * 16; // estimate height given number of lines
         
-      }
-
-      // If both values and labels are wrapping to more than 1 line, attempt to shrink the bar until one side does not have to wrap
-      while ((dims.values.lines > 1 && dims.labels.lines > 1 || dims.labels.lines > 3) && dims.bar.width > barMinWidth) {
-        var newBarWidth = dims.bar.width * 0.95;
-        optimizeSizes(newBarWidth);
       }
 
       // TODO: add logic to allocation remainingWidth to labels if they are wrapping or to bar
