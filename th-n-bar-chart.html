@@ -150,7 +150,6 @@
 			      polymerObj.labels.select(function() {return this.parentNode; })
 	      			.attr('width', polymerObj.dims.bars.width)
 	      			.attr('height', polymerObj.dims.labels.height);  
-
 	      		polymerObj.labels
 	      			.attr("class", function(d,i){return "label wrapped-labels data"+i;})
 	      			.style('color', function(d){ return d.color });
@@ -362,7 +361,7 @@
 		      self.y = y;
 		      self.x = x;
 
-		      self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1, 1.3);
+		      self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1, 1.3, self.wrapLabels);
 
 		      staticObj._setElementSizes(self);
 

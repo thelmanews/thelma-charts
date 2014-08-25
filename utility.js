@@ -44,7 +44,6 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
 	  this.setupBarLabelDims = function(dims, chartData, overlap, gap, wrap) {
         
         // bars margin and dims
-
         dims.bars = {};
         dims.bars.count = chartData.length;
         dims.bars.gap = gap || 1;
@@ -71,10 +70,7 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
           dims.margin.top = dims.values.size+dims.values.margin;
         }
 
-
-
         // label margins and dims
-
         dims.labels = {};
         dims.labels.maxLength = d3.max(chartData, function(d){ return  d.label.length;}); 
 	      dims.labels.width = dims.labels.maxLength * 5.25; // This calc works with the font-size 13px
@@ -83,15 +79,17 @@ Thelma.BarFamilyPrivateStaticMethods = function() {
 
 	      // If labels are long, angle them and adjust margins 
 	      // 1.1 worked with well with different labels but it might be a little bit too aggressive. (larger->more conservative)
-	    if (dims.labels.width > dims.bars.width/dims.bars.overlap/1.3) { 
+	     if (wrap){
+          dims.margin.bottom = dims.labels.height + dims.margin.label;
+       } else if (dims.labels.width > dims.bars.width/dims.bars.overlap/1.3) { 
 	        dims.labels.angle = 25;
-          if (wrap){
-             dims.margin.bottom = dims.labels.height + dims.margin.label;
-          } else {
-            dims.margin.bottom = dims.labels.width/1.5 + dims.margin.label;  
-            // increase right margin by width of last label
-            dims.margin.right = dims.margin.right + chartData[chartData.length-1].label.length*5; 
-          }
+          
+          // increase bottom margin for angled labels
+          dims.margin.bottom = dims.labels.width/1.5 + dims.margin.label;  
+          
+          // increase right margin by width of last label
+          dims.margin.right = dims.margin.right + chartData[chartData.length-1].label.length*5; 
+          
 	    } else {
 	        dims.labels.angle = 0;
 	    }
