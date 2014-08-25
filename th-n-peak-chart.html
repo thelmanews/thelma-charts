@@ -115,14 +115,20 @@
           if (polymerObj.wrapLabels){
             polymerObj.labels = polymerObj.container.selectAll('.label')
               .data(polymerObj.chartData)
-              .enter().append('foreignObject')
-                .attr('class', function(d,i){return "label wrapped-labels data"+i;})
-                .attr('color', function(d,i){ return polymerObj.colors.accents[i]; })
-                .attr('transform', function(d,i){
-                  var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
-                  var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
-                  return "translate("+xPos+","+yPos+")";
-                });     
+              .enter()
+                .append('g').attr('class', 'labelg')
+                  .attr('transform', function(d,i){
+                    var xPos = (barDims.width - barDims.widthOverlap)*i;
+                    var yPos = polymerObj.height + polymerObj.dims.margin.label;
+                    return "translate("+xPos+","+yPos+")";
+                  })
+                .append("foreignObject")
+                .append('xhtml:div')
+                  .attr('class', function(d,i){return "label wrapped-labels data"+i;})
+                  .attr('color', function(d,i){ return polymerObj.colors.accents[i]; });
+
+              polymerObj.labelGroups = polymerObj.labels.select(function(){return this.parentNode.parentNode;}).attr('class', 'labelg');
+            
           } else {
             polymerObj.labels = polymerObj.container.selectAll('.label')
               .data(polymerObj.chartData)
@@ -187,11 +193,15 @@
             .data(peakData);
 
           if (polymerObj.wrapLabels){
-            polymerObj.labels
-              .style('color', function(d){ return d.color })
+            polymerObj.labels.select(function() {return this.parentNode; })
               .attr('width', barDims.width) 
               .attr('height', polymerObj.dims.labels.height) 
+            
+            polymerObj.labels
+              .attr("class", function(d,i){return "label wrapped-labels data"+i;})
+              .style('color', function(d){ return d.color })
               .html(function(d) {return d.label;});
+
           } else {
             polymerObj.labels
                 .style('fill', function(d){ return d.color })
@@ -231,10 +241,7 @@
           self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25, 1, self.wrapLabels);
 
           self.colors = self.getColors();
-          // format chart elements based on chartData
-          //self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
-          //self.labelDims = self.setupLabelDims(self);
-          //self.valueDims = self.setupValueDims(self);
+
        
           // create scales
           self.scales = self.simpleScaleBuilder(self.width, self.height, self.chartData);
@@ -271,7 +278,6 @@
               barDims = self.dims.bars,//self.barDims;
               valueDims = self.dims.values;//self.barDims;
 
-
           self.peaks.transition()
             .attr('opacity', 0.8)
             .duration(self.animationDelay) 
@@ -282,11 +288,10 @@
             .attr('y', function(d) {return height - y(d.value) - self.dims.values.margin;})
             .attr('x', function(d,i) { return ((barDims.width/2) + ((barDims.width - barDims.widthOverlap)*i)); })
             .style('opacity', 1);
-
           
           if (self.wrapLabels){
-            self.labels.transition(self.animationDelay)
-              .duration(self.animationDelay)
+            self.labels.select(function() {return this.parentNode.parentNode; })
+              .transition().duration(self.animationDelay)
               .attr('transform', function(d,i){
                   var xPos = (barDims.width - barDims.widthOverlap)*i;
                   var yPos = height + self.dims.margin.label;
@@ -321,11 +326,6 @@
           self.width = self.dims.width;
           self.height = self.dims.height;
 
-          // format chart elements based on chartData
-          // self.barDims = self.setupBarDims(self, 1.25); // pass in overlap to override default
-          // self.labelDims = self.setupLabelDims(self);
-          // self.valueDims = self.setupValueDims(self);
-
           self.dims = staticObj.setupBarLabelDims(self.dims, self.chartData, 1.25, 1, self.wrapLabels);
 
           // create scales
@@ -344,6 +344,7 @@
           self.peakData = staticObj._setupData(self);
 
           self.peaks = self.container.selectAll('.peak').data(self.peakData);
+          self.labelGroups = self.container.selectAll('.labelg').data(self.chartData);
           self.labels = self.container.selectAll('.label').data(self.chartData);
           self.values = self.container.selectAll('.value').data(self.chartData);
 
@@ -351,23 +352,28 @@
             
             self.dataLength = self.peakData.length;
             
-
+            // ENTER NEW ELEMENTS
             self.peaks.enter().append('path').attr('class',function(d,i){return "peak data"+i;})
               .attr('height', 0)
               .attr('y', height)
               .attr('d', self.peakLineStart)
               .attr('opacity', 0)
-              .style('fill', function(d,i){ return polymerObj.chartData[i].color })
-              .style('stroke', function(d,i){ return polymerObj.chartData[i].color });
+              .style('fill', function(d,i){ return self.chartData[i].color })
+              .style('stroke', function(d,i){ return self.chartData[i].color });
 
             if (self.wrapLabels){
-              self.labels.enter().append('foreignObject').attr('class',function(d,i){return "label wrapped-labels data"+i;})
-                .style('color', function(d){ return d.color })
-                .attr('transform', function(d,i){
-                  var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
-                  var yPos = height + self.dims.margin.label;
-                  return "translate("+xPos+","+yPos+")";
-                });
+              self.labelGroups.enter()
+                .append('g')
+                  .attr('class', 'labelg')
+                  .attr('transform', function(d,i){
+                    var xPos = (barDims.width/2) + (barDims.width - barDims.widthOverlap)*i;
+                    var yPos = height + self.dims.margin.label;
+                    return "translate("+xPos+","+yPos+")";
+                  })
+                .append("foreignObject")
+                .append('xhtml:div')
+                  .attr('class', function(d,i){ return "label wrapped-labels data"+i;})
+                  .style('color', function(d){ return d.color });
             } else {
               self.labels.enter().append('text').attr('class',function(d,i){return "label no-stroke data"+i;})
                 .style('fill', function(d){ return d.color })
@@ -386,12 +392,20 @@
               .style('fill', function(d){ return d.color })
               .style('stroke', function(d){ return d.color });
 
+            // EXIT REMOVED ELEMENTS
+            if (self.wrapLabels){
+              self.labelGroups.exit().transition().duration(1000).style('opacity', 0).remove();
+            } else {
+              self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+            }
             self.peaks.exit().transition().duration(1000).style('opacity', 0).remove();
-            self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
             self.values.exit().transition().duration(1000).style('opacity', 0).remove();
-            self.resize();
+            
           }
-            // this is independent of size but dependent on data
+
+          self.resize();
+          
+            // UPDATE ELEMENT CONTENT
             if (self.wrapLabels){
               self.labels.html(function(d) {return d.label;});
             } else {
@@ -399,8 +413,8 @@
             }
 
             self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
-            self.animate();
-          
+            
+
         },
         chartSpecificDataValidate: function() {
             var self = this,

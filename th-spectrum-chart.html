@@ -86,12 +86,30 @@
 		      	
 		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
 
-		      self.labels = this.container.selectAll('.label').data(this.chartData).enter().append('foreignObject');
+		      self.labels = this.container.selectAll('.label').data(this.chartData).enter()
+    				.append('g')
+    					.attr('transform',function(d) {
+						     return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')';
+						   }) 
+    				.append('foreignObject')
+    				.append('xhtml:div');
+
+		      self.labelGroups = self.labels.select(function() {return this.parentNode.parentNode; }).attr('class','labelg');
 
 		      self.spectrum.attr('class','spectrum')
 		      	.style('fill', function(d,i) {return '#FFF';});
 
-		      self.values = this.container.selectAll('.value').data(this.chartData).enter().append('foreignObject');
+		      self.values = this.container.selectAll('.value').data(this.chartData).enter()
+		      	.append('g')
+		      		.attr('transform',function(d) {
+						     var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width,
+						     yPos = self.dims.height - self.y(d.range_max_value );
+						     return 'translate('+xPos+','+yPos+')';
+						   }) 
+    				.append('foreignObject')
+    				.append('xhtml:div');
+
+		     	self.valueGroups = self.values.select(function() {return this.parentNode.parentNode; }).attr('class','valueg');
 
 		      self._setElementSizes();	
 
@@ -126,10 +144,10 @@
 		      self._wholeRange = {min : minmin-marginValue, max:  maxmax+marginValue};
 
 
-	          var scales = self.simpleScaleBuilder(this.dims.width, this.dims.height, self.chartData);
+	        var scales = self.simpleScaleBuilder(this.dims.width, this.dims.height, self.chartData);
 
-	          self.y = scales.y;
-	          self.x = scales.x;
+          self.y = scales.y;
+          self.x = scales.x;
 
 		      self.y.domain([self._wholeRange.min, self._wholeRange.max]); 
         
@@ -143,12 +161,9 @@
 			  	self.svg.attr('width', self.dims.width + self.dims.margin.left + self.dims.margin.right)
 		          .attr('height', self.dims.height + self.dims.margin.top + self.dims.margin.bottom);
 
+	        self.container.attr('transform', 'translate(' + self.dims.margin.left + ',' + self.dims.margin.top + ')');
 
-	           self.container.attr('transform', 'translate(' + self.dims.margin.left + ',' + self.dims.margin.top + ')');
-
-
-			   self.bars
-		        .attr('class','bar')
+			    self.bars
 		        .attr("class", function(d,i){ return "bar data"+i; })
 		        .style('mask', function(d) { return d.pattern ?  'url(#mask-stripe)' : 'none' ;})
 		        .style('fill', function(d){ return d.color;})
@@ -157,10 +172,13 @@
 		      
 		      self.labels
 		      	.attr('class', function(d,i){return 'label wrapped-labels data' + i;})
-		      	.attr('width', self.dims.labels.containerWidth) 
-		      	.attr('height', self.dims.labels.containerHeight) 
 		      	.html(function(d) {return d.label;})
 		      	.style('color', function(d){ return d.color;});
+
+		      // for foreignObject
+		      self.labels.select(function() {return this.parentNode; })
+		        .attr('width', self.dims.labels.containerWidth) 
+		      	.attr('height', self.dims.labels.containerHeight);
 
 		     	self.values
 		      	.attr('width', self.dims.values.containerWidth) 
@@ -171,6 +189,11 @@
 	            return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
 	          	})
 	            .style('color', function(d){ return d.color;});
+
+	        // for foreignObject
+		      self.values.select(function() {return this.parentNode; })
+		        .attr('width', self.dims.values.containerWidth) 
+		      	.attr('height', self.dims.values.containerHeight);
 
 		  },
 
@@ -226,53 +249,76 @@
 	        		return h;
 	        	});
 
-	        self.labels.transition(delay).duration(delay)//.delay(function(d,i) { return i*delay;})
-		        .attr('x', 0)
-		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value );}) 
-		        .style('opacity', 1);
+	        // Transition for opacity causes the labels to jump. Why is opacity affecting position?!
+	        self.labels.style('opacity', 1);
 	        
-	        self.values.transition(delay).duration(delay)//.delay(function(d,i) { return i*delay;})
-		        .attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
-		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value );}) 
-		        .style('opacity', 1);
+	        self.labels.select(function() {return this.parentNode.parentNode; })
+	        	.transition().duration(delay)
+		        .attr('transform',function(d) {
+		        	return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')'; 
+		        });
+		      
+		      // Transition for opacity causes the values to jump. Why is opacity affecting position?!
+		      self.values.style('opacity', 1);
+
+	        self.values.select(function() {return this.parentNode.parentNode; })
+	        	.transition().duration(self.animationDelay)
+		        .attr('transform',function(d) {
+		        	var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width,
+		        			yPos = self.dims.height - self.y(d.range_max_value );
+		        	return 'translate('+xPos+','+yPos+')'; 
+		        });
 
 		  },
 
 		  updateData: function() {
 
-
 		  	  var self = this;
 
 		      self._setAllDims();  	  
 
-			  self.bars = self.container.selectAll('.bar').data(self.chartData);
-			  self.labels = self.container.selectAll('.label').data(self.chartData);
-			  self.values=self.container.selectAll('.value').data(self.chartData);
+				  self.bars = self.container.selectAll('.bar').data(self.chartData);
+				  self.labelGroups = self.container.selectAll('.labelg').data(self.chartData);
+				  self.labels = self.container.selectAll('.label').data(self.chartData);
+				  self.valueGroups = self.container.selectAll('.valueg').data(self.chartData);
+				  self.values=self.container.selectAll('.value').data(self.chartData);
 
-		  	  if(self.dataLength!=self.chartData.length)
-		  	  {
+		  	  if(self.dataLength!=self.chartData.length) {
 
 			      self.bars.enter().append('rect').attr('class','bar').attr('height', 0);
-			      self.labels.enter().append('foreignObject').attr('class', 'label wrapped-labels');
-			      self.values.enter().append('foreignObject').attr('class', 'value wrapped-values');
+
+			      self.labelGroups.enter()
+			      	.append('g').attr('class','labelg')
+			      		.attr('transform',function(d) {
+						     return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')';
+						   }) 
+		      		.append('foreignObject')
+		      		.append('xhtml:div').attr('class', function(d,i){ return "label wrapped-labels data"+i;});
+
+			      
+			      self.valueGroups.enter()
+				      .append('g').attr('class','valueg')		      		
+				      	.attr('transform',function(d) {
+						     var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width,
+						     yPos = self.dims.height - self.y(d.range_max_value );
+						     return 'translate('+xPos+','+yPos+')';
+						   }) 
+			      	.append('foreignObject')
+			      	.append('xhtml:div').attr('class', function(d,i){ return "value wrapped-values data"+i;});
 
 			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', self.dims.height).style('opacity', 0).remove();
-			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
-			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
-			      
-			     //self.resize();
-			     self._setElementSizes();
-
+			      self.labelGroups.exit().transition().duration(1000).style('opacity', 0).remove();
+			      self.valueGroups.exit().transition().duration(1000).style('opacity', 0).remove();
+			    
 			    }
-
+  
 		      // this is independent of size but dependent on data
 		      self.labels.html(function(d) {return d.label;});
 		      self.values.html(function(d) {
 		      		return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
 		      	});
 
-
-		      self.animate();
+		      self.resize();
 
 		  },
 		  chartSpecificDataValidate: function() {
@@ -305,34 +351,34 @@
 
           getMetaData: function() {
           	return {
-			  "name": "th-spectrum-chart",
-			  "description": "Thelma spectrum chart",
-			  "category":"chart",
-			  "version": "0.0.1",
-			  "thumbnail":"spectrum.jpg", 
-			  "tags":["chart", "column", "animated"],
-			  "content":false,
-			  "inputAttr": {
-			    "chartWidth":{"friendly":"Width", "type":"int", "default":275},
-			    "chartHeight":{"friendly":"Height", "type":"int", "default":250},
-			    "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
-			      "fields":{
-			        "label":{"friendly":"Label", "type":"string", "default":"Medicaid"},
-			        "range_min_value":{"friendly":"Min Val", "type":"int", "default":10},
-			        "range_min_display_value":{"friendly":"Min Disp", "type":"string", "default":"$10"},
-			        "range_max_value":{"friendly":"Value", "Max Val":"int", "default":50},
-			        "range_max_display_value":{"friendly":"Max Disp", "type":"string", "default":"$50"},
-			        "color":{"friendly":"Color", "type":"colorPicker", "default":"", "optional":true},
-			        "pattern":{"friendly":"Pattern", "type":"string", "default":"stripe", "optional":true}
-			      },
-			      "default":[
-			        {"label": "Medicaid", "color": "", "pattern": "",  "range_min_value": 10, "range_max_value": 50},
-			        {"label": "Federal", "color": "", "pattern": "",  "range_min_value": 40, "range_max_value": 60},
-			        {"label": "Medicare",  "color": "", "pattern": "stripe", "range_min_value": 70, "range_max_value": 100}]
-			    }
-			  }
-			}
-          }
+					  "name": "th-spectrum-chart",
+					  "description": "Thelma spectrum chart",
+					  "category":"chart",
+					  "version": "0.0.1",
+					  "thumbnail":"spectrum.jpg", 
+					  "tags":["chart", "column", "animated"],
+					  "content":false,
+					  "inputAttr": {
+					    "chartWidth":{"friendly":"Width", "type":"int", "default":275},
+					    "chartHeight":{"friendly":"Height", "type":"int", "default":250},
+					    "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
+					      "fields":{
+					        "label":{"friendly":"Label", "type":"string", "default":"Medicaid"},
+					        "range_min_value":{"friendly":"Min Val", "type":"int", "default":10},
+					        "range_min_display_value":{"friendly":"Min Disp", "type":"string", "default":"$10"},
+					        "range_max_value":{"friendly":"Value", "Max Val":"int", "default":50},
+					        "range_max_display_value":{"friendly":"Max Disp", "type":"string", "default":"$50"},
+					        "color":{"friendly":"Color", "type":"colorPicker", "default":"", "optional":true},
+					        "pattern":{"friendly":"Pattern", "type":"string", "default":"stripe", "optional":true}
+					      },
+					      "default":[
+					        {"label": "Medicaid", "color": "", "pattern": "",  "range_min_value": 10, "range_max_value": 50},
+					        {"label": "Federal", "color": "", "pattern": "",  "range_min_value": 40, "range_max_value": 60},
+					        {"label": "Medicare",  "color": "", "pattern": "stripe", "range_min_value": 70, "range_max_value": 100}]
+						    }
+						  }
+						}
+         	}
 		  
 		});
 	</script>
