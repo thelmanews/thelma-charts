@@ -81,13 +81,17 @@
 			      // Wrapped HTML
 			      polymerObj.labels = polymerObj.container.selectAll('.label')
 			      	.data(polymerObj.chartData)
-			      	.enter().append("foreignObject")
-			      		.attr('class', function(d,i){ return 'label wrapped-labels data'+i })
+			      	.enter()
+			      	.append('g').attr('class', 'labelg')
 			      		.attr('transform', function(d,i){
 			      			var xPos = polymerObj.x(i)  ;
 				        	var yPos = polymerObj.dims.height + polymerObj.dims.margin.label;
 				        	return "translate("+xPos+","+yPos+")";
 			      		})
+			      	.append("foreignObject")
+		      		.append('xhtml:div');
+
+			      polymerObj.labelGroups = polymerObj.labels.select(function(){return this.parentNode.parentNode;}).attr('class', 'labelg');
 						    
 					} else {
 						// Angled labels with SVG text
@@ -143,10 +147,14 @@
 
 
  		     	if(polymerObj.wrapLabels){
-			      polymerObj.labels
-			      	.style('color', function(d){ return d.color })
+			      polymerObj.labels.select(function() {return this.parentNode; })
 	      			.attr('width', polymerObj.dims.bars.width)
 	      			.attr('height', polymerObj.dims.labels.height);  
+
+	      		polymerObj.labels
+	      			.attr("class", function(d,i){return "label wrapped-labels data"+i;})
+	      			.style('color', function(d){ return d.color });
+
  		     	} else {
  		     		polymerObj.labels
 		        .attr("class", function(d,i){return "label no-stroke data"+i;})
@@ -297,7 +305,7 @@
 		        .style('opacity', 1);
 
 		        if (self.wrapLabels){
-		        	self.labels.transition().duration(this.animationDelay)
+		        	self.labels.select(function() {return this.parentNode.parentNode; }).transition().duration(this.animationDelay)
 		        		.attr('transform', function(d,i){
 				        	var xPos = self.x(i);
 				        	var yPos = height + self.dims.margin.label;
@@ -381,6 +389,7 @@
 		      	 height = self.dims.height;	  	  
 
 			  self.bars = self.container.selectAll('.bar').data(self.chartData);
+			  self.labelGroups = self.container.selectAll('.labelg').data(self.chartData);
 			  self.labels = self.container.selectAll('.label').data(self.chartData);
 			  self.values=self.container.selectAll('.value').data(self.chartData);
 			  
@@ -408,13 +417,16 @@
 			      	});
 			      
 			      if (self.wrapLabels){
-			      	self.labels.enter().append("foreignObject")
-			      		.attr('class', function(d,i){return 'label wrapped-labels data' + i;})
-			      		.attr('transform', function(d,i){
-			      			var xPos = self.x(i)  ;
-				        	var yPos = self.dims.height + self.dims.margin.label;
-				        	return "translate("+xPos+","+yPos+")";
-			      		});
+			      	self.labelGroups.enter()
+			      		.append('g')
+			      			.attr('class', 'labelg')
+			      			.attr('transform', function(d,i){
+				      			var xPos = self.x(i)  ;
+					        	var yPos = self.dims.height + self.dims.margin.label;
+					        	return "translate("+xPos+","+yPos+")";
+				      		})
+				      	.append("foreignObject")
+			      		.append('xhtml:div').attr('class', function(d,i){ return "label wrapped-labels data"+i;});
 			      	
 			      } else {
 			      	self.labels.enter().append('text').attr('class','label');	
@@ -424,7 +436,12 @@
 
 
 			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).attr('x', width).style('opacity', 0).remove();
-			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+			      if (self.wrapLabels){
+			      	self.labelGroups.exit().transition().duration(1000).style('opacity', 0).remove();
+			      } else {
+			      	self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
+			      }
+			      
 			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
 
 			    }
