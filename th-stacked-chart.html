@@ -83,7 +83,6 @@
 
 		      self.container = self.svg.append('g');
 
-      
 
 	      // set up initial state of data
 
@@ -91,21 +90,17 @@
 
 		      self.labels = this.container.selectAll('.label').data(this.chartData).enter()
 		      				.append('g')
-		      				//.attr('class','label')
 		      				.append('foreignObject')
 		      				.append('xhtml:div');
-		      				//.attr('class','label');
 
-		      self.labels.select(function() {return this.parentNode.parentNode; }).attr('class','labelg');
+		      self.labelGroups = self.labels.select(function() {return this.parentNode.parentNode; }).attr('class','labelg');
 
 		      self.values = this.container.selectAll('.value').data(this.chartData).enter()
 		      				.append('g')
-		      				//.attr('class','value')
 		      				.append('foreignObject')
 		      				.append('xhtml:div');
-		      				//.attr('class','value');
 
-		      //self.values.append('xhtml:div').attr('class','label');
+		      self.valueGroups = self.values.select(function() {return this.parentNode.parentNode; }).attr('class','valueg');
 
 
 		      self._setElementSizes();
@@ -129,7 +124,7 @@
 		          .attr('height', self.dims.height + self.dims.margin.top + self.dims.margin.bottom);
 
 
-	          self.container.attr('transform', 'translate(' + self.dims.margin.left + ',' + self.dims.margin.top + ')');
+	        self.container.attr('transform', 'translate(' + self.dims.margin.left + ',' + self.dims.margin.top + ')');
 
 		  	  self.bars
 		        .attr("class", function(d,i){ return "bar data"+i; })
@@ -142,17 +137,17 @@
 		      	.html(function(d) {return d.label;})
 		        .style('color', function(d){ return d.color; });
 
-			 // for foreignObject
-			 self.labels.select(function() {return this.parentNode; })
+					// for foreignObject
+					self.labels.select(function() {return this.parentNode; })
 		        .attr('width', self.dims.labels.containerWidth)
 		      	.attr('height', self.dims.labels.containerHeight);
-
 		        
 		      self.values
 		        .attr("class", function(d,i){return "value wrapped-values data"+i;})
 		        .html(function(d) {return d.display_value ? d.display_value : d.value ;})
 		        .style('color', function(d){ return d.color; });
 
+		      // for foreignObject
 		      self.values.select(function() {return this.parentNode; })  
 		        .attr('width', self.dims.values.containerWidth) 
 		      	.attr('height',self.dims.values.containerHeight);
@@ -218,42 +213,38 @@
 		      	 height = self.dims.height;	  	  
 
 			  self.bars = self.container.selectAll('.bar').data(self.chartData);
+			  self.labelGroups = self.container.selectAll('.labelg').data(self.chartData);
 			  self.labels = self.container.selectAll('.label').data(self.chartData);
+			  self.valueGroups=self.container.selectAll('.valueg').data(self.chartData);
 			  self.values=self.container.selectAll('.value').data(self.chartData);
 
-		  	  if(self.dataLength!=self.chartData.length)
-		  	  {
-
+		  	  if(self.dataLength!=self.chartData.length) {
 
 		  	  	  self.dataLength = self.chartData.length;
 
-				  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
+						  self.dims.barWidth = Math.min(70,((self.dims.width / self.dataLength)/(1+self.dims.barGap)));
 
-			      self.bars.enter().append('rect').attr('class','bar')
-			      	.attr('height', 0);
+				      self.bars.enter().append('rect').attr('class','bar')
+				      	.attr('height', 0);
 
-			      self.labels.enter()
-		      				.append('g')
+			      	self.labelGroups.enter()
+		      				.append('g').attr('class','labelg')
 		      				.append('foreignObject')
-		      				.append('xhtml:div');
+		      				.append('xhtml:div').attr('class', function(d,i){ return "label wrapped-labels data"+i;});
 		      				//.attr('class','label');
 
 		      				//.append('foreignObject').attr('class','label').style('opacity', 0);
-			      self.values.enter()
-			      		    .append('g')
+			      	self.valueGroups.enter()
+			      		   .append('g').attr('class','valueg')
 		      				.append('foreignObject')
-		      				.append('xhtml:div');
-		      				//.attr('class','value');
+		      				.append('xhtml:div').attr("class", function(d,i){return "value wrapped-values data"+i;});
+		      				
 
-
-			      //.append('foreignObject').attr('class','value').attr('y', height).style('opacity', 0);;
-
-
-			      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();
-			      self.labels.exit().transition().duration(1000).style('opacity', 0).remove();
-			      self.values.exit().transition().duration(1000).style('opacity', 0).remove();
-			      
-			     //self.resize();
+				      self.bars.exit().transition().duration(1000).attr('height', 0).attr('y', height).style('opacity', 0).remove();
+				      self.labelGroups.exit().transition().duration(1000).style('opacity', 0).remove();
+				      self.valueGroups.exit().transition().duration(1000).style('opacity', 0).remove();
+				      
+				     //self.resize();
 
 			    }
 
@@ -265,7 +256,7 @@
 		      self.values.html(function(d) {return d.display_value ? d.display_value : d.value ;});
 
 
-		      self.animate();
+		      // self.animate();
 
 		  },
 		  
