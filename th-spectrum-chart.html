@@ -87,9 +87,12 @@
 		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
 
 		      self.labels = this.container.selectAll('.label').data(this.chartData).enter()
-		      				.append('g')
-		      				.append('foreignObject')
-		      				.append('xhtml:div');
+    				.append('g')
+    					.attr('transform',function(d) {
+						     return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')';
+						   }) 
+    				.append('foreignObject')
+    				.append('xhtml:div');
 
 		      self.labelGroups = self.labels.select(function() {return this.parentNode.parentNode; }).attr('class','labelg');
 
@@ -98,8 +101,13 @@
 
 		      self.values = this.container.selectAll('.value').data(this.chartData).enter()
 		      	.append('g')
-		      				.append('foreignObject')
-		      				.append('xhtml:div');
+		      		.attr('transform',function(d) {
+						     var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width,
+						     yPos = self.dims.height - self.y(d.range_max_value );
+						     return 'translate('+xPos+','+yPos+')';
+						   }) 
+    				.append('foreignObject')
+    				.append('xhtml:div');
 
 		     	self.valueGroups = self.values.select(function() {return this.parentNode.parentNode; }).attr('class','valueg');
 
@@ -241,7 +249,8 @@
 	        		return h;
 	        	});
 
-	        self.labels.transition().style('opacity', 1);
+	        // Transition for opacity causes the labels to jump. Why is opacity affecting position?!
+	        self.labels.style('opacity', 1);
 	        
 	        self.labels.select(function() {return this.parentNode.parentNode; })
 	        	.transition().duration(delay)
@@ -249,12 +258,12 @@
 		        	return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')'; 
 		        });
 		      
-		      self.values.transition().style('opacity', 1);
+		      // Transition for opacity causes the values to jump. Why is opacity affecting position?!
+		      self.values.style('opacity', 1);
 
 	        self.values.select(function() {return this.parentNode.parentNode; })
 	        	.transition().duration(self.animationDelay)
 		        .attr('transform',function(d) {
-		        	console.log(self.dims.bar.width);
 		        	var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width,
 		        			yPos = self.dims.height - self.y(d.range_max_value );
 		        	return 'translate('+xPos+','+yPos+')'; 
@@ -280,12 +289,20 @@
 
 			      self.labelGroups.enter()
 			      	.append('g').attr('class','labelg')
+			      		.attr('transform',function(d) {
+						     return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')';
+						   }) 
 		      		.append('foreignObject')
 		      		.append('xhtml:div').attr('class', function(d,i){ return "label wrapped-labels data"+i;});
 
 			      
 			      self.valueGroups.enter()
 				      .append('g').attr('class','valueg')		      		
+				      	.attr('transform',function(d) {
+						     var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width,
+						     yPos = self.dims.height - self.y(d.range_max_value );
+						     return 'translate('+xPos+','+yPos+')';
+						   }) 
 			      	.append('foreignObject')
 			      	.append('xhtml:div').attr('class', function(d,i){ return "value wrapped-values data"+i;});
 
