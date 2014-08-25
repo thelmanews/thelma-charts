@@ -113,9 +113,9 @@
 		      self.bars.attr('y', self.dims.height)
 			        .attr('height', 0);
 
-			  self.labels.style('opacity', 0);
+			  // self.labels.style('opacity', 0);
 
-			  self.values.style('opacity', 0);
+			  // self.values.style('opacity', 0);
 	      
 
 		  },
@@ -265,15 +265,15 @@
 			        .attr('y', function(d) {return y(d.total)})
 			        .attr('height', function(d) {return y(d.value)});
 
-		        self.labels//transition()//.duration(self.animationDelay)
-		        .style('opacity', 1)
+		        // self.labels//transition()//.duration(self.animationDelay)
+		        // .style('opacity', 1);
 
 		        self.labels.select(function() {return this.parentNode.parentNode; })
 		        .transition().duration(self.animationDelay)
-		        .attr('transform',function(d) {return 'translate(0,'+y(d.total)+')'; } )
+		        .attr('transform',function(d) {return 'translate(0,'+y(d.total)+')'; } );
 		        
-		        self.values//transition()//.duration(self.animationDelay)
-		        .style('opacity', 1)
+		        // self.values//transition()//.duration(self.animationDelay)
+		        // .style('opacity', 1);
 		        
 		        self.values.select(function() {return this.parentNode.parentNode; })
 		        .transition().duration(self.animationDelay)
