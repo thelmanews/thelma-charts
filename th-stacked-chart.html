@@ -53,7 +53,6 @@
 		      var self = this;
 		      
 		      // setup dimensions
-		      // self.dims = self.setupDimensions(self);
 		      self.dims = self.setupStackedDims(self);
 
 		      var margin = self.dims.margin,
@@ -85,7 +84,6 @@
 
 
 	      // set up initial state of data
-
 		      self.bars = this.container.selectAll('.bar').data(this.chartData).enter().append('rect');
 
 		      self.labels = this.container.selectAll('.label').data(this.chartData).enter()
@@ -151,8 +149,6 @@
 		      self.values.select(function() {return this.parentNode; })  
 		        .attr('width', self.dims.values.containerWidth) 
 		      	.attr('height',self.dims.values.containerHeight);
-		        //.attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
-		        //.html(function(d){return d.display_value ? d.display_value : d.value ;})
 		   
 		  },
 
@@ -194,10 +190,6 @@
 
 		  updateData: function() {
 
-
-
-			  console.log('UUpdate');
-
 		  	  var self = this;
 
 		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData);
@@ -212,11 +204,11 @@
 		      var width = self.dims.width,
 		      	 height = self.dims.height;	  	  
 
-			  self.bars = self.container.selectAll('.bar').data(self.chartData);
-			  self.labelGroups = self.container.selectAll('.labelg').data(self.chartData);
-			  self.labels = self.container.selectAll('.label').data(self.chartData);
-			  self.valueGroups=self.container.selectAll('.valueg').data(self.chartData);
-			  self.values=self.container.selectAll('.value').data(self.chartData);
+				  self.bars = self.container.selectAll('.bar').data(self.chartData);
+				  self.labelGroups = self.container.selectAll('.labelg').data(self.chartData);
+				  self.labels = self.container.selectAll('.label').data(self.chartData);
+				  self.valueGroups=self.container.selectAll('.valueg').data(self.chartData);
+				  self.values=self.container.selectAll('.value').data(self.chartData);
 
 		  	  if(self.dataLength!=self.chartData.length) {
 
@@ -242,7 +234,6 @@
 				      self.labelGroups.exit().transition().duration(1000).style('opacity', 0).remove();
 				      self.valueGroups.exit().transition().duration(1000).style('opacity', 0).remove();
 				      
-				     //self.resize();
 
 			    }
 
@@ -252,10 +243,6 @@
 		      // this is independent of size but dependent on data
 		      self.labels.html(function(d) {return d.label;});
 		      self.values.html(function(d) {return d.display_value ? d.display_value : d.value ;});
-
-
-		      // self.animate();
-
 		  },
 		  
 		  animate: function() {
@@ -267,7 +254,6 @@
 			        .attr('width', self.dims.bar.width)
 			        .attr('y', function(d) {return y(d.total)})
 			        .attr('height', function(d) {return y(d.value)});
-			        console.log(self.labels);
 
 		        self.labels.transition()//.duration(self.animationDelay)
 		        .style('opacity', 1)
@@ -275,8 +261,6 @@
 		        self.labels.select(function() {return this.parentNode.parentNode; })
 		        .transition().duration(self.animationDelay)
 		        .attr('transform',function(d) {return 'translate(0,'+y(d.total)+')'; } )
-		        //.attr('x', 0)
-		        //.attr('y', function(d) {return y(d.total); }) //12: font size;
 		        
 		        self.values.transition()//.duration(self.animationDelay)
 		        .style('opacity', 1)
@@ -288,9 +272,7 @@
 		        	//var xx = 0;
 		        	return 'translate('+xx+','+y(d.total)+')'; 
 		        });
-		        //.style('opacity', 1)
-		        //.attr('x', self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width)
-		        //.attr('y', function(d) {return y(d.total); }); //12: font size
+		        
 
 		  },
 		  chartSpecificDataValidate: function() {
@@ -327,29 +309,29 @@
 
           getMetaData: function() {
           	return {
-				  "name": "th-stacked-chart",
-				  "description": "Thelma stacked chart",
-				  "category":"chart",
-				  "version": "0.0.1",
-				  "thumbnail":"stacked.jpg", 
-				  "tags":["chart", "column", "animated"],
-				  "inputAttr": {
-				    "chartWidth":{"friendly":"Width", "type":"int", "default":200},
-				    "chartHeight":{"friendly":"Height", "type":"int", "default":250},
-				    "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
-				      "fields":{
-				        "label":{"friendly":"Label", "type":"string", "default":"Player"},
-				        "value":{"friendly":"Value", "type":"int", "default":15},
-				        "display_value":{"friendly":"Display Value", "type":"string", "default":""},
-				        "color":{"friendly":"Color", "type":"colorPicker", "default":"", "optional":true}
-				      },
-				      "default":[
-				      {"label": "medicaid", "value": 20, "color":""},
-				      {"label": "gap", "value": 40, "color":""},
-				      {"label": "sub", "value": 10, "color":""}]
-				    }
-				  }
-				};
+						  "name": "th-stacked-chart",
+						  "description": "Thelma stacked chart",
+						  "category":"chart",
+						  "version": "0.0.1",
+						  "thumbnail":"stacked.jpg", 
+						  "tags":["chart", "column", "animated"],
+						  "inputAttr": {
+						    "chartWidth":{"friendly":"Width", "type":"int", "default":200},
+						    "chartHeight":{"friendly":"Height", "type":"int", "default":250},
+						    "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
+						      "fields":{
+						        "label":{"friendly":"Label", "type":"string", "default":"Player"},
+						        "value":{"friendly":"Value", "type":"int", "default":15},
+						        "display_value":{"friendly":"Display Value", "type":"string", "default":""},
+						        "color":{"friendly":"Color", "type":"colorPicker", "default":"", "optional":true}
+						      },
+						      "default":[
+						      {"label": "medicaid", "value": 20, "color":""},
+						      {"label": "gap", "value": 40, "color":""},
+						      {"label": "sub", "value": 10, "color":""}]
+						    }
+						  }
+						};
           }
 		  
 		  
