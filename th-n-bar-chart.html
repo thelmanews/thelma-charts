@@ -449,9 +449,14 @@
 			   	self.resize();
 
 		      // this is independent of size but dependent on data
-		      self.labels.text(function(d) {return d.label;});
+	       	if (self.wrapLabels){
+            self.labels.html(function(d) {return d.label;});
+          } else {
+            self.labels.text(function(d) {return d.label;});
+          }
+		      // self.labels.text(function(d) {return d.label;});
 		      self.values.text(function(d) {return d.display_value ? d.display_value : d.value ;});
-		      self.animate();
+		      // self.animate();
 
 		  },
 
