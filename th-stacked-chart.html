@@ -161,6 +161,7 @@
 		  reset: function() {
 		      var self = this;
 		      var height= this.height;
+		      console.log("stacked reset");
 		      // self.bars.transition().duration(self.animationDelay).attr('y', height).attr('height', 0);
 		      // self.labels.transition().duration(self.animationDelay).attr('y', height );
 		      // self.values.transition().duration(self.animationDelay).attr('y', height );
@@ -258,7 +259,7 @@
 		  animate: function() {
             var self = this;
 		        var y = self.y;
-
+		        console.log("stacked animate");
 		        self.bars.transition().duration(self.animationDelay)
 			        .attr('x', self.dims.width/2 - self.dims.bar.width/2)
 			        .attr('width', self.dims.bar.width)

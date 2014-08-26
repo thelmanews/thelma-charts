@@ -216,6 +216,7 @@
 		  reset: function(hard) {
 		      var self = this;
 		      var height= this.height;
+		      console.log("spectrum reset");
 		      if(hard) {
 			      self.bars.transition().duration(1).attr('height', 0);
 			      self.labels.transition().duration(1);
@@ -235,7 +236,7 @@
 	        var y = self.y;
 	        var labels = self.labels;
 	        var delay = self.animationDelay;
-
+	        console.log("spectrum animate");
 	        self.spectrum.transition().duration(delay)
 		        .attr('x', self.dims.width/2 - self.dims.bar.width/2 )
 		        .attr('y', function(d) {return self.y(self._wholeRange.min)})
