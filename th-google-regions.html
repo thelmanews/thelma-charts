@@ -1,0 +1,81 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="th-d3-chart.html">
+
+<polymer-element name="th-google-regions" extends="th-d3-chart" >
+  <template>
+    <core-style ref="theme"></core-style>
+    <style>
+
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+
+      #data_errors {
+        font-size: 14px;
+        color: red;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+    </style>
+      <ul id="data_errors">
+      </ul>
+
+      <div id="regions_div" style="width: {{chartWidth}}px; height: {{chartHeight}}px;"></div>
+      <!-- to allow embeded th-editor component -->
+      <content select="th-editor"></content> 
+
+      
+  </template>
+  <link rel="import" href="dependencies/google-regions_dep.html">
+  
+  <script>
+        Polymer('th-google-regions', {
+          chartWidth: 280,
+          chartHeight: 400,
+          chartData: [
+            ['Country', 'Popularity'],
+            ['Germany', 200],
+            ['United States', 800],
+            ['Brazil', 400],
+            ['Canada', 500],
+            ['France', 600],
+            ['RU', 700]
+          ],
+          init: function() {
+            var self = this;
+            self.drawRegionsMap();
+
+          },
+          drawRegionsMap: function(){
+            var self = this,
+                data = google.visualization.arrayToDataTable(self.chartData);
+
+            var options = {};
+            var chart = new google.visualization.GeoChart(self.$.regions_div);
+            
+            chart.draw(data, options);
+          },
+          reset: function() {
+             var self = this;
+
+              
+          },
+          
+          animate: function() {
+
+                var self = this;
+               
+          },
+          updateData: function() {
+              var self = this;
+          }
+
+          
+        });
+
+
+  </script>
+</polymer-element>

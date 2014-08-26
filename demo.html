@@ -25,8 +25,10 @@
   <link rel="import" href="th-bubble.html">
 
   <link rel="import" href="th-gauge-chart.html">
+  <link rel="import" href="th-google-regions.html">
+  <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1','packages':['geochart']}]}"></script>
 
-
+  
   <style>
   	body {
   		font-family: arial;
@@ -39,7 +41,8 @@
 <body unresolved>
 
   <p>thelma-components looks like this:</p>
-
+  
+  <th-google-regions style="margin: 20px;"></th-google-regions>
   <th-bubble id="bubble" animateAfter="2000"></th-bubble>
 
   <th-bubble animateAfter="2000" chartData="[{'startValue': '10', 'endValue': '95', 'color':'orange', 'suffix': '%', 'label': 'below poverty line' }]"></th-bubble>
