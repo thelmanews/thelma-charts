@@ -92,7 +92,7 @@
 						     return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')';
 						   }) 
     				.append('foreignObject')
-    				.append('xhtml:div');
+    				.append('xhtml:div').style('opacity', 1);
 
 		      self.labelGroups = self.labels.select(function() {return this.parentNode.parentNode; }).attr('class','labelg');
 
@@ -107,7 +107,8 @@
 						     return 'translate('+xPos+','+yPos+')';
 						   }) 
     				.append('foreignObject')
-    				.append('xhtml:div');
+    				.append('xhtml:div')
+    					.style('opacity', 1);
 
 		     	self.valueGroups = self.values.select(function() {return this.parentNode.parentNode; }).attr('class','valueg');
 
@@ -116,9 +117,9 @@
 		      self.bars.attr('height', 0)
 		      		   .attr('width',self.dims.bar.width);
 
-		      self.labels.style('opacity', 0);
+		      // self.labels.style('opacity', 0);
 
-		      self.values.style('opacity', 0);
+		      // self.values.style('opacity', 0);
 
 		      self.spectrum
 		        .attr('x', self.dims.width/2 - self.dims.bar.width/2 )
@@ -173,7 +174,8 @@
 		      self.labels
 		      	.attr('class', function(d,i){return 'label wrapped-labels data' + i;})
 		      	.html(function(d) {return d.label;})
-		      	.style('color', function(d){ return d.color;});
+		      	.style('color', function(d){ return d.color;})
+		      	.style('opacity', 1);
 
 		      // for foreignObject
 		      self.labels.select(function() {return this.parentNode; })
@@ -188,7 +190,8 @@
 		        .html(function(d) {
 	            return d.range_max_display_value && d.range_min_display_value ? (d.range_min_display_value + " - " + d.range_max_display_value) : (d.range_min_value.toString() + " - " + d.range_max_value.toString()) ;
 	          	})
-	            .style('color', function(d){ return d.color;});
+	            .style('color', function(d){ return d.color;})
+	            .style('opacity', 1);
 
 	        // for foreignObject
 		      self.values.select(function() {return this.parentNode; })
