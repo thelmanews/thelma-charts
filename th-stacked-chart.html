@@ -91,7 +91,7 @@
 		      					.attr('transform',function(d) {
 						        	return 'translate(0,'+self.dims.height+')';}) 
 		      				.append('foreignObject')
-		      				.append('xhtml:div');
+		      				.append('xhtml:div').style('opacity', 1);
 
 		      self.labelGroups = self.labels.select(function() {return this.parentNode.parentNode; }).attr('class','labelg');
 
@@ -162,8 +162,8 @@
 		      var self = this;
 		      var height= this.height;
 		      self.bars.transition().duration(self.animationDelay).attr('y', height).attr('height', 0);
-		      self.labels.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
-		      self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+		      // self.labels.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
+		      // self.values.transition().duration(self.animationDelay).attr('y', height ).style('opacity', 0);
 		      
 		  },
 
@@ -265,15 +265,15 @@
 			        .attr('y', function(d) {return y(d.total)})
 			        .attr('height', function(d) {return y(d.value)});
 
-		        self.labels//transition()//.duration(self.animationDelay)
-		        .style('opacity', 1);
+		        // self.labels//transition()//.duration(self.animationDelay)
+		        // .style('opacity', 1);
 
 		        self.labels.select(function() {return this.parentNode.parentNode; })
-		        .transition().duration(self.animationDelay)
-		        .attr('transform',function(d) {return 'translate(0,'+y(d.total)+')'; } );
+			        .transition().duration(self.animationDelay)
+			        .attr('transform',function(d) {return 'translate(0,'+y(d.total)+')'; } );
 		        
-		        self.values//transition()//.duration(self.animationDelay)
-		        .style('opacity', 1);
+		        // self.values//transition()//.duration(self.animationDelay)
+		        // .style('opacity', 1);
 		        
 		        self.values.select(function() {return this.parentNode.parentNode; })
 		        .transition().duration(self.animationDelay)
