@@ -218,13 +218,13 @@
 		      var height= this.height;
 		      if(hard) {
 			      self.bars.transition().duration(1).attr('height', 0);
-			      self.labels.transition().duration(1).style('opacity', 0);
-			      self.values.transition().duration(1).style('opacity', 0);
+			      self.labels.transition().duration(1);
+			      self.values.transition().duration(1);
 		      }
 		      else {
 			      self.bars.transition().duration(this.animationDelay).attr('height', 0);
-			      self.labels.transition().duration(this.animationDelay).style('opacity', 0);
-			      self.values.transition().duration(this.animationDelay).style('opacity', 0);
+			      self.labels.transition().duration(this.animationDelay);
+			      self.values.transition().duration(this.animationDelay);
 			  }
 		      
 		  },
