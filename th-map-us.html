@@ -86,8 +86,68 @@
 	
 		Polymer('th-map-us', {
 			
-		  	chartData: 
-		  		{ marked_states : 
+		  	chartData: [
+						{"state":"Alabama","value":0.16490015, "crossed": true, "color": "#000"},
+						{"state":"Alaska","value":1.27506968, "crossed": true},
+						{"state":"Arizona","value":1.3},
+						{"state":"Arkansas","value":1.3},
+						{"state":"California","value":1.3},
+						{"state":"Colorado","value":1.3},
+						{"state":"Connecticut","value":2.0},
+						{"state":"Delaware","value":1.3},
+						{"state":"District of Columbia","value":2},
+						{"state":"Florida","value":0.34861751, "crossed": true},
+						{"state":"Georgia","value":0.38855606, "crossed": true},
+						{"state":"Hawaii","value":1.3},
+						{"state":"Idaho","value":0.27427035, "crossed": true},
+						{"state":"Illinois","value":1.3},
+						{"state":"Indiana","value":0.2404761, "crossed": true},
+						{"state":"Iowa","value":1.3},
+						{"state":"Kansas","value":0.37995391, "crossed": true},
+						{"state":"Kentucky","value":1.3},
+						{"state":"Louisiana","value":0.23986175, "crossed": true},
+						{"state":"Maine","value":1.0503072, "crossed": true},
+						{"state":"Maryland","value":1.3},
+						{"state":"Massachusetts","value":1.3},
+						{"state":"Michigan","value":1.3},
+						{"state":"Minnesota","value":2.0},
+						{"state":"Mississippi","value":0.29024577, "crossed": true},
+						{"state":"Missouri","value":0.23863287, "crossed": true},
+						{"state":"Montana","value":0.51758832, "crossed": true},
+						{"state":"Nebraska","value":0.55384024, "crossed": true},
+						{"state":"Nevada","value":1.3},
+						{"state":"New Hampshire","value":0.7498463, "crossed": true},
+						{"state":"New Jersey","value":1.3},
+						{"state":"New Mexico","value":1.3},
+						{"state":"New York","value":1.3},
+						{"state":"North Carolina","value":0.45368663, "crossed": true},
+						{"state":"North Dakota","value":1.3},
+						{"state":"Ohio","value":1.3},
+						{"state":"Oklahoma","value":0.48010752, "crossed": true},
+						{"state":"Oregon","value":1.3},
+						{"state":"Pennsylvania","value":0.37995391, "crossed": true},
+						{"state":"Rhode Island","value":1.3},
+						{"state":"South Carolina","value":0.66996927, "crossed": true},
+						{"state":"South Dakota","value":0.53909370, "crossed": true},
+						{"state":"Tennessee","value":1.10990783, "crossed": true},
+						{"state":"Texas","value":0.19132104, "crossed": true},
+						{"state":"Utah","value":0.46658986},
+						{"state":"Vermont","value":1.3},
+						{"state":"Virginia","value":0.51820276, "crossed": true},
+						{"state":"Washington","value":1.3},
+						{"state":"West Virginia","value":1.3},
+						{"state":"Wisconsin","value":0.99992319, "crossed": true},
+						{"state":"Wyoming","value":0.58640553}
+
+		  	],
+		  	dataLabel: "Medicaid Coverage",
+
+
+
+
+		  	/*
+
+		  		{ crossed_states : 
 			  		['Alabama', 'Alaska', 'Florida', 'Georgia', 'Idaho', 'Indiana',
 				    'Kansas', 'Louisiana', 'Maine', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'New Hampshire',
 				    'North Carolina', 'Oklahoma', 'Pennsylvania', 'South Carolina', 'South Dakota', 'Tennessee',
@@ -96,15 +156,13 @@
 				  state_data: {
 					label: "Medicaid Coverage",
 					values: {"Alabama":0.164900154,"Alaska":1.275069684,"Arizona":1.38,"Arkansas":1.38,"California":1.38,"Colorado":1.38,"Connecticut":2.01,"Delaware":1.38,"District of Columbia":2.2,"Florida":0.348617512,"Georgia":0.388556068,"Hawaii":1.38,"Idaho":0.274270353,"Illinois":1.38,"Indiana":0.24047619,"Iowa":1.38,"Kansas":0.379953917,"Kentucky":1.38,"Louisiana":0.239861751,"Maine":1.05030722,"Maryland":1.38,"Massachusetts":1.38,"Michigan":1.38,"Minnesota":2.05,"Mississippi":0.290245776,"Missouri":0.238632873,"Montana":0.517588326,"Nebraska":0.553840246,"Nevada":1.38,"New Hampshire":0.74984639,"New Jersey":1.38,"New Mexico":1.38,"New York":1.38,"North Carolina":0.453686636,"North Dakota":1.38,"Ohio":1.38,"Oklahoma":0.480107527,"Oregon":1.38,"Pennsylvania":0.379953917,"Rhode Island":1.38,"South Carolina":0.669969278,"South Dakota":0.539093702,"Tennessee":1.109907834,"Texas":0.191321045,"Utah":0.466589862,"Vermont":1.38,"Virginia":0.518202765,"Washington":1.38,"West Virginia":1.38,"Wisconsin":0.999923195,"Wyoming":0.58640553}
-					/*,
-					"percent below poverty":{"Alabama":0.219664393,"Alaska":0.198169573,"Arizona":0.226977565,"Arkansas":0.243154785,"California":0.231239698,"Colorado":0.166283636,"Connecticut":0.147110733,"Delaware":0.187855101,"District of Columbia":0.243237576,"Florida":0.205145787,"Georgia":0.221429767,"Hawaii":0.241177383,"Idaho":0.18619448,"Illinois":0.188204664,"Indiana":0.201189495,"Iowa":0.137628173,"Kansas":0.177831712,"Kentucky":0.222823488,"Louisiana":0.262765021,"Maine":0.156862792,"Maryland":0.149920605,"Massachusetts":0.160023772,"Michigan":0.18981823,"Minnesota":0.131927905,"Mississippi":0.265346662,"Missouri":0.191245572,"Montana":0.177703732,"Nebraska":0.141574636,"Nevada":0.212894191,"New Hampshire":0.10871429,"New Jersey":0.162068175,"New Mexico":0.270058081,"New York":0.221591876,"North Carolina":0.207018643,"North Dakota":0.129428322,"Ohio":0.194272285,"Oklahoma":0.196266808,"Oregon":0.191402224,"Pennsylvania":0.178901029,"Rhode Island":0.182359067,"South Carolina":0.2269408,"South Dakota":0.163271326,"Tennessee":0.220263748,"Texas":0.225242076,"Utah":0.154519447,"Vermont":0.142461983,"Virginia":0.157363673,"Washington":0.158530765,"West Virginia":0.208636528,"Wisconsin":0.158505258,"Wyoming":0.139751762}
-					*/
 					}
 
 
 				}
+			*/
 
-			,
+			
 			dataUrls : {
                 us: "data/us.json"  //TODO needs to be corrected!
        		},
@@ -170,69 +228,69 @@
                     })
                     .attr('d', self.path)
                     //.style('fill', CoreStyle.g.theme.background)
-                    .on("click", function(d) { self._clicked(d,self); })
+                    .on("click", function(d) { return self._clicked(d,self); })
                     .attr("centroid", function(d) {
                       var centroid = self.path.centroid(d);
                       centers[d.properties.name.toLowerCase().replace(/\s/g, '-')]= centroid;
-                    });
-
-                if(self.chartData.marked_states) {
-	           	
-		           	self.marks = self.map.selectAll('.mark').data(self.chartData.marked_states).enter().append('g')
-		            .attr('class', function(d) {
-		                var name = d.toLowerCase().replace(/ /g,"-");
-		                return 'mark data0 mark-'+name;
-		            })
-		            .style('opacity',0)
-		            .attr('transform', function(d, i) {
-		                var name = d.toLowerCase().replace(/ /g,"-");
-		                //TODO change to a more elegant formatting....
-		            	return 'translate ('+parseInt(centers[name][0]-7)+','+parseInt(centers[name][1]-7)+') scale('+scale+','+scale+')';
-		            })
-		            .attr('width', 12)
-		            .attr('height', 12);
-		            //.on("click", self.clicked);	// d is going to be state name
+                    })
+                    .attr("color", function(d) { return d.color;})
+                    .attr("state", function(d) { return d.state;})//.toLowerCase();});
 
 
-		            self.marks.append('path')
-		            .attr('d', 'm100,60l-40,40l170,170l40,-40l-170,-170z');
 
-		            self.marks.append('path')
-		            .attr('d', 'm60,230l170,-170l40,40l-170,170l-40,-40z');
+                var marks = self.chartData.filter(function(d) {
 
-		        }
-
-		        if(self.chartData.state_data) {
-
-		        	self.dataMap = d3.map();
-
-		        	var minValue = d3.min(d3.values(self.chartData.state_data.values));
-		        	var maxValue = d3.max(d3.values(self.chartData.state_data.values));
-
-		        	var breaks = 4;
-		        	var interval = (maxValue - minValue) / breaks;
-
-		        	var domain = d3.range(breaks).map(function(i) {
-		        		return minValue + ((i) * interval);
-		        	});
-
-		            range = CoreStyle.g.theme.mapColors;
-		            //CoreStyle.g.theme.allAccents; 
-		            //['rgb(246,239,247)','rgb(189,201,225)','rgb(103,169,207)','rgb(28,144,153)','rgb(1,108,89)'];
+                		return d.crossed ? d : null;
+                });
 
 
-					for(key in self.chartData.state_data.values) {
-						self.dataMap.set(key, self.chartData.state_data.values[key]);
-					}
+                self.marks = self.map.selectAll('.mark').data(marks).enter().append('g')
+	            .attr('class', function(d) {
+	                var name = d.state.toLowerCase().replace(/ /g,"-");
+	                return 'mark data0 mark-'+name;
+	            })
+	            .style('opacity',0)
+	            .attr('transform', function(d, i) {
+	                var name = d.state.toLowerCase().replace(/ /g,"-");
+	                //TODO change to a more elegant formatting....
+	            	return 'translate ('+parseInt(centers[name][0]-7)+','+parseInt(centers[name][1]-7)+') scale('+scale+','+scale+')';
+	            })
+	            .attr('width', 12)
+	            .attr('height', 12);
+	            //.on("click", self.clicked);	// d is going to be state name
 
-				      
-				    self.colors = d3.scale.threshold()
-				        .domain(domain)
-				        .range(range);
 
-		        }
+	            self.marks.append('path')
+	            .attr('d', 'm100,60l-40,40l170,170l40,-40l-170,-170z');
 
-	          
+	            self.marks.append('path')
+	            .attr('d', 'm60,230l170,-170l40,40l-170,170l-40,-40z');
+
+
+	        	self.dataMap = d3.map();
+
+	        	var minValue = d3.min(self.chartData, function(d) {return d.value;});
+	        	var maxValue = d3.max(self.chartData, function(d) {return d.value;});
+
+
+	        	var breaks = 4;
+	        	var interval = (maxValue - minValue) / breaks;
+
+	        	var domain = d3.range(breaks).map(function(i) {
+	        		return minValue + ((i) * interval);
+	        	});
+
+	            range = CoreStyle.g.theme.mapColors;
+
+				for(index in self.chartData) {
+					self.dataMap.set(self.chartData[index].state, self.chartData[index].value);
+				}
+
+			      
+			    self.colors = d3.scale.threshold()
+			        .domain(domain)
+			        .range(range);
+
                     
              }, 
              reset : function() {
@@ -261,8 +319,12 @@
 
 				    if(self.dataMap) {
 	
-					    self.$.label.innerText = self.chartData.state_data.label;
+					    // self.$.label.innerText = self.chartData.state_data.label;
+					    // self.$.value.innerText = self.dataMap.get(d.properties.name).toFixed(2);
+					    
+					    self.$.label.innerText = self.dataLabel;
 					    self.$.value.innerText = self.dataMap.get(d.properties.name).toFixed(2);
+
 
 					    self.$.legend.style.opacity = 1;
 
@@ -291,7 +353,7 @@
 				      .duration(750)
 				      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
 				      .style("stroke-width", 1.5 / k + "px");
-              },
+             },
              animate : function() {
 
 		        var self = this;
@@ -299,29 +361,22 @@
 		        var initDelay = 100;
 		        var pause = 100;
                 
-                if(self.chartData.marked_states) {
 
-		            self.marks.transition().duration(pause).delay(function(d, i) {
-		                return i * pause;
-		            })
-		            .style('opacity',1);
+	            self.marks.transition().duration(pause).delay(function(d, i) {
+	                return i * pause;
+	            })
+	            .style('opacity',1);
 
+	            console.log(self.states);
 
-		        } 
-
-		        if(self.dataMap) {
-
-		            self.states.transition().duration(pause)
-		            .style('fill',function(d,i) {
-				        var pc = self.colors(self.dataMap.get(d.properties.name));
-				        return pc;
-				        
-				    });
-
-
-		        }
-
-
+	            self.states.transition().duration(pause)
+	            .style('fill',function(d,i) {
+	            	//TODO color doesn't work because d.color is not there
+	            	// self.states has path information and not what is set in the render method, WHY?!?
+			        var pc = d.color ? d.color : self.colors(self.dataMap.get(d.properties.name));
+			        return pc;
+			        
+			    });
 
 
 		   }
