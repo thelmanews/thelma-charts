@@ -142,32 +142,29 @@
 		  	],
 		  	dataLabel: "Medicaid Coverage",
 
-
-
-
-		  	/*
-
-		  		{ crossed_states : 
-			  		['Alabama', 'Alaska', 'Florida', 'Georgia', 'Idaho', 'Indiana',
-				    'Kansas', 'Louisiana', 'Maine', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'New Hampshire',
-				    'North Carolina', 'Oklahoma', 'Pennsylvania', 'South Carolina', 'South Dakota', 'Tennessee',
-				    'Texas', 'Utah', 'Virginia', 'Wisconsin', 'Wyoming'],
-				  //mark: 'cross',
-				  state_data: {
-					label: "Medicaid Coverage",
-					values: {"Alabama":0.164900154,"Alaska":1.275069684,"Arizona":1.38,"Arkansas":1.38,"California":1.38,"Colorado":1.38,"Connecticut":2.01,"Delaware":1.38,"District of Columbia":2.2,"Florida":0.348617512,"Georgia":0.388556068,"Hawaii":1.38,"Idaho":0.274270353,"Illinois":1.38,"Indiana":0.24047619,"Iowa":1.38,"Kansas":0.379953917,"Kentucky":1.38,"Louisiana":0.239861751,"Maine":1.05030722,"Maryland":1.38,"Massachusetts":1.38,"Michigan":1.38,"Minnesota":2.05,"Mississippi":0.290245776,"Missouri":0.238632873,"Montana":0.517588326,"Nebraska":0.553840246,"Nevada":1.38,"New Hampshire":0.74984639,"New Jersey":1.38,"New Mexico":1.38,"New York":1.38,"North Carolina":0.453686636,"North Dakota":1.38,"Ohio":1.38,"Oklahoma":0.480107527,"Oregon":1.38,"Pennsylvania":0.379953917,"Rhode Island":1.38,"South Carolina":0.669969278,"South Dakota":0.539093702,"Tennessee":1.109907834,"Texas":0.191321045,"Utah":0.466589862,"Vermont":1.38,"Virginia":0.518202765,"Washington":1.38,"West Virginia":1.38,"Wisconsin":0.999923195,"Wyoming":0.58640553}
-					}
-
-
-				}
-			*/
-
 			
 			dataUrls : {
                 us: "data/us.json"  //TODO needs to be corrected!
        		},
        		centers: [],
        		centered: false,
+       		/**
+       		 * domReady function is defined here overriding hte definition in th-animated not to fire th-ready too early
+       		 * @return {[type]} [description]
+       		 */
+	        domReady: function() {
+	            this.init();
+
+	            if(this.animateAfter>0) {
+	                if(this.animateAfter>0) {
+	                  var self = this;
+	                  setTimeout(function() {
+	                    self.animate();
+	                  },self.animateAfter);
+	                }
+	            }
+
+	        },
 			init: function() {
 		    
 			  	var self = this;
@@ -205,18 +202,37 @@
 	            
 
 	            d3.json(self.resolvePath(self.dataUrls.us), function(error, us) {
-	                self.render(error,us);
+	                self._processData(error,us);
 	            
 	            });    
 
 		  	},
 
-		  	render: function(err, us) {
+		  	_processData: function(err, us) {
+		  		this.us = us;
+		  		this._render();
+
+		  		if(this.animateOnInit) {
+		  			this.animate();
+		  		}
+
+		  		this.initialized = true;
+
+	            //TODO should it be triggered by a callback in the end of init() ?
+	            this.fire('th-ready', {msg: 'element ready', element: this});
+
+		  	},
+
+		  	_render: function() {
             	var self = this;
+
+            	if(!self.us) {
+            		return;
+            	}
 
                 var scale = 0.05,
 		        	centers = self.centers,
-                	states = topojson.feature(us, us.objects.states);
+                	states = topojson.feature(self.us, self.us.objects.states);
 
 
             
@@ -379,6 +395,34 @@
 			    });
 
 
+		   },
+		   updateData: function() {
+		   	var self = this;
+		   	self._render();
+		   	self.animate();
+		   },
+
+		   getMetaData: function() {
+		   	return {
+				  "name": "th-map-us",
+				  "description": "Thelma US Map",
+				  "category":"chart",
+				  "version": "0.0.1",
+				  "thumbnail":"map.jpg", 
+				  "tags":["chart", "bar"],
+				  "inputAttr": {
+				    "chartWidth":{"friendly":"Width", "type":"int", "default":300},
+				    "chartHeight":{"friendly":"Height", "type":"int", "default":200},
+				    "dataLabel":{"friendly":"Data Label", "type":"String", "default":"Medicaid Coverage"},
+				    "chartData":{"friendly":"Data", "type":"table-repeating","rows":2, 
+				      "fields":{
+				        "state":{"friendly":"State", "type":"string", "readonly": "true"},
+				        "value":{"friendly":"Value", "type":"int", "default":15},
+				        "crossed":{"friendly":"Cross Mark", "type":"boolean"}
+				      }
+				    }
+				  }
+				}
 		   }
                 
             
