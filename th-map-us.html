@@ -216,11 +216,6 @@
 		  			this.animate();
 		  		}
 
-		  		this.initialized = true;
-
-	            //TODO should it be triggered by a callback in the end of init() ?
-	            this.fire('th-ready', {msg: 'element ready', element: this});
-
 		  	},
 
 		  	_render: function() {
@@ -306,6 +301,13 @@
 			    self.colors = d3.scale.threshold()
 			        .domain(domain)
 			        .range(range);
+
+			    if(!self.initialized) {
+
+				    self.initialized = true;
+		            self.fire('th-ready', {msg: 'element ready', element: this});
+		        }
+
 
                     
              }, 
