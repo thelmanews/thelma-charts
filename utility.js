@@ -234,7 +234,7 @@ Thelma.chartUtils = {
           BAR_MIN_WIDTH = 20,
           remainingWidth;
       
-      dims.margin = { top : 0, right : 0, bottom : 0, left : 0, label: 10, };
+      dims.margin = { top : 0, right : 0, bottom : 8, left : 0, label: 10, };
       dims.width = Math.max(MIN_WIDTH,(polymerObj.chartWidth - dims.margin.left - dims.margin.right));
       dims.height = Math.max(MIN_HEIGHT,(polymerObj.chartHeight - dims.margin.top - dims.margin.bottom));
       dims.bar = {};
