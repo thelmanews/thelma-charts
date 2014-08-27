@@ -48,7 +48,7 @@
 	<script>
 
 		Polymer('th-stacked-chart', {
-			chartData: [{label: 'medicaid', value: 20, display_value: '', color:''},{label: 'gap', value: 40, display_value: '', color:''},{label: 'sub', value: 1, display_value: '', color:''}], 
+			chartData: [{label: 'medicaid', value: 20, display_value: '', color:'', offset: 0},{label: 'gap', value: 40, display_value: '', color:'', offset: 0},{label: 'sub', value: 0.1, display_value: '', color:'', offset: 5}], 
 		  init: function() {
 		      var self = this;
 		      
@@ -60,8 +60,11 @@
 		          height = self.dims.height,
 		          barWidth = self.dims.bar.width;
 
+		      self.MIN_BAR_HEIGHT = 5;
+		      var scaleHeight = height - (self.MIN_BAR_HEIGHT*self.chartData.length);
+
 		      // setup scales
-		      var scales = self.simpleScaleBuilder(width, height, self.chartData),
+		      var scales = self.simpleScaleBuilder(width, scaleHeight, self.chartData),
 		      x = scales.x,
 		      y = scales.y;
 		      self.y = y;
@@ -69,9 +72,12 @@
 
 		      var total = 0;
 		      self.chartData.forEach(function(d) {
+		          d.offset = d.offset || 0;
 		          d.total = total;
 		          total+=parseFloat(d.value);
 		      });
+
+		      console.log(self.chartData);
 
 		      self.y.domain([0, total]); 
 			      
@@ -162,9 +168,9 @@
 		      var self = this;
 		      var height= this.height;
 		      console.log("stacked reset");
-		      // self.bars.transition().duration(self.animationDelay).attr('y', height).attr('height', 0);
-		      // self.labels.transition().duration(self.animationDelay).attr('y', height );
-		      // self.values.transition().duration(self.animationDelay).attr('y', height );
+		      self.bars.transition().duration(self.animationDelay).style('opacity',0).attr('y', height).attr('height', 0);
+		      self.labels.transition().duration(self.animationDelay).style('opacity',0).attr('y', height );
+		      self.values.transition().duration(self.animationDelay).style('opacity',0).attr('y', height );
 		      
 		  },
 
@@ -174,7 +180,8 @@
 		      var self = this;
 		      self.dims = self.setupStackedDims(self);
 
-		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData),
+		      var scaleHeight = self.dims.height - (self.MIN_BAR_HEIGHT*self.chartData.length);
+		      var scales = self.simpleScaleBuilder(self.dims.width, scaleHeight, self.chartData),
 		      x = scales.x,
 		      y = scales.y;
 		      self.y = y;
@@ -182,6 +189,7 @@
 
 		      var total = 0;
 		      self.chartData.forEach(function(d) {
+		          d.offset = d.offset || 0;
 		          d.total = total;
 		          total+=parseFloat(d.value);
 		      });
@@ -198,7 +206,8 @@
 
 		  	  var self = this;
 
-		      var scales = self.simpleScaleBuilder(self.dims.width, self.dims.height, self.chartData);
+		  	  var scaleHeight = self.dims.height - (self.MIN_BAR_HEIGHT*self.chartData.length);
+		      var scales = self.simpleScaleBuilder(self.dims.width, scaleHeight, self.chartData);
 
 		      var x = scales.x;
 		      var y = scales.y;
@@ -263,25 +272,27 @@
 		        self.bars.transition().duration(self.animationDelay)
 			        .attr('x', self.dims.width/2 - self.dims.bar.width/2)
 			        .attr('width', self.dims.bar.width)
-			        .attr('y', function(d) {return y(d.total)})
-			        .attr('height', function(d) {return y(d.value)});
+			        .attr('y', function(d,i) {return y(d.total)+(i*self.MIN_BAR_HEIGHT)})
+			        .attr('height', function(d) {return (y(d.value)+self.MIN_BAR_HEIGHT)});
 
 		        // self.labels//transition()//.duration(self.animationDelay)
 		        // .style('opacity', 1);
 
 		        self.labels.select(function() {return this.parentNode.parentNode; })
 			        .transition().duration(self.animationDelay)
-			        .attr('transform',function(d) {return 'translate(0,'+y(d.total)+')'; } );
+			        .attr('transform',function(d,i) {
+			        	var yPos = y(d.total) - d.offset+(i*self.MIN_BAR_HEIGHT);
+			        	return 'translate(0,'+yPos+')'; } );
 		        
 		        // self.values//transition()//.duration(self.animationDelay)
 		        // .style('opacity', 1);
 		        
 		        self.values.select(function() {return this.parentNode.parentNode; })
 		        .transition().duration(self.animationDelay)
-		        .attr('transform',function(d) {
-		        	var xx = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width;
-		        	//var xx = 0;
-		        	return 'translate('+xx+','+y(d.total)+')'; 
+		        .attr('transform',function(d,i) {
+		        	var yPos = y(d.total) - d.offset +(i*self.MIN_BAR_HEIGHT);
+		        	var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width;
+		        	return 'translate('+xPos+','+yPos+')'; 
 		        });
 		        
 
