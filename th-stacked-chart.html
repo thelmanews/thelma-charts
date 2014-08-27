@@ -162,9 +162,9 @@
 		      var self = this;
 		      var height= this.height;
 		      console.log("stacked reset");
-		      self.bars.transition().duration(self.animationDelay).style('opacity',0).attr('y', height).attr('height', 0);
-		      self.labels.transition().duration(self.animationDelay).style('opacity',0).attr('y', height );
-		      self.values.transition().duration(self.animationDelay).style('opacity',0).attr('y', height );
+		      // self.bars.transition().duration(self.animationDelay).attr('y', height).attr('height', 0);
+		      // self.labels.transition().duration(self.animationDelay).attr('y', height );
+		      // self.values.transition().duration(self.animationDelay).attr('y', height );
 		      
 		  },
 
@@ -271,10 +271,7 @@
 
 		        self.labels.select(function() {return this.parentNode.parentNode; })
 			        .transition().duration(self.animationDelay)
-			        .attr('transform',function(d) {
-			        	var yPos = y(d.total) + y(d.value)/2 - 8;
-			        	return 'translate(0,'+yPos+')'; 
-			        } );
+			        .attr('transform',function(d) {return 'translate(0,'+y(d.total)+')'; } );
 		        
 		        // self.values//transition()//.duration(self.animationDelay)
 		        // .style('opacity', 1);
@@ -282,10 +279,9 @@
 		        self.values.select(function() {return this.parentNode.parentNode; })
 		        .transition().duration(self.animationDelay)
 		        .attr('transform',function(d) {
-		        	var yPos = y(d.total) + y(d.value)/2 - 8;
-		        	var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width;
-		        	
-		        	return 'translate('+xPos+','+yPos+')'; 
+		        	var xx = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width;
+		        	//var xx = 0;
+		        	return 'translate('+xx+','+y(d.total)+')'; 
 		        });
 		        
 
