@@ -104,9 +104,27 @@ the animation, which is provided by the th-countup-num element.
               self.bubble = self.container.append("circle")
                 .attr("class", "bubble data0");
             }
-              
+
+            // Calculate the number of decimal places to display
+            self.decimalPlaces  = Math.max(self._decimalPlaces(self.data.startValue), self._decimalPlaces(self.data.endValue));
+            
             self._setupElements();
         
+          },
+          /**
+           * '_decimalPlaces' takes a number and determines how many digits come after the decimal point
+           * @param  {[Number]} num is the number to test
+           * @return {[Number]} number of digits
+           */
+          _decimalPlaces: function(num){
+            var match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+              if (!match) { return 0; }
+              return Math.max(
+                   0,
+                   // Number of digits right of decimal point.
+                   (match[1] ? match[1].length : 0)
+                   // Adjust for scientific notation.
+                   - (match[2] ? +match[2] : 0));
           },
           /**
            * setting up element properties after each data size change 
@@ -184,7 +202,7 @@ the animation, which is provided by the th-countup-num element.
             self.value.transition().duration(self.duration*1000).tween("countup", function() {
                   return function(t) {
                     var num = i(t);
-                    self.value.text(self.data.prefix+Math.round(num)+self.data.suffix);
+                    self.value.text(self.data.prefix+parseFloat(num).toFixed(self.decimalPlaces)+self.data.suffix);
                   };
             });
 
