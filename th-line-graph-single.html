@@ -76,6 +76,24 @@
 
               polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]); 
 
+              polymerObj.axisFormatter = d3.time.format.multi([
+                [".%L", function(d) { return d.getMilliseconds(); }],
+                [":%S", function(d) { return d.getSeconds(); }],
+                ["%I:%M", function(d) { return d.getMinutes(); }],
+                ["%I %p", function(d) { return d.getHours(); }],
+                ["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
+                ["%b %d", function(d) { return d.getDate() != 1; }],
+                ["%B", function(d) { return d.getMonth(); }],
+                ["%Y %B", function(d) { return d.getMonth(); }],
+                ["%Y", function() { return true; }]
+              ]);
+              // console.log(polymerObj.x(2013));
+              // polymerObj.dateType = "1-year";
+
+              polymerObj.x = d3.time.scale().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]);
+
+              // console.log(polymerObj.xTime(2012));
+
               polymerObj.numXticks = Math.min(5, polymerObj.chartData.length);
               polymerObj.numYticks = 4;
 
@@ -118,17 +136,27 @@
 
               // x labels
               polymerObj.xLabels = g.selectAll(".xLabel")
-                .data(x.ticks(polymerObj.numXticks))
+                .data(x.ticks(1))
                 .enter().append("text")
                 .attr("class", "xLabel axis")
-                .text(function(d){ return d;})
+                .text(function(d){ return polymerObj.axisFormatter(d);})
                 .attr("opacity", function(d) { return polymerObj.xAxisLabels ? 1 : 0; })
                 .attr("text-anchor", "middle");
               
+
+              // var xAxis = d3.svg.axis()
+              //   .scale(x)
+              //   // .ticks(3)
+              //   .tickFormat(d3.time.format("%Y"));
+              //   // .tickFormat(function(d){return d.customTimeFormat});
+
+              // polymerObj.xAxis = g.append("g").attr('class', 'axis').call(xAxis);
+
               // y labels
               polymerObj.yLabels = g.selectAll(".yLabel")
                 .data(y.ticks(polymerObj.numYticks))
                 .enter().append("text")
+
                 .attr("class", "yLabel axis")
                 .text(function(d){ return d;})
                 .attr("dy", 4)
