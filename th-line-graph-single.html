@@ -79,8 +79,6 @@
               polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([15, 
                       (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom + polymerObj.dims.joystick.d))]), 
 
-              // polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]); 
-
               // polymerObj.axisFormatter = d3.time.format.multi([
               //   [".%L", function(d) { return d.getMilliseconds(); }],
               //   [":%S", function(d) { return d.getSeconds(); }],
@@ -92,22 +90,22 @@
               //   ["%Y %B", function(d) { return d.getMonth(); }],
               //   ["%Y", function() { return true; }]
               // ]);
-              // console.log(polymerObj.x(2013));
-              // polymerObj.dateType = "1-year";
+
+              polymerObj.DATE_FORMATS = {
+                "DD-MM-YY": "%d-%m-%y",
+                "DD-MM": "%d-%m",
+                "DD-Mth": "%d-%b",
+                "MM-YY": "%m-%y",
+                "Mth-YY": "%b-%y",
+                "YY": "\'%y",
+                "YYYY": "%Y"
+              }
 
               polymerObj.x = d3.time.scale().domain(d3.extent(polymerObj.chartData, function(d){return Date.parse(d.label);})).range([polymerObj.dims.margin.left, polymerObj.dims.width ]);
 
               polymerObj.chartData.forEach(function(d){
                 d.date = Date.parse(d.label);
               })
-
-      
-
-              // 
-              // polymerObj.x = d3.scale.ordinal().domain(d3.range(polymerObj.chartData.length)).range([polymerObj.dims.margin.left, polymerObj.dims.width ]);
-
-
-              // console.log(polymerObj.xTime(2012));
 
               polymerObj.numXticks = Math.min(5, polymerObj.chartData.length);
               polymerObj.numYticks = 4;
@@ -137,31 +135,16 @@
               polymerObj.note = d3.select(polymerObj.$.info)
                 .append("div")   
                 .attr("class", "note");
-           
-              // x-axis
-              // polymerObj.xAxis = g.append("line")
-              //   .attr("class", "axis")
-              //   .attr("stroke-width", 2)
-              //   .attr("opacity", function(d) { return polymerObj.xAxisLine ? 1 : 0; });
-               
+          
               // y-axis
               polymerObj.yAxis = g.append("line")
                 .attr("x1", 0)
                 .attr("x2", 0);       
-
-              // x labels
-              // polymerObj.xLabels = g.selectAll(".xLabel")
-              //   .data(x.ticks(1))
-              //   .enter().append("text")
-              //   .attr("class", "xLabel axis")
-              //   .text(function(d){ return polymerObj.axisFormatter(d);})
-              //   .attr("opacity", function(d) { return polymerObj.xAxisLabels ? 1 : 0; })
-              //   .attr("text-anchor", "middle");
               
               var xAxis = d3.svg.axis()
                 .scale(x)
                 .ticks(polymerObj.numXticks)
-                .tickFormat(d3.time.format("%Y"))
+                .tickFormat(d3.time.format(polymerObj.DATE_FORMATS[polymerObj.dateType]))
                 .tickSize(0);
 
               polymerObj.xAxis = g.append("g").attr('class', 'axis xAxis').call(xAxis);
@@ -365,12 +348,13 @@
             joyStick: true,
             color: "",
             defaultDisplayValues: false,
+            dateType: "DD-Mth", //"DD-MM-YY", "DD-MM", "DD-Mth", "MM-YY", "Mth-YY", "YY", "YYYY"
           chartData: [
-            {'label': '1-1-2011', 'value': 104, 'display_value': '$104', 'note': ''},
-            {'label': '1-1-2012', 'value': 108, 'display_value': '$108', 'note': ''},
-            {'label': '1-1-2013', 'value': 107, 'display_value': '$107', 'note': ''},
-            {'label': '1-1-2014', 'value': 110, 'display_value': '$110', 'note': ''},
-            {'label': '1-1-2015', 'value': 112, 'display_value': '$112', 'note': ''}
+            {'label': 'January 30, 2011', 'value': 104, 'display_value': '$104', 'note': ''},
+            {'label': 'March 6, 2011', 'value': 108, 'display_value': '$108', 'note': ''},
+            {'label': 'August 21, 2011', 'value': 107, 'display_value': '$107', 'note': ''},
+            {'label': 'September 21, 2011', 'value': 107, 'display_value': '$107', 'note': ''},
+            {'label': 'December 3, 2011', 'value': 112, 'display_value': '$112', 'note': ''}
           ],
           init: function() {
             var self = this;
@@ -774,7 +758,6 @@
                   });
                 
                 }
-                
             }
 
             function dragEnd(){
@@ -800,7 +783,6 @@
                 self.currentPos.closestLabel = Date.parse(x.invert(self.currentPos.closestX));
                 
                 self.showCurrentData(self.currentPos);
-
             
             }
           },
