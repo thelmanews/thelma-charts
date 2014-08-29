@@ -13,7 +13,7 @@
       }
 
       .xLabel, .yLabel {
-        font-size: 0.6em;
+        font-size: 0.7em;
         font-weight: 300;
       }
 
@@ -161,7 +161,8 @@
               var xAxis = d3.svg.axis()
                 .scale(x)
                 .ticks(polymerObj.numXticks)
-                .tickFormat(d3.time.format("%Y"));
+                .tickFormat(d3.time.format("%Y"))
+                .tickSize(0);
 
               polymerObj.xAxis = g.append("g").attr('class', 'axis xAxis').call(xAxis);
               
@@ -169,7 +170,7 @@
               g.selectAll('.tick').selectAll('line').attr('y2', 0);
               
               polymerObj.xLabels = g.selectAll('.axis').selectAll('text')
-                .attr('class', 'label').attr('stroke-width', 0);
+                .attr('class', 'label no-stroke xLabel').attr('y', 8);
 
               // y labels
               polymerObj.yLabels = g.selectAll(".yLabel")
