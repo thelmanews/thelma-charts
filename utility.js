@@ -345,6 +345,22 @@ Thelma.chartUtils = {
       }
 
       return data;
+    },
+    /**
+    * '_decimalPlaces' takes a number and determines how many digits come after the decimal point
+    * @param  {[Number]} num is the number to test
+    * @return {[Number]} number of digits
+    */
+    getDecimalPlaces: function(num){
+      var match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+        console.log(num);
+        if (!match) { return 0; }
+        return Math.max(
+             0,
+             // Number of digits right of decimal point.
+             (match[1] ? match[1].length : 0)
+             // Adjust for scientific notation.
+             - (match[2] ? +match[2] : 0));
     }
 
 }
