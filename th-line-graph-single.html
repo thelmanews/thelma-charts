@@ -13,7 +13,7 @@
       }
 
       .xLabel, .yLabel {
-        font-size: 0.6em;
+        font-size: 0.7em;
         font-weight: 300;
       }
 
@@ -48,6 +48,11 @@
         animation-timing-function: linear;
       }
 
+      .xAxis path {
+        fill: none;
+        stroke-width: 2;
+      }
+
     </style>
     <svg id="chart"></svg> 
     <div id="info"></div> 
@@ -74,7 +79,36 @@
               polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([15, 
                       (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom + polymerObj.dims.joystick.d))]), 
 
-              polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]); 
+              // polymerObj.axisFormatter = d3.time.format.multi([
+              //   [".%L", function(d) { return d.getMilliseconds(); }],
+              //   [":%S", function(d) { return d.getSeconds(); }],
+              //   ["%I:%M", function(d) { return d.getMinutes(); }],
+              //   ["%I %p", function(d) { return d.getHours(); }],
+              //   ["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
+              //   ["%b %d", function(d) { return d.getDate() != 1; }],
+              //   ["%B", function(d) { return d.getMonth(); }],
+              //   ["%Y %B", function(d) { return d.getMonth(); }],
+              //   ["%Y", function() { return true; }]
+              // ]);
+              
+              // Select options for date formats with friendly formats
+              DATE_FORMATS = {
+                "DD-MM-YY": "%d-%m-%y",
+                "DD-MM": "%d-%m",
+                "DD-Mth": "%d-%b",
+                "MM-YY": "%m-%y",
+                "Mth-YY": "%b-%y",
+                "YY": "\'%y",
+                "YYYY": "%Y"
+              };
+
+              polymerObj.dateFormat = DATE_FORMATS[polymerObj.dateType] || "%Y";
+
+              polymerObj.x = d3.time.scale().domain(d3.extent(polymerObj.chartData, function(d){return Date.parse(d.label);})).range([polymerObj.dims.margin.left, polymerObj.dims.width ]);
+
+              polymerObj.chartData.forEach(function(d){
+                d.date = Date.parse(d.label);
+              })
 
               polymerObj.numXticks = Math.min(5, polymerObj.chartData.length);
               polymerObj.numYticks = 4;
@@ -104,27 +138,26 @@
               polymerObj.note = d3.select(polymerObj.$.info)
                 .append("div")   
                 .attr("class", "note");
-           
-              // x-axis
-              polymerObj.xAxis = g.append("line")
-                .attr("class", "axis")
-                .attr("stroke-width", 2)
-                .attr("opacity", function(d) { return polymerObj.xAxisLine ? 1 : 0; });
-               
+          
               // y-axis
               polymerObj.yAxis = g.append("line")
                 .attr("x1", 0)
                 .attr("x2", 0);       
-
-              // x labels
-              polymerObj.xLabels = g.selectAll(".xLabel")
-                .data(x.ticks(polymerObj.numXticks))
-                .enter().append("text")
-                .attr("class", "xLabel axis")
-                .text(function(d){ return d;})
-                .attr("opacity", function(d) { return polymerObj.xAxisLabels ? 1 : 0; })
-                .attr("text-anchor", "middle");
               
+              var xAxis = d3.svg.axis()
+                .scale(x)
+                .ticks(polymerObj.numXticks)
+                .tickFormat(d3.time.format(polymerObj.dateFormat))
+                .tickSize(0);
+
+              polymerObj.xAxis = g.append("g").attr('class', 'axis xAxis').call(xAxis);
+              
+              // format ticks
+              g.selectAll('.tick').selectAll('line').attr('y2', 0);
+              
+              polymerObj.xLabels = g.selectAll('.axis').selectAll('text')
+                .attr('class', 'label no-stroke xLabel').attr('y', 8);
+
               // y labels
               polymerObj.yLabels = g.selectAll(".yLabel")
                 .data(y.ticks(polymerObj.numYticks))
@@ -194,11 +227,11 @@
                 
               staticObj._setupContainerSize(polymerObj);
               
-              polymerObj.xAxis
-                .attr("x1", x(polymerObj.minLabel))
-                .attr("y1", 0)
-                .attr("x2", x(polymerObj.maxLabel)) 
-                .attr("y2", 0);
+              // polymerObj.xAxis
+              //   .attr("x1", x(polymerObj.minLabel))
+              //   .attr("y1", 0)
+              //   .attr("x2", x(polymerObj.maxLabel)) 
+              //   .attr("y2", 0);
 
               polymerObj.yAxis
                 .attr("y1", function(d) { return polymerObj.axisAnimation ? y(0) : -1 * y(polymerObj.minValue); }) 
@@ -206,11 +239,11 @@
                 // .attr("stroke-width", 2)
                 // .attr("opacity", function(d) { return polymerObj.axisAnimation ? 0 : 1; });
 
-              polymerObj.xLabels
-                // .data(x.ticks(polymerObj.numXticks))
-                .text(function(d){ return d;})
-                .attr("x", function(d) { return x(d) })
-                .attr("y", polymerObj.dims.margin.top/2);
+              // polymerObj.xLabels
+              //   // .data(x.ticks(polymerObj.numXticks))
+              //   .text(function(d){ return d;})
+              //   .attr("x", function(d) { return x(d) })
+              //   .attr("y", polymerObj.dims.margin.top/2);
 
               polymerObj.yLabels
                 .text(function(d){ return d;})
@@ -230,23 +263,23 @@
               
               // line data, starting state (raise)
               polymerObj.startingLine = d3.svg.line()
-                .x(function(d) { return x(d.label); })
+                .x(function(d) { return x(d.date); })
                 .y(0).interpolate(polymerObj.lineStyle);
 
               // line data, ending state
               polymerObj.line = d3.svg.line()
-                .x(function(d) { return x(d.label); })
+                .x(function(d) { return x(d.date); })
                 .y(function(d) { return -y(d.value); })
                 .interpolate(polymerObj.lineStyle);
 
               // data for fill area, starting state (raise)
               polymerObj.areaDataStart = d3.svg.area()
-                .x(function(d) { return x(d.label); })
+                .x(function(d) { return x(d.date); })
                 .y1(0).interpolate(polymerObj.lineStyle);
 
               // data for fill area, ending state
               polymerObj.areaData = d3.svg.area()
-                .x(function(d) { return x(d.label); })
+                .x(function(d) { return x(d.date); })
                 .y1(function(d) { return -y(d.value); })
                 .interpolate(polymerObj.lineStyle);
 
@@ -289,7 +322,7 @@
                 
               polymerObj.circles
                 .attr("stroke-width", 3)
-                .attr("cx", function(d) { return  x(d.label); })
+                .attr("cx", function(d) { return  x(d.date); })
                 .attr("cy", function(d) { return -1 * y(d.value); });
 
               if (polymerObj.joystick){
@@ -304,7 +337,6 @@
 
 
         Polymer('th-line-graph-single', {
-          
             lineStyle: "cardinal", // options: linear, basis, cardinal, monotone, step-before/after
             animateStyle: "draw", // options: raise, draw
             fillArea: false, 
@@ -319,12 +351,13 @@
             joyStick: true,
             color: "",
             defaultDisplayValues: false,
+            dateType: "YYYY", // options: "DD-MM-YY", "DD-MM", "DD-Mth", "MM-YY", "Mth-YY", "YY", "YYYY"
           chartData: [
-            {'label': 2010, 'value': 104, 'display_value': '$104', 'note': ''},
-            {'label': 2011, 'value': 108, 'display_value': '$108', 'note': ''},
-            {'label': 2012, 'value': 107, 'display_value': '$107', 'note': ''},
-            {'label': 2013, 'value': 110, 'display_value': '$110', 'note': ''},
-            {'label': 2014, 'value': 112, 'display_value': '$112', 'note': ''}
+            {'label': 'December 3, 2011', 'value': 104, 'display_value': '$104', 'note': ''},
+            {'label': 'March 30, 2012', 'value': 108, 'display_value': '$108', 'note': ''},
+            {'label': 'August 21, 2013', 'value': 107, 'display_value': '$107', 'note': ''},
+            {'label': 'September 21, 2014', 'value': 107, 'display_value': '$107', 'note': ''},
+            {'label': 'January 1, 2016', 'value': 112, 'display_value': '$112', 'note': ''}
           ],
           init: function() {
             var self = this;
@@ -356,7 +389,7 @@
             self.dims.margin.top += self.dims.joystick.d;
             self.dims.margin.bottom += self.dims.joystick.d;
 
-            self.dims.width = self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
+            self.dims.width = Math.max(100,(self.chartWidth*0.95 -self.dims.margin.left - self.dims.margin.right));
           
             staticObj._scaleBuilder(self);
             staticObj._setupElementSizes(self);
@@ -567,12 +600,12 @@
             // FIND THE FIRST TOOLTIP AND SET AS CURRENT POSITION
             for (var i=0; i<data.length; i++){
               if (data[i].note){
-                self.currentPos.label = data[i].label;
+                self.currentPos.label = data[i].date;
                 self.currentPos.note = data[i].note;
                 self.currentPos.value = data[i].display_value ? data[i].display_value : "";
                 break;
               } else {
-                self.currentPos.label = data[0].label;
+                self.currentPos.label = data[0].date;
                 self.currentPos.note = data[0].note;
                 self.currentPos.value = data[0].display_value ? data[0].display_value : "";
               }
@@ -591,8 +624,8 @@
                     .delay(function(){ return firstTime ? 1000 : 0})
                     .duration(300)
                     .attr("r", function(d){
-                     
-                      if ((parseInt(d.label)==parseInt(label))){ 
+                      if (Math.abs(self.x(d.date) - self.x(label)) < 2){
+                      // if (d.date==label){ 
                         note = d.note;
                         value = d.display_value ? d.display_value : "";
                         return 4;
@@ -622,7 +655,7 @@
             self.currentPos.x = x(self.currentPos.label);  
             
             if (!self.joystick){
-            
+              
               self.joystick = svg.selectAll('g.joystick')
                   .data([{x: self.currentPos.x}]) //??
                   .enter()
@@ -675,7 +708,7 @@
 
                 // move the circle
                 d3.select(this).selectAll('circle')
-                  .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.dims.width, d3.event.x)));
+                  .attr("cx", d.x = Math.max(self.dims.margin.left, Math.min(self.dims.width-1, d3.event.x)));
 
                 // define current position
                 self.currentPos.x = self.joystick.selectAll('circle').attr("cx");
@@ -697,7 +730,8 @@
                 // determine which circles/notes are to be displayed
                 g.selectAll(".circle")
                   .attr("r", function(d){
-                    if ( Math.abs(x(d.label) - parseInt(self.currentPos.x)) < 3) {
+                    if ( Math.abs(x(d.date) - parseInt(self.currentPos.x)) < 3) {
+                      
                       self.currentPos.note = d.note;
                       self.currentPos.value = d.display_value ? d.display_value : "";
                       self.displayValue.text(self.currentPos.value);
@@ -720,12 +754,13 @@
                   });
               
                 } else {
+
                   self.currentPos.closestX = d3.max(self.circles[0], function(d){
                     var cx = parseInt(d3.select(d).attr("cx")); 
                     return (cx - self.currentPos.x < 0) ? cx : Number.MIN_VALUE  ;
                   });
-                }
                 
+                }
             }
 
             function dragEnd(){
@@ -747,9 +782,10 @@
                     .attr('opacity', 0.4);
 
                 // Rounding the below number is a temp fix - because x.invert is resulting in a decimal number.
-                self.currentPos.closestLabel = Math.round(x.invert(self.currentPos.closestX));
+                
+                self.currentPos.closestLabel = Date.parse(x.invert(self.currentPos.closestX));
+                
                 self.showCurrentData(self.currentPos);
-
             
             }
           },
@@ -762,7 +798,7 @@
 
             self.tips          
               .text( function(d){return d.display_value ? d.display_value : ""; })
-              .attr("x", function(d) { return  x(d.label); })
+              .attr("x", function(d) { return  x(d.date); })
               .attr("y", function(d) { return -y(d.value) - 15; })
               .attr('opacity', 0)
               .transition()
