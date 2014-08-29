@@ -74,23 +74,26 @@
               polymerObj.y = d3.scale.linear().domain([polymerObj.minValue, polymerObj.maxValue]).range([15, 
                       (polymerObj.dims.height-(polymerObj.dims.margin.top + polymerObj.dims.margin.bottom + polymerObj.dims.joystick.d))]), 
 
-              polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]); 
+              // polymerObj.x = d3.scale.linear().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]); 
 
-              polymerObj.axisFormatter = d3.time.format.multi([
-                [".%L", function(d) { return d.getMilliseconds(); }],
-                [":%S", function(d) { return d.getSeconds(); }],
-                ["%I:%M", function(d) { return d.getMinutes(); }],
-                ["%I %p", function(d) { return d.getHours(); }],
-                ["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
-                ["%b %d", function(d) { return d.getDate() != 1; }],
-                ["%B", function(d) { return d.getMonth(); }],
-                ["%Y %B", function(d) { return d.getMonth(); }],
-                ["%Y", function() { return true; }]
-              ]);
+              // polymerObj.axisFormatter = d3.time.format.multi([
+              //   [".%L", function(d) { return d.getMilliseconds(); }],
+              //   [":%S", function(d) { return d.getSeconds(); }],
+              //   ["%I:%M", function(d) { return d.getMinutes(); }],
+              //   ["%I %p", function(d) { return d.getHours(); }],
+              //   ["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
+              //   ["%b %d", function(d) { return d.getDate() != 1; }],
+              //   ["%B", function(d) { return d.getMonth(); }],
+              //   ["%Y %B", function(d) { return d.getMonth(); }],
+              //   ["%Y", function() { return true; }]
+              // ]);
               // console.log(polymerObj.x(2013));
               // polymerObj.dateType = "1-year";
 
-              polymerObj.x = d3.time.scale().domain([polymerObj.minLabel, polymerObj.maxLabel]).range([polymerObj.dims.margin.left, polymerObj.dims.width ]);
+              polymerObj.x = d3.time.scale().domain(d3.extent(polymerObj.chartData, function(d){return Date.parse(d.label);})).range([polymerObj.dims.margin.left, polymerObj.dims.width ]);
+              // 
+              // polymerObj.x = d3.scale.ordinal().domain(d3.range(polymerObj.chartData.length)).range([polymerObj.dims.margin.left, polymerObj.dims.width ]);
+
 
               // console.log(polymerObj.xTime(2012));
 
@@ -124,10 +127,10 @@
                 .attr("class", "note");
            
               // x-axis
-              polymerObj.xAxis = g.append("line")
-                .attr("class", "axis")
-                .attr("stroke-width", 2)
-                .attr("opacity", function(d) { return polymerObj.xAxisLine ? 1 : 0; });
+              // polymerObj.xAxis = g.append("line")
+              //   .attr("class", "axis")
+              //   .attr("stroke-width", 2)
+              //   .attr("opacity", function(d) { return polymerObj.xAxisLine ? 1 : 0; });
                
               // y-axis
               polymerObj.yAxis = g.append("line")
@@ -135,28 +138,29 @@
                 .attr("x2", 0);       
 
               // x labels
-              polymerObj.xLabels = g.selectAll(".xLabel")
-                .data(x.ticks(1))
-                .enter().append("text")
-                .attr("class", "xLabel axis")
-                .text(function(d){ return polymerObj.axisFormatter(d);})
-                .attr("opacity", function(d) { return polymerObj.xAxisLabels ? 1 : 0; })
-                .attr("text-anchor", "middle");
+              // polymerObj.xLabels = g.selectAll(".xLabel")
+              //   .data(x.ticks(1))
+              //   .enter().append("text")
+              //   .attr("class", "xLabel axis")
+              //   .text(function(d){ return polymerObj.axisFormatter(d);})
+              //   .attr("opacity", function(d) { return polymerObj.xAxisLabels ? 1 : 0; })
+              //   .attr("text-anchor", "middle");
               
 
-              // var xAxis = d3.svg.axis()
-              //   .scale(x)
-              //   // .ticks(3)
-              //   .tickFormat(d3.time.format("%Y"));
-              //   // .tickFormat(function(d){return d.customTimeFormat});
+              var xAxis = d3.svg.axis()
+                .scale(x)
+                .ticks(polymerObj.numXticks)
+                .tickFormat(d3.time.format("%Y"));
 
-              // polymerObj.xAxis = g.append("g").attr('class', 'axis').call(xAxis);
+              polymerObj.xAxis = g.append("g").attr('class', 'axis').call(xAxis);
+              
+              polymerObj.xLabels = g.selectAll('.axis').selectAll('text')
+                .attr('class', 'label').attr('stroke-width', 0);
 
               // y labels
               polymerObj.yLabels = g.selectAll(".yLabel")
                 .data(y.ticks(polymerObj.numYticks))
                 .enter().append("text")
-
                 .attr("class", "yLabel axis")
                 .text(function(d){ return d;})
                 .attr("dy", 4)
@@ -222,11 +226,11 @@
                 
               staticObj._setupContainerSize(polymerObj);
               
-              polymerObj.xAxis
-                .attr("x1", x(polymerObj.minLabel))
-                .attr("y1", 0)
-                .attr("x2", x(polymerObj.maxLabel)) 
-                .attr("y2", 0);
+              // polymerObj.xAxis
+              //   .attr("x1", x(polymerObj.minLabel))
+              //   .attr("y1", 0)
+              //   .attr("x2", x(polymerObj.maxLabel)) 
+              //   .attr("y2", 0);
 
               polymerObj.yAxis
                 .attr("y1", function(d) { return polymerObj.axisAnimation ? y(0) : -1 * y(polymerObj.minValue); }) 
@@ -234,11 +238,11 @@
                 // .attr("stroke-width", 2)
                 // .attr("opacity", function(d) { return polymerObj.axisAnimation ? 0 : 1; });
 
-              polymerObj.xLabels
-                // .data(x.ticks(polymerObj.numXticks))
-                .text(function(d){ return d;})
-                .attr("x", function(d) { return x(d) })
-                .attr("y", polymerObj.dims.margin.top/2);
+              // polymerObj.xLabels
+              //   // .data(x.ticks(polymerObj.numXticks))
+              //   .text(function(d){ return d;})
+              //   .attr("x", function(d) { return x(d) })
+              //   .attr("y", polymerObj.dims.margin.top/2);
 
               polymerObj.yLabels
                 .text(function(d){ return d;})
