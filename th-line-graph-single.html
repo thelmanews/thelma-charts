@@ -2,7 +2,7 @@
 <link rel="import" href="th-d3-chart.html">
 
 <polymer-element name="th-line-graph-single" extends="th-d3-chart" attributes="lineStyle animateStyle fillArea xAxisLine 
-  xAxisLabels yAxisLabels yAxisLine axisAnimation dataPosition joyStick yAxisMin yAxisMax dateType">
+  xAxisLabels yAxisLabels yAxisLine axisAnimation dataPosition joyStick yAxisMin yAxisMax dateType textColor">
   <template>
     <core-style ref="theme"> </core-style>
     <style>
@@ -150,30 +150,36 @@
                 .tickFormat(d3.time.format(polymerObj.dateFormat))
                 .tickSize(0);
 
-              polymerObj.xAxis = g.append("g").attr('class', 'axis xAxis').call(xAxis);
+              polymerObj.xAxis = g.append("g").attr('class', 'axis xAxis').call(xAxis).style('stroke', polymerObj.textColor);
               
               // format ticks
               g.selectAll('.tick').selectAll('line').attr('y2', 0);
               
               polymerObj.xLabels = g.selectAll('.axis').selectAll('text')
-                .attr('class', 'label no-stroke xLabel').attr('y', 8);
+                .attr('class', 'label no-stroke xLabel').attr('y', 8)
+                .style('fill', polymerObj.textColor);
 
               // y labels
               polymerObj.yLabels = g.selectAll(".yLabel")
                 .data(y.ticks(polymerObj.numYticks))
                 .enter().append("text")
-                .attr("class", "yLabel axis")
+                .attr("class", "yLabel axis no-stroke")
                 .text(function(d){ return d;})
                 .attr("dy", 4)
                 .attr("opacity", function(d) { return polymerObj.axisAnimation || !polymerObj.yAxisLabels ? 0 : 1; })
-                .style("text-anchor", "middle");
+                .style("text-anchor", "middle")
+                .attr('stroke-width', 0)
+                .style('fill', polymerObj.textColor)
+                .style('stroke', polymerObj.textColor);
               
               // large display value
               polymerObj.displayValue = g.append('g').append('text')
                 .attr("class", "fill-foreground")
                 .attr("opacity", function(){
                   return polymerObj.joyStick ? 0.7 : 0;
-                }); // this can start as 0 and fade in after datapoint and joystick appear
+                })
+                .style("fill", polymerObj.textColor)
+                .style("stroke", polymerObj.textColor); // this can start as 0 and fade in after datapoint and joystick appear
 
               // fill area path
               polymerObj.areaPath = g.append("path");
@@ -193,14 +199,16 @@
               .enter().append("circle")
               .attr("class", "circle data0 stroke-foreground")
               .attr("r", 0)
-              .style("fill", polymerObj.color);
+              .style("fill", polymerObj.color)
+              .style("stroke", polymerObj.textColor);
               
               // tooltips
               polymerObj.tips = g.selectAll('.tip')
                 .data(data)
                 .enter().append('text')
                 .attr('class', 'tip label fill-foreground')
-                .attr('text-anchor', 'middle');
+                .attr('text-anchor', 'middle')
+                .style('fill', polymerObj.textColor);
 
             },
             _setupContainerSize: function(polymerObj){
@@ -452,12 +460,14 @@
                 return self.joyStick ? 0 : 4;
               })
               .attr("r", 0)
-              .style("fill", self.color);
+              .style("fill", self.color)
+              .style("stroke", self.textColor);
 
             self.tips
               .enter().append('text')
               .attr('class', 'tip label fill-foreground')
-              .attr('text-anchor', 'middle');
+              .attr('text-anchor', 'middle')
+              .style('fill', self.textColor);
 
              // remove extra datapoints
             self.linePath.exit().remove();
@@ -682,7 +692,8 @@
                   .attr("cx", self.currentPos.x)
                   .attr("cy", self.dims.joystick.r)
                   .attr("class", "target pulse stroke-foreground fill-background")
-                  .attr("stroke-width", 4.5);
+                  .attr("stroke-width", 4.5)
+                  .style('stroke', self.textColor);
               
               self.joystick.append('rect')
                   .attr('y', self.dims.joystick.r*2 +2)
@@ -690,7 +701,8 @@
                   .attr("height", h-self.dims.joystick.d - self.dims.margin.bottom)
                   .attr("width", 3)
                   .attr("class", "fill-foreground")
-                  .attr('opacity', 0.4);
+                  .attr('opacity', 0.4)
+                  .style('fill', self.textColor);
 
               self.joystick
                 .call(drag);
@@ -704,7 +716,8 @@
                 // style the circle
                 self.joystick.selectAll('.target')
                   .attr("class", "target stroke-foreground fill-background")
-                  .attr('fill-opacity', 0);
+                  .attr('fill-opacity', 0)
+                  .style('stroke', self.textColor);
 
                 // move the circle
                 d3.select(this).selectAll('circle')
@@ -773,7 +786,7 @@
                     .attr('cx', self.currentPos.closestX);
 
                 self.joystick.selectAll('.target')
-                  .attr('class','pulse target stroke-foreground fill-background');
+                  .attr('class','pulse target stroke-foreground fill-background').style('stroke', self.textColor);
                   
                 self.joystick.select('rect')
                   .transition()
