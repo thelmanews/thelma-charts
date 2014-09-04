@@ -166,12 +166,22 @@
 
 		  reset: function() {
 		      var self = this;
-		      var height= this.height;
-		      console.log("stacked reset");
-		      self.bars.transition().duration(self.animationDelay).style('opacity',0).attr('y', height).attr('height', 0);
-		      self.labels.transition().duration(self.animationDelay).style('opacity',0).attr('y', height );
-		      self.values.transition().duration(self.animationDelay).style('opacity',0).attr('y', height );
-		      
+		      var height= this.dims.height;
+
+		      self.bars.transition().duration(self.animationDelay).attr('y', height).attr('height', 0);
+		      self.labels.select(function() {return this.parentNode.parentNode; })
+		      	.transition().duration(self.animationDelay)
+		      		.attr('transform',function(d) {
+		      			var yPos = height + 10;
+						    return 'translate(0,'+yPos+')';
+						  });
+		      self.values.select(function() {return this.parentNode.parentNode; })
+		      	.transition().duration(self.animationDelay)
+		      		.attr('transform',function(d) {
+			        	var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width;
+			        	var yPos = height + 10;
+			        	return 'translate('+xPos+','+yPos+')';
+			        });
 		  },
 
 		  resize: function() {
